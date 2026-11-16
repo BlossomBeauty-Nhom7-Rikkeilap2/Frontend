@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Blossom - Duyệt bài</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS dùng chung (thêm css riêng của trang bên dưới nếu cần) -->
+    <link rel="stylesheet" href="../../css/common.css">
+    <link rel="stylesheet" href="../../css/layout.css">
+    <link rel="stylesheet" href="../../css/components.css">
+
+    <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
+    <script src="../../js/auth.js"></script>
+    <script src="../../js/permissions.js"></script>
+</head>
+<body>
+
+    <!-- Sidebar + Header + Footer do js/layout.js render -->
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <div class="main">
+        <header class="topbar" id="topbar"></header>
+
+        <main class="content">
+            <div class="crumb">Blossom / Quản trị / Duyệt bài</div>
+            <h2 class="page-title">Duyệt bài</h2>
+            <p class="page-sub">Duyệt các bài viết đang chờ phê duyệt.</p>
+
+            <!-- TODO: nội dung trang -->
+            <section class="card">
+                <div class="empty-state"><i data-icon="empty"></i><span>Trang đang được phát triển.</span></div>
+            </section>
+        </main>
+
+        <footer class="footer" id="footer"></footer>
+    </div>
+
+    <script src="../../js/components.js"></script>
+    <script src="../../js/layout.js"></script>
+</body>
+</html>

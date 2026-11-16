@@ -1,0 +1,185 @@
+/* ==========================================================
+   ADMIN / MANAGER – Trang Tiến độ bài viết (chỉ phần riêng của trang)
+   Sidebar, Header, Button, Stat card, Tabs, Select... nằm trong
+   common.css / layout.css / components.css
+   ========================================================== */
+
+/* ---------- Tabs + bộ lọc ---------- */
+.bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--pink-line);
+}
+
+.filters {
+    display: flex;
+    gap: 10px;
+    padding-bottom: 10px;
+}
+
+.filters .select {
+    height: 34px;
+    min-width: 218px;
+    border-radius: var(--radius);
+    font-size: 16px;
+    font-weight: 550;
+    color: var(--pink);
+}
+
+/* ---------- Kanban ---------- */
+.board {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 46px;
+}
+
+.kb-col {
+    display: flex;
+    flex-direction: column;
+    height: 480px;
+    padding: 24px;
+    border: 1px solid;
+    border-radius: 25px;
+}
+
+.kb-col.draft  { background: var(--purple-bg); border-color: var(--purple-bd); }
+.kb-col.review { background: var(--orange-bg); border-color: var(--orange-bd); }
+.kb-col.edit   { background: var(--rose-bg);   border-color: var(--rose-bd); }
+.kb-col.ready  { background: var(--green-bg);  border-color: var(--green-bd); }
+
+.kb-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.kb-head h3 {
+    font-size: 20px;
+    font-weight: 550;
+    color: #2f2635;
+}
+
+.count {
+    padding: 5px 9px;
+    border: 1px solid;
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, .55);
+    font-size: 18px;
+}
+
+.draft  .count { color: var(--purple); border-color: var(--purple-bd); }
+.review .count { color: var(--orange); border-color: var(--orange-bd); }
+.edit   .count { color: var(--pink);   border-color: #f2b9cc; }
+.ready  .count { color: var(--green);  border-color: var(--green-bd); }
+
+.cards {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.kb-col .empty-state {
+    height: 95px;
+    background: transparent;
+    font-size: 16px;
+}
+
+.draft  .empty-state { border-color: var(--purple-bd); }
+.review .empty-state { border-color: var(--orange-bd); }
+.edit   .empty-state { border-color: var(--rose-bd); }
+.ready  .empty-state { border-color: var(--green-bd); }
+
+.post {
+    padding: 12px;
+    border: 1px solid rgba(0, 0, 0, .05);
+    border-radius: 8px;
+    background: #fff;
+    font-size: 16px;
+}
+
+.post b {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.post small {
+    color: var(--muted);
+}
+
+.see-all {
+    margin-top: auto;
+    padding-top: 16px;
+    font-size: 13px;
+    color: #8f8697;
+}
+
+.see-all:hover {
+    color: var(--pink);
+}
+
+/* ---------- Ưu tiên hôm nay ---------- */
+.priority {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    min-height: 78px;
+    margin-top: 20px;
+    padding: 12px 22px;
+    background: #fff;
+    border: 1px solid var(--pink-line);
+    border-radius: var(--radius);
+}
+
+.priority > .ico {
+    width: 22px;
+    height: 22px;
+    color: var(--pink);
+}
+
+.priority div {
+    flex: 1;
+}
+
+.priority b {
+    display: block;
+    margin-bottom: 3px;
+    font-size: 20px;
+}
+
+.priority p {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1100px) {
+    .board {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+}
+
+@media (max-width: 720px) {
+    .board {
+        grid-template-columns: 1fr;
+    }
+
+    .bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filters {
+        flex-wrap: wrap;
+    }
+
+    .filters .select {
+        min-width: 0;
+        flex: 1;
+    }
+}

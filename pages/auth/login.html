@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <!-- ============ 1. META & TITLE ============ -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập | Blossom Beauty Store</title>
+
+  <!-- ============ 2. FONTS ============ -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,400&display=swap" rel="stylesheet" />
+
+  <!-- ============ 3. CSS ============ -->
+  <link rel="stylesheet" href="../../css/login.css" />
+</head>
+<body>
+
+  <!-- ============ 4. TOAST THÔNG BÁO (hiển thị 3 giây) ============ -->
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden>
+    <span class="toast__icon" id="toastIcon"></span>
+    <div class="toast__body">
+      <strong id="toastTitle"></strong>
+      <span id="toastMessage"></span>
+    </div>
+    <span class="toast__bar" id="toastBar"></span>
+  </div>
+
+  <main class="login">
+
+    <!-- ============ 5. CỘT TRÁI: THƯƠNG HIỆU ============ -->
+    <section class="brand">
+      <!-- 5.1 Logo chữ -->
+      <h1 class="brand__logo">Blossom.</h1>
+      <p class="brand__sub">BEAUTY STORE</p>
+
+      <!-- 5.2 Slogan -->
+      <p class="brand__tag">NƠI VẺ ĐẸP ĐƯỢC NUÔI DƯỠNG</p>
+      <h2 class="brand__title">Một chút yêu thương,<br />ngàn điều rạng rỡ.</h2>
+      <p class="brand__desc">Cùng Blossom chăm chút trải nghiệm và lan tỏa vẻ đẹp đến mỗi khách hàng.</p>
+
+      <!-- 5.3 Ảnh sản phẩm -->
+      <figure class="brand__figure">
+        <img src="../../assets/poster.png" alt="Bộ sản phẩm Blossom Beauty giữa hoa anh đào" />
+      </figure>
+      <p class="brand__quote">"Đẹp từ những điều nhỏ."</p>
+
+      <!-- 5.4 Bản quyền -->
+      <p class="brand__copy">© 2026 Blossom Beauty Store. Mọi quyền được bảo lưu.</p>
+    </section>
+
+    <!-- ============ 6. CỘT PHẢI: FORM ĐĂNG NHẬP ============ -->
+    <section class="panel">
+
+      <!-- 6.1 Thanh trên cùng -->
+      <header class="panel__top">
+        <span class="panel__label">ĐĂNG NHẬP</span>
+        <span class="panel__secure">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          Kết nối an toàn
+        </span>
+      </header>
+
+      <div class="panel__content">
+        <!-- 6.2 Logo tròn -->
+        <div class="panel__logo"><img src="../../assets/logo.png" alt="Logo Blossom" /></div>
+
+        <!-- 6.3 Tiêu đề -->
+        <h2 class="panel__title">Chào mừng trở lại!</h2>
+        <p class="panel__subtitle">Đăng nhập để bắt đầu một ngày thật rạng rỡ cùng Blossom Beauty Store.</p>
+
+        <!-- 6.4 Form -->
+        <form id="loginForm" novalidate>
+
+          <!-- Email -->
+          <div class="field" id="fieldEmail">
+            <label for="email">Email hoặc tên đăng nhập</label>
+            <div class="field__box">
+              <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+              <input type="text" id="email" name="email" placeholder="name@blossom.vn" autocomplete="username" />
+            </div>
+            <p class="field__error" id="emailError" role="alert"></p>
+          </div>
+
+          <!-- Mật khẩu -->
+          <div class="field" id="fieldPassword">
+            <label for="password">Mật khẩu</label>
+            <div class="field__box">
+              <svg class="field__icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>
+              <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" autocomplete="current-password" />
+              <button type="button" class="field__toggle" id="togglePassword" aria-label="Hiện mật khẩu">
+                <svg id="eyeIcon" viewBox="0 0 24 24" aria-hidden="true"></svg>
+              </button>
+            </div>
+            <p class="field__error" id="passwordError" role="alert"></p>
+          </div>
+
+          <!-- Ghi nhớ + Quên mật khẩu -->
+          <div class="options">
+            <label class="check">
+              <input type="checkbox" id="remember" checked />
+              <span>Ghi nhớ đăng nhập</span>
+            </label>
+            <a href="#" class="link">Quên mật khẩu?</a>
+          </div>
+
+          <!-- Nút đăng nhập -->
+          <button type="submit" class="btn" id="btnLogin">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            <span>Đăng nhập</span>
+          </button>
+        </form>
+
+        <!-- 6.5 Ghi chú -->
+        <div class="note">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+          <p>Dành riêng cho đội ngũ Blossom. Vui lòng sử dụng tài khoản được quản trị viên cấp.</p>
+        </div>
+
+        <p class="help">Bạn gặp khó khăn? <a href="#">Liên hệ quản trị viên</a></p>
+      </div>
+
+      <!-- 6.6 Chân trang -->
+      <footer class="panel__foot">
+        <span>Chăm sóc bạn mỗi ngày</span>
+        <span>Tiếng Việt ⌄</span>
+      </footer>
+    </section>
+  </main>
+
+  <!-- ============ 7. JAVASCRIPT ============ -->
+  <script src="../../js/login.js"></script>
+</body>
+</html>

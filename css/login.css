@@ -1,0 +1,706 @@
+/* =====================================================
+   BLOSSOM BEAUTY STORE - TRANG ĐĂNG NHẬP
+
+   Mục lục:
+   1. Biến màu & reset
+   2. Bố cục chung (khoá vừa 1 màn hình, không cuộn)
+   3. Cột trái (thương hiệu)
+   4. Cột phải (panel)
+   5. Form (field, option, button)
+   6. Ghi chú & chân trang
+   7. Toast thông báo
+   8. Responsive
+   ===================================================== */
+
+
+/* ---------- 1. BIẾN MÀU & RESET ---------- */
+
+:root {
+    --pink-600: #c4547f;
+    --pink-700: #a9436b;
+    --pink-100: #fde9f0;
+    --pink-50: #fff5f8;
+
+    --ink: #3a3236;
+    --muted: #8d8186;
+    --line: #ead9e0;
+
+    --success: #2e9e6a;
+    --danger: #d6455d;
+
+    --font-head: "Playfair Display", Georgia, serif;
+    --font-body: "Nunito", system-ui, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;              /* [FIX] ẩn thanh cuộn của trang */
+}
+
+body {
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: #ffffff;
+
+} 
+
+
+
+svg {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+a {
+    color: var(--pink-600);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+
+/* ---------- 2. BỐ CỤC CHUNG ---------- */
+
+.login {
+    display: grid;
+    grid-template-columns: 1.05fr 1fr;
+    grid-template-rows: minmax(0, 1fr);   /* [FIX] hàng không bị nội dung đẩy cao hơn màn hình */
+    height: 100vh;                        /* [FIX] đúng bằng chiều cao màn hình */
+    height: 100dvh;
+    overflow: hidden;
+}
+
+
+/* ---------- 3. CỘT TRÁI: THƯƠNG HIỆU ---------- */
+
+.brand {
+    padding: clamp(24px, 5vh, 56px) 8% clamp(16px, 3vh, 32px) 9%;
+
+    background: linear-gradient(
+        160deg,
+        var(--pink-50),
+        var(--pink-100)
+    );
+
+    display: flex;
+    flex-direction: column;
+    min-height: 0;                 /* [FIX] cho phép co lại theo màn hình */
+    overflow: hidden;
+}
+
+/* Logo */
+
+.brand__logo {
+    font-family: var(--font-head);
+    font-size: clamp(34px, 5vh, 46px);
+    font-weight: 600;
+    line-height: 1;
+    color: #4a3f44;
+}
+
+.brand__sub {
+    color: var(--pink-600);
+    letter-spacing: 0.2em;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 6px;
+}
+
+/* Nội dung giới thiệu */
+
+.brand__tag {
+    color: var(--pink-600);
+    letter-spacing: 0.1em;
+    font-size: clamp(16px, 2.2vh, 20px);
+    font-weight: 700;
+    margin-top: clamp(16px, 4.5vh, 44px);
+}
+
+.brand__title {
+    font-family: var(--font-head);
+    font-weight: 500;
+    font-size: clamp(28px, min(3.4vw, 5.6vh), 54px);   /* [FIX] co theo cả chiều rộng và chiều cao */
+    line-height: 1.2;
+    margin-top: clamp(8px, 1.8vh, 18px);
+    color: #4a3f44;
+}
+
+.brand__desc {
+    margin-top: clamp(8px, 1.6vh, 16px);
+    font-size: 15px;
+    color: #5d5156;
+}
+
+/* Hình ảnh thương hiệu */
+
+.brand__figure {
+    flex: 1 1 0;                   /* [FIX] ảnh tự lấp phần cao còn lại */
+    min-height: 90px;
+    margin-top: clamp(14px, 3vh, 28px);
+    border-radius: 14px 100px 14px 14px;
+    overflow: hidden;
+
+    box-shadow: 0 18px 40px rgba(196, 84, 127, 0.15);
+
+    background: #f6d9e4;
+}
+
+.brand__figure img {
+    width: 100%;
+    height: 100%;                  /* [FIX] bỏ max-height cố định, ảnh theo khung */
+    object-fit: cover;
+    display: block;
+}
+
+/* Câu slogan */
+
+.brand__quote {
+    font-family: var(--font-head);
+    font-style: italic;
+    color: var(--pink-600);
+    font-size: 20px;
+    margin-top: clamp(8px, 1.6vh, 16px);
+}
+
+/* Copyright */
+
+.brand__copy {
+    padding-top: clamp(8px, 2vh, 24px);
+    font-size: 14px;
+    color: var(--muted);
+}
+
+
+/* ---------- 4. CỘT PHẢI: PANEL ---------- */
+
+.panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;                 /* [FIX] */
+    overflow: hidden;
+
+    padding: clamp(16px, 3vh, 28px) 8% clamp(12px, 2.4vh, 22px) 9%;
+
+    border-left: 1px solid var(--line);
+}
+
+/* Thanh thông tin phía trên */
+
+.panel__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.panel__label {
+    color: var(--pink-600);
+    letter-spacing: 0.15em;
+    font-weight: 700;
+}
+
+.panel__secure {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    color: #5d5156;
+    font-size: 14px;
+}
+
+.panel__secure svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Nội dung đăng nhập */
+
+.panel__content {
+    width: 100%;
+    max-width: 700px;
+    margin: auto;                  /* [FIX] tự căn giữa dọc giữa thanh trên và chân trang */
+}
+
+/* Logo biểu tượng */
+
+.panel__logo {
+    width: clamp(56px, 8vh, 76px);
+    height: clamp(56px, 8vh, 76px);
+
+    border-radius: 50%;
+    overflow: hidden;
+
+    background: var(--pink-100);
+
+    box-shadow:
+        0 0 0 4px #ffffff,
+        0 6px 18px rgba(196, 84, 127, 0.2);
+}
+
+.panel__logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Tiêu đề đăng nhập */
+
+.panel__title {
+    font-family: var(--font-head);
+    font-weight: 500;
+    font-size: clamp(30px, 4.6vh, 40px);
+    margin-top: 8px;
+}
+
+.panel__subtitle {
+    color: var(--muted);
+    margin-top: 6px;
+    font-size: 16px;
+}
+
+
+/* ---------- 5. FORM ---------- */
+
+/* Form đăng nhập */
+
+#loginForm {
+    margin-top: clamp(10px, 2vh, 18px);
+}
+
+/* Nhóm input */
+
+.field {
+    margin-bottom: clamp(10px, 1.8vh, 18px);
+}
+
+.field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.field__box {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    border: 1px solid var(--line);
+    border-radius: 8px;
+
+    background: #ffffff;
+    height: clamp(40px, 5.2vh, 46px);
+
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
+
+.field__box:focus-within {
+    border-color: var(--pink-600);
+
+    box-shadow: 0 0 0 3px rgba(196, 84, 127, 0.15);
+}
+
+/* Icon trong input */
+
+.field__icon {
+    margin-left: 16px;
+    color: var(--muted);
+    flex-shrink: 0;
+}
+
+/* Ô nhập dữ liệu */
+
+.field__box input {
+    flex: 1;
+    height: 100%;
+
+    border: 0;
+    outline: 0;
+    background: transparent;
+
+    padding: 0 14px;
+
+    font-size: 16px;
+    color: var(--ink);
+}
+
+.field__box input::placeholder {
+    color: #a79ca1;
+}
+
+/* Nút ẩn hiện mật khẩu */
+
+.field__toggle {
+    border: 0;
+    background: transparent;
+
+    cursor: pointer;
+
+    padding: 0 16px;
+    height: 100%;
+
+    color: var(--muted);
+}
+
+.field__toggle:hover {
+    color: var(--pink-600);
+}
+
+/* Thông báo lỗi */
+
+.field__error {
+    display: none;
+    margin-top: 6px;
+
+    font-size: 14px;
+    color: var(--danger);
+    font-weight: 600;
+}
+
+.field.is-error .field__box {
+    border-color: var(--danger);
+
+    box-shadow: 0 0 0 3px rgba(214, 69, 93, 0.12);
+}
+
+.field.is-error .field__error {
+    display: block;
+}
+
+/* Ghi nhớ và quên mật khẩu */
+
+.options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: clamp(10px, 2vh, 20px);
+}
+
+.check {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.check input {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--pink-600);
+}
+
+/* Nút đăng nhập */
+
+.btn {
+    width: 100%;
+    height: clamp(40px, 5.2vh, 46px);
+
+    border: 0;
+    border-radius: 8px;
+
+    background: var(--pink-600);
+    color: #ffffff;
+
+    font-weight: 700;
+    font-size: 17px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    cursor: pointer;
+
+    box-shadow: 0 8px 20px rgba(196, 84, 127, 0.25);
+
+    transition:
+        background 0.2s,
+        transform 0.1s;
+}
+
+.btn:hover {
+    background: var(--pink-700);
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.btn.is-loading span::after {
+    content: "...";
+}
+
+
+/* ---------- 6. GHI CHÚ & CHÂN TRANG ---------- */
+
+/* Hộp ghi chú */
+
+.note {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    margin-top: clamp(12px, 2.4vh, 24px);
+    padding: clamp(10px, 1.8vh, 16px) 20px;
+
+    border: 1px solid var(--line);
+    border-radius: 8px;
+
+    background: var(--pink-50);
+    font-size: 14px;
+}
+
+.note svg {
+    color: var(--pink-600);
+    flex-shrink: 0;
+}
+
+/* Hỗ trợ */
+
+.help {
+    text-align: center;
+    margin-top: clamp(10px, 1.8vh, 18px);
+
+    color: var(--muted);
+    font-size: 15px;
+}
+
+.help a {
+    color: var(--ink);
+    font-weight: 600;
+}
+
+/* Chân trang */
+
+.panel__foot {
+    display: flex;
+    justify-content: space-between;
+
+    color: var(--muted);
+    font-size: 14px;
+}
+
+
+/* ---------- 7. TOAST THÔNG BÁO ---------- */
+
+.toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 100;
+
+    min-width: 320px;
+    max-width: calc(100vw - 48px);
+
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+
+    padding: 16px 20px;
+
+    background: #ffffff;
+    border-radius: 10px;
+
+    border-left: 5px solid var(--success);
+
+    box-shadow: 0 14px 40px rgba(58, 50, 54, 0.18);
+
+    overflow: hidden;
+
+    animation: toast-in 0.3s ease;
+}
+
+.toast[hidden] {
+    display: none;
+}
+
+.toast--error {
+    border-left-color: var(--danger);
+}
+
+/* Icon thông báo */
+
+.toast__icon {
+    width: 24px;
+    height: 24px;
+
+    border-radius: 50%;
+
+    display: grid;
+    place-items: center;
+
+    color: #ffffff;
+    background: var(--success);
+
+    font-weight: 700;
+    font-size: 14px;
+
+    flex-shrink: 0;
+}
+
+.toast--error .toast__icon {
+    background: var(--danger);
+}
+
+/* Nội dung thông báo */
+
+.toast__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    font-size: 14px;
+}
+
+.toast__body strong {
+    font-size: 15px;
+}
+
+/* Thanh thời gian toast */
+
+.toast__bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+
+    height: 3px;
+    width: 100%;
+
+    background: var(--success);
+
+    transform-origin: left;
+}
+
+.toast--error .toast__bar {
+    background: var(--danger);
+}
+
+.toast.is-running .toast__bar {
+    animation: toast-bar 3s linear forwards;
+}
+
+/* Animation */
+
+@keyframes toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(-12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes toast-bar {
+    from {
+        transform: scaleX(1);
+    }
+
+    to {
+        transform: scaleX(0);
+    }
+}
+
+
+/* ---------- 8. RESPONSIVE ---------- */
+
+/* Màn hình thấp: thu gọn thêm để vẫn vừa 1 trang */
+@media (max-height: 760px) {
+
+    .brand__desc,
+    .help {
+        font-size: 14px;
+    }
+
+    .panel__subtitle {
+        font-size: 14px;
+    }
+
+    .brand__quote {
+        font-size: 17px;
+    }
+}
+
+@media (max-height: 660px) {
+
+    .brand__desc,
+    .note {
+        display: none;
+    }
+}
+
+/* Điện thoại / màn hình hẹp: bỏ khoá để nội dung cuộn được, tránh bị cắt */
+@media (max-width: 900px) {
+
+    html,
+    body {
+        overflow: auto;
+    }
+
+    .login {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
+    }
+
+    .brand {
+        display: none;
+    }
+
+    .panel {
+        border-left: 0;
+        padding: 32px 6%;
+        overflow: visible;
+    }
+
+    .panel__content {
+        margin: 36px auto;
+    }
+
+    .panel__foot {
+        padding-top: 16px;
+    }
+}
+
+/* Giảm chuyển động nếu người dùng yêu cầu */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .toast,
+    .toast.is-running .toast__bar {
+        animation: none;
+    }
+}
