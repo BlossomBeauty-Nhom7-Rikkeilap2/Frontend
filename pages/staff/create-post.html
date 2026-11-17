@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blossom - Soạn thảo & Gửi duyệt bài viết</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Styles -->
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="../../css/staff/dashboard.css">
+  <link rel="stylesheet" href="../../css/staff/create-post.css">
+</head>
+<body>
+  <div class="overlay" id="overlay"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <h1>Blossom.</h1>
+      <span>BEAUTY STORE</span>
+    </div>
+    <div class="side-label">Không gian nhân viên</div>
+    <ul class="nav" id="nav">
+      <li><a href="dashboard.html"><i data-icon="home"></i>Tổng quan</a></li>
+      <li><a href="posts.html"><i data-icon="doc"></i>Bài viết của tôi</a></li>
+      <li><a href="create-post.html" class="active"><i data-icon="plus"></i>Tạo bài viết</a></li>
+      <li><a href="calendar.html"><i data-icon="cal"></i>Lịch đăng bài</a></li>
+      <li><a href="notifications.html"><i data-icon="bell"></i>Thông báo</a></li>
+      <li><a href="profile.html"><i data-icon="user"></i>Hồ sơ cá nhân</a></li>
+    </ul>
+    <div class="side-bottom">
+      <div class="quote">Mỗi bài viết là một câu chuyện.</div>
+      <a href="support.html" class="help"><i data-icon="help"></i>Bạn cần hỗ trợ?</a>
+    </div>
+  </aside>
+
+  <!-- MAIN WRAPPER -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Mở menu"><i data-icon="menu"></i></button>
+
+      <div style="font-weight: 600; font-size: 16px; color: var(--text);">
+        ✨ Tạo & Gửi duyệt bài viết mới
+      </div>
+
+      <div class="top-right">
+        <a href="notifications.html" class="bell" aria-label="Thông báo">
+          <i data-icon="bell"></i><span class="dot"></span>
+        </a>
+
+        <button class="user" id="userBtn">
+          <span class="avatar">ĐP</span>
+          <span class="user-info"><b>Nguyễn Phát Đạt</b><small>Marketing Staff</small></span>
+          <i data-icon="chev" class="chev"></i>
+        </button>
+
+        <div class="menu" id="menu">
+          <div class="who">
+            <b>Nguyễn Phát Đạt</b>
+            <span>phatdatggg@gmail.com</span>
+            <em>Marketing Staff · ACTIVE</em>
+          </div>
+          <button class="item" onclick="location.href='profile.html'"><i data-icon="user"></i>Hồ sơ cá nhân</button>
+          <hr>
+          <button class="item logout" id="logout"><i data-icon="logout"></i>Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content">
+      <div class="crumb">Blossom / Bài viết của tôi / Soạn thảo & Gửi duyệt (FR-08)</div>
+
+      <div class="create-grid">
+        <!-- FORM COLUMN -->
+        <div class="form-card">
+          <div style="border-bottom: 1px solid var(--pink-line); padding-bottom: 12px; margin-bottom: 6px;">
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text);" id="formHeading">Soạn thảo bài viết truyền thông</h2>
+            <p style="color: var(--muted); font-size: 13.5px;">Điền đầy đủ thông tin bên dưới để lưu nháp hoặc gửi bài cho Quản lý phê duyệt.</p>
+          </div>
+
+          <!-- REVISION ALERT IF EDITING -->
+          <div id="revisionAlert" style="display:none; background: var(--purple-bg); border-left: 4px solid var(--purple); padding: 12px 16px; border-radius: 8px;">
+            <b style="color: var(--purple);">⚠️ Góp ý chỉnh sửa từ Quản lý:</b>
+            <p id="revisionReasonText" style="margin-top: 4px; color: var(--text);"></p>
+          </div>
+
+          <!-- POST TITLE -->
+          <div class="form-group">
+            <label class="form-label" for="postTitle">
+              <span>Tiêu đề bài viết <span class="required">*</span></span>
+              <small id="titleCharCount">0/150 ký tự</small>
+            </label>
+            <input type="text" id="postTitle" class="input-text" placeholder="VD: Bộ sưu tập Son dưỡng ẩm hoa hồng mùa hanh khô..." maxlength="150">
+            <span class="error-text" id="titleError">[ERR-03] Tiêu đề bài viết không được để trống khi gửi duyệt!</span>
+          </div>
+
+          <!-- PLATFORM SELECT -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>Nền tảng xuất bản <span class="required">*</span></span>
+              <small>Chọn ít nhất 1 nền tảng</small>
+            </label>
+            <div class="platform-options">
+              <label class="platform-checkbox-label fb" id="lblFb">
+                <input type="checkbox" name="platform" value="Facebook" id="chkFb">
+                <span>Facebook</span>
+              </label>
+              <label class="platform-checkbox-label ig" id="lblIg">
+                <input type="checkbox" name="platform" value="Instagram" id="chkIg">
+                <span>Instagram</span>
+              </label>
+              <label class="platform-checkbox-label tiktok" id="lblTiktok">
+                <input type="checkbox" name="platform" value="TikTok" id="chkTiktok">
+                <span>TikTok</span>
+              </label>
+            </div>
+            <span class="error-text" id="platformError">[ERR-03] Bạn phải chọn ít nhất một nền tảng mạng xã hội!</span>
+          </div>
+
+          <!-- CAPTION -->
+          <div class="form-group">
+            <label class="form-label" for="postCaption">
+              <span>Nội dung bài viết (Caption) <span class="required">*</span></span>
+              <small id="captionCharCount">0/2000</small>
+            </label>
+            <textarea id="postCaption" class="input-textarea" placeholder="Nhập nội dung chia sẻ, câu chuyện sản phẩm, lời kêu gọi hành động (Call To Action)..."></textarea>
+            <span class="error-text" id="captionError">[ERR-03] Nội dung bài viết không được để trống khi gửi duyệt!</span>
+
+            <!-- QUICK HASHTAG SUGGESTIONS -->
+            <div class="hashtag-chips">
+              <span style="font-size: 11.5px; color: var(--muted); align-self: center;">Gợi ý Hashtag:</span>
+              <span class="chip-tag" onclick="appendHashtag('#BlossomBeauty')">#BlossomBeauty</span>
+              <span class="chip-tag" onclick="appendHashtag('#Skincare')">#Skincare</span>
+              <span class="chip-tag" onclick="appendHashtag('#DuongAm')">#DuongAm</span>
+              <span class="chip-tag" onclick="appendHashtag('#GlassSkin')">#GlassSkin</span>
+              <span class="chip-tag" onclick="appendHashtag('#NaturalGlow')">#NaturalGlow</span>
+              <span class="chip-tag" onclick="appendHashtag('#BlackFriday')">#BlackFriday</span>
+            </div>
+          </div>
+
+          <!-- MEDIA UPLOAD -->
+          <div class="form-group">
+            <label class="form-label">
+              <span>Hình ảnh / Video đính kèm</span>
+              <small>Hỗ trợ JPG, PNG, MP4 hoặc dán URL</small>
+            </label>
+            <div class="upload-dropzone" id="dropzone">
+              <i data-icon="spark"></i>
+              <div style="font-weight: 500; color: var(--text);">Kéo thả ảnh vào đây hoặc bấm để chọn tệp</div>
+              <small style="color: var(--muted);">Hoặc dán đường dẫn ảnh trực tiếp bên dưới</small>
+              <input type="file" id="fileInput" accept="image/*" style="display: none;">
+            </div>
+            <input type="url" id="mediaUrlInput" class="input-text" placeholder="https://example.com/hinh-anh-san-pham.jpg" style="margin-top: 8px;">
+
+            <div class="media-preview-box" id="mediaPreviewBox">
+              <img id="mediaPreviewImg" src="" alt="preview">
+              <button type="button" class="remove-media-btn" id="removeMediaBtn" title="Xóa ảnh">&times;</button>
+            </div>
+          </div>
+
+          <!-- SCHEDULED TIME -->
+          <div class="form-group">
+            <label class="form-label" for="publishDate">
+              <span>Ngày & Giờ dự kiến xuất bản <span class="required">*</span></span>
+              <small>Hệ thống tự động đồng bộ vào Lịch đăng khi Sếp duyệt</small>
+            </label>
+            <input type="datetime-local" id="publishDate" class="input-text">
+            <span class="error-text" id="dateError">[ERR-02] Thời gian dự kiến xuất bản phải lớn hơn thời điểm hiện tại!</span>
+          </div>
+
+          <!-- SUBMIT NOTE (OPTIONAL) -->
+          <div class="form-group">
+            <label class="form-label" for="submitNote">
+              <span>Ghi chú gửi duyệt cho Sếp / Manager</span>
+              <small>Tin nhắn kèm theo để Quản lý nắm thông tin</small>
+            </label>
+            <input type="text" id="submitNote" class="input-text" placeholder="VD: Gửi Chị Minh Anh duyệt kịch bản clip sale cuối tháng ạ...">
+          </div>
+
+          <!-- ACTIONS -->
+          <div class="form-actions">
+            <button type="button" class="btn btn-outline" onclick="location.href='posts.html'">Hủy bỏ</button>
+            <button type="button" class="btn btn-secondary" id="saveDraftBtn">
+              <i data-icon="doc"></i> Lưu bản nháp
+            </button>
+            <button type="button" class="btn btn-primary" id="submitApprovalBtn">
+              <i data-icon="send"></i> Gửi duyệt ngay (FR-08)
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT SIDE: LIVE MOCKUP PREVIEW -->
+        <div class="preview-sticky">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <b style="font-size: 14px; color: var(--text);">👁️ Xem trước giao diện bài đăng</b>
+            <span class="badge ready" style="font-size: 11px;">Trực quan</span>
+          </div>
+
+          <!-- PREVIEW TABS -->
+          <div class="preview-tabs">
+            <button type="button" class="preview-tab-btn active" data-mockup="fb">Facebook</button>
+            <button type="button" class="preview-tab-btn" data-mockup="ig">Instagram</button>
+            <button type="button" class="preview-tab-btn" data-mockup="tiktok">TikTok</button>
+          </div>
+
+          <!-- MOCKUP CONTAINER -->
+          <div class="mockup-container" id="mockupBox">
+            <div class="mockup-header">
+              <div class="mockup-avatar">B</div>
+              <div class="mockup-author-info">
+                <b>Blossom Beauty Store</b>
+                <small id="mockupPlatformText">Facebook · Vừa xong</small>
+              </div>
+            </div>
+
+            <div class="mockup-caption" id="mockupCaption">
+              Nội dung bài viết sẽ hiển thị trực quan tại đây khi bạn soạn thảo...
+            </div>
+
+            <img id="mockupImage" class="mockup-image" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=600&q=80" alt="post visual">
+
+            <div class="mockup-footer" id="mockupFooter">
+              <span>👍 Thích (0)</span>
+              <span>💬 Bình luận (0)</span>
+              <span>↗️ Chia sẻ</span>
+            </div>
+          </div>
+
+          <div style="font-size: 12px; color: var(--muted); text-align: center;">
+            💡 Đảm bảo hình ảnh rõ nét và hashtag phù hợp để đạt tương tác cao nhất.
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>© 2026 Blossom Beauty Store. Đẹp từ những điều nhỏ.</span>
+      <span>Phiên bản 1.0 · Trung tâm trợ giúp</span>
+    </footer>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- SCRIPTS -->
+  <script src="../../js/posts-store.js"></script>
+  <script src="../../js/staff/create-post.js"></script>
+</body>
+</html>
