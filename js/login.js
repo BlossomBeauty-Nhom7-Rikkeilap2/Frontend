@@ -2,6 +2,9 @@
 /* =====================================================
    BLOSSOM BEAUTY STORE - XỬ LÝ ĐĂNG NHẬP
 
+   Dùng chung auth.js (nạp trước file này trong login.html):
+   lưu phiên, đường dẫn trang chủ theo role, thông báo "một lần".
+
    Mục lục:
    1. Cấu hình và dữ liệu mẫu
    2. Lấy phần tử DOM
@@ -17,11 +20,7 @@
     /* ---------- 1. CẤU HÌNH VÀ DỮ LIỆU MẪU ---------- */
 
     const TOAST_DURATION = 1000;
-    const MANAGER_URL = "../admin/dashboard.html";
-    const STAFF_URL = "../staff/dashboard.html";
-
-    const REMEMBER_KEY = "blossom_remember_user";
-    const USER_KEY = "blossom_user";
+    const FLASH_DURATION = 3000;    // thông báo từ trang khác (vd: phiên hết hạn)
 
     // Tài khoản demo
     const USERS = [
@@ -89,7 +88,7 @@
 
     let toastTimer = null;
 
-    function showToast(type, title, message) {
+    function showToast(type, title, message, duration) {
         clearTimeout(toastTimer);
 
         toast.className = "toast toast--" + type;
@@ -106,7 +105,7 @@
 
         toastTimer = setTimeout(() => {
             toast.hidden = true;
-        }, TOAST_DURATION);
+        }, duration || TOAST_DURATION);
     }
 
     /* ---------- 5. XÁC THỰC VÀ PHÂN QUYỀN ---------- */
@@ -229,56 +228,36 @@
             }
 
             // 5.4 Đăng nhập thành công
-            const user = result.user;
+            // Auth.login lưu phiên (user + mốc thời gian) và từ chối role không hợp lệ
+            const savedUser = Auth.login(result.user);
 
-            // Ghi nhớ tài khoản
-            if (rememberBox.checked) {
-                localStorage.setItem(REMEMBER_KEY, identifier);
-            } else {
-                localStorage.removeItem(REMEMBER_KEY);
-            }
-
-            // Lưu thông tin người dùng
-            localStorage.setItem(
-                USER_KEY,
-                JSON.stringify({
-                    username: user.username,
-                    email: user.email,
-                    role: user.role,
-                    fullName: user.fullName,
-                    position: user.position
-                })
-            );
-
-            // Phân quyền chuyển trang
-            let redirectURL;
-
-            if (user.role === "MANAGER") {
-                redirectURL = MANAGER_URL;
-            } else if (user.role === "STAFF") {
-                redirectURL = STAFF_URL;
-            } else {
+            if (!savedUser) {
                 showToast(
                     "error",
                     "Không có quyền truy cập",
                     "Vai trò tài khoản không hợp lệ."
                 );
 
-                localStorage.removeItem(USER_KEY);
-
                 return;
+            }
+
+            // Ghi nhớ tài khoản
+            if (rememberBox.checked) {
+                localStorage.setItem(Auth.REMEMBER_KEY, identifier);
+            } else {
+                localStorage.removeItem(Auth.REMEMBER_KEY);
             }
 
             // Hiển thị thông báo
             showToast(
                 "success",
                 "Đăng nhập thành công",
-                "Chào mừng " + user.username + " quay trở lại!"
+                "Chào mừng " + savedUser.username + " quay trở lại!"
             );
 
-            // Chuyển trang
+            // Phân quyền chuyển trang: dashboard theo role
             setTimeout(() => {
-                window.location.href = redirectURL;
+                window.location.href = Auth.homeUrl(savedUser.role);
             }, TOAST_DURATION);
 
         }, 600);
@@ -321,11 +300,18 @@
     // 6.4 Khởi tạo
     renderEye(false);
 
-    const saved = localStorage.getItem(REMEMBER_KEY);
+    const saved = localStorage.getItem(Auth.REMEMBER_KEY);
 
     if (saved) {
         emailInput.value = saved;
         rememberBox.checked = true;
+    }
+
+    // Thông báo từ trang trước (vd: phiên đăng nhập đã hết hạn)
+    const flash = Auth.takeFlash();
+
+    if (flash) {
+        showToast(flash.type, flash.title, flash.message, FLASH_DURATION);
     }
 
 })();
