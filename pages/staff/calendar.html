@@ -1,44 +1,223 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Blossom - Lịch đăng bài</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- CSS dùng chung (thêm css riêng của trang bên dưới nếu cần) -->
-    <link rel="stylesheet" href="../../css/common.css">
-    <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/components.css">
-
-    <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
-    <script src="../../js/auth.js"></script>
-    <script src="../../js/permissions.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blossom - Lịch đăng bài & Kiểm tra xung đột (FR-11)</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Styles -->
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="../../css/staff/dashboard.css">
+  <link rel="stylesheet" href="../../css/staff/calendar.css">
 </head>
 <body>
+  <div class="overlay" id="overlay"></div>
 
-    <!-- Sidebar + Header + Footer do js/layout.js render -->
-    <aside class="sidebar" id="sidebar"></aside>
-
-    <div class="main">
-        <header class="topbar" id="topbar"></header>
-
-        <main class="content">
-            <div class="crumb">Blossom / Không gian nhân viên / Lịch đăng bài</div>
-            <h2 class="page-title">Lịch đăng bài</h2>
-            <p class="page-sub">Các bài viết của bạn đã được lên lịch.</p>
-
-            <!-- TODO: nội dung trang -->
-            <section class="card">
-                <div class="empty-state"><i data-icon="empty"></i><span>Trang đang được phát triển.</span></div>
-            </section>
-        </main>
-
-        <footer class="footer" id="footer"></footer>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <h1>Blossom.</h1>
+      <span>BEAUTY STORE</span>
     </div>
+    <div class="side-label">Không gian nhân viên</div>
+    <ul class="nav" id="nav">
+      <li><a href="dashboard.html"><i data-icon="home"></i>Tổng quan</a></li>
+      <li><a href="posts.html"><i data-icon="doc"></i>Bài viết của tôi</a></li>
+      <li><a href="create-post.html"><i data-icon="plus"></i>Tạo bài viết</a></li>
+      <li><a href="calendar.html" class="active"><i data-icon="cal"></i>Lịch đăng bài</a></li>
+      <li><a href="notifications.html"><i data-icon="bell"></i>Thông báo</a></li>
+      <li><a href="profile.html"><i data-icon="user"></i>Hồ sơ cá nhân</a></li>
+    </ul>
+    <div class="side-bottom">
+      <div class="quote">Mỗi bài viết là một câu chuyện.</div>
+      <a href="support.html" class="help"><i data-icon="help"></i>Bạn cần hỗ trợ?</a>
+    </div>
+  </aside>
 
-    <script src="../../js/components.js"></script>
-    <script src="../../js/layout.js"></script>
+  <!-- MAIN WRAPPER -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Mở menu"><i data-icon="menu"></i></button>
+
+      <div style="font-weight: 600; font-size: 16px; color: var(--text);">
+        📅 Quản lý Lịch xuất bản nội dung (Content Calendar)
+      </div>
+
+      <div class="top-right">
+        <a href="notifications.html" class="bell" aria-label="Thông báo">
+          <i data-icon="bell"></i><span class="dot"></span>
+        </a>
+
+        <button class="user" id="userBtn">
+          <span class="avatar">ĐP</span>
+          <span class="user-info"><b>Nguyễn Phát Đạt</b><small>Marketing Staff</small></span>
+          <i data-icon="chev" class="chev"></i>
+        </button>
+
+        <div class="menu" id="menu">
+          <div class="who">
+            <b>Nguyễn Phát Đạt</b>
+            <span>phatdatggg@gmail.com</span>
+            <em>Marketing Staff · ACTIVE</em>
+          </div>
+          <button class="item" onclick="location.href='profile.html'"><i data-icon="user"></i>Hồ sơ cá nhân</button>
+          <hr>
+          <button class="item logout" id="logout"><i data-icon="logout"></i>Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content">
+      <div class="crumb">Blossom / Kế hoạch truyền thông / Lịch đăng bài (FR-11)</div>
+
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Lịch đăng bài & Kiểm tra xung đột</h2>
+          <p>Hệ thống tự động phát hiện và cảnh báo nếu có 2 bài đăng cùng nền tảng cách nhau dưới 30 phút.</p>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-primary" onclick="openNewScheduleModal()">
+            <i data-icon="plus"></i> Lên lịch bài viết mới
+          </button>
+        </div>
+      </div>
+
+      <!-- CALENDAR TOOLBAR -->
+      <div class="calendar-toolbar">
+        <div class="nav-month-controls">
+          <button class="btn btn-outline btn-sm" id="prevMonthBtn" title="Tháng trước">◀</button>
+          <h3 class="current-month-heading" id="currentMonthHeading">Tháng 11 / 2026</h3>
+          <button class="btn btn-outline btn-sm" id="nextMonthBtn" title="Tháng sau">▶</button>
+          <button class="btn btn-secondary btn-sm" id="todayBtn">Hôm nay</button>
+        </div>
+
+        <div class="toolbar-right">
+          <div class="select">
+            <select class="select-filter" id="platformFilter">
+              <option value="all">Tất cả nền tảng</option>
+              <option value="Facebook">Facebook</option>
+              <option value="Instagram">Instagram</option>
+              <option value="TikTok">TikTok</option>
+            </select>
+          </div>
+
+          <div class="view-toggle">
+            <button class="view-btn active" id="viewMonthBtn" title="Xem tháng">Tháng</button>
+            <button class="view-btn" id="viewListBtn" title="Xem danh sách">Danh sách</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALENDAR CONTAINER -->
+      <div class="calendar-card" id="calendarCard">
+        <div class="calendar-weekdays">
+          <div class="weekday-col">Thứ 2</div>
+          <div class="weekday-col">Thứ 3</div>
+          <div class="weekday-col">Thứ 4</div>
+          <div class="weekday-col">Thứ 5</div>
+          <div class="weekday-col">Thứ 6</div>
+          <div class="weekday-col weekend">Thứ 7</div>
+          <div class="weekday-col weekend">Chủ Nhật</div>
+        </div>
+        <div class="calendar-grid-days" id="calendarDaysGrid">
+          <!-- Rendered by JS -->
+        </div>
+      </div>
+
+      <!-- LIST VIEW CONTAINER (HIDDEN INITIALLY) -->
+      <div class="calendar-card" id="calendarListView" style="display: none;">
+        <div class="calendar-list-view" id="calendarListContent"></div>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>© 2026 Blossom Beauty Store. Đẹp từ những điều nhỏ.</span>
+      <span>Phiên bản 1.0 · Trung tâm trợ giúp</span>
+    </footer>
+  </div>
+
+  <!-- SCHEDULE & RESCHEDULE MODAL WITH CONFLICT CHECK -->
+  <div class="modal-overlay" id="scheduleModal">
+    <div class="modal-box" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 id="scheduleModalTitle">Lên lịch xuất bản bài viết</h3>
+        <span class="modal-close-btn" onclick="closeScheduleModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="scheduleForm" onsubmit="return false;">
+          <div class="form-group" id="postSelectGroup">
+            <label class="form-label" for="schedulePostSelect">
+              <span>Chọn bài viết cần lên lịch <span class="required">*</span></span>
+            </label>
+            <select class="input-select" id="schedulePostSelect">
+              <!-- Rendered by JS -->
+            </select>
+          </div>
+
+          <div id="selectedPostInfoBox" style="background: var(--pink-bg); border: 1px solid var(--pink-line); border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+            <b id="schPostTitle"></b>
+            <div style="font-size: 12.5px; color: var(--muted); margin-top: 4px;" id="schPostMeta"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="scheduleDatetimeInput">
+              <span>Thời gian xuất bản dự kiến <span class="required">*</span></span>
+              <small>Hệ thống tự động kiểm tra xung đột thời gian</small>
+            </label>
+            <input type="datetime-local" class="input-text" id="scheduleDatetimeInput">
+            <span class="error-text" id="schDateError">[ERR-02] Không được chọn thời gian trong quá khứ!</span>
+          </div>
+
+          <!-- DYNAMIC CONFLICT WARNING BANNER (FR-11 CORE FEATURE) -->
+          <div class="conflict-alert-box" id="conflictAlertBox" style="display: none;">
+            <div class="conflict-alert-header">
+              <span>⚠️ CẢNH BÁO XUNG ĐỘT LỊCH ĐĂNG (< 30 PHÚT)</span>
+            </div>
+            <div class="conflict-alert-body" id="conflictAlertText">
+              <!-- Rendered by JS -->
+            </div>
+            <button type="button" class="btn btn-warning btn-sm conflict-alert-action" id="autoFixConflictBtn">
+              💡 Tự động dời sang giờ an toàn tiếp theo (+30 phút)
+            </button>
+          </div>
+
+          <!-- REMINDER FLAGS (FR-11) -->
+          <div class="form-group" style="margin-top: 14px;">
+            <label class="form-label">
+              <span>Cài đặt thông báo nhắc nhở</span>
+              <small>Tự động reset khi thay đổi giờ đăng</small>
+            </label>
+            <div style="display: flex; gap: 16px; margin-top: 4px;">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+                <input type="checkbox" id="remind30" checked>
+                <span>Nhắc trước 30 phút</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+                <input type="checkbox" id="remind10" checked>
+                <span>Nhắc trước 10 phút</span>
+              </label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeScheduleModal()">Hủy bỏ</button>
+        <button class="btn btn-primary" id="saveScheduleBtn">
+          <i data-icon="check"></i> Lưu lịch xuất bản
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- SCRIPTS -->
+  <script src="../../js/posts-store.js"></script>
+  <script src="../../js/staff/calendar.js"></script>
 </body>
 </html>

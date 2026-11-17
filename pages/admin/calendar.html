@@ -1,44 +1,185 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Blossom - Lịch đăng bài</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- CSS dùng chung (thêm css riêng của trang bên dưới nếu cần) -->
-    <link rel="stylesheet" href="../../css/common.css">
-    <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/components.css">
-
-    <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
-    <script src="../../js/auth.js"></script>
-    <script src="../../js/permissions.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blossom Admin – Lịch đăng bài toàn kênh (FR-11)</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Styles -->
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="../../css/admin/dashboard.css">
+  <link rel="stylesheet" href="../../css/staff/calendar.css">
 </head>
 <body>
-
-    <!-- Sidebar + Header + Footer do js/layout.js render -->
-    <aside class="sidebar" id="sidebar"></aside>
-
-    <div class="main">
-        <header class="topbar" id="topbar"></header>
-
-        <main class="content">
-            <div class="crumb">Blossom / Quản trị / Lịch đăng bài</div>
-            <h2 class="page-title">Lịch đăng bài</h2>
-            <p class="page-sub">Theo dõi lịch phát hành của toàn đội.</p>
-
-            <!-- TODO: nội dung trang -->
-            <section class="card">
-                <div class="empty-state"><i data-icon="empty"></i><span>Trang đang được phát triển.</span></div>
-            </section>
-        </main>
-
-        <footer class="footer" id="footer"></footer>
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">
+      <h1>Blossom.</h1>
+      <span>BEAUTY STORE</span>
     </div>
+    <div class="side-label">KHÔNG GIAN QUẢN TRỊ</div>
+    <ul class="nav" id="nav">
+      <li><a href="dashboard.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Tổng quan</a></li>
+      <li><a href="posts.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><path d="M11 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6"/><path d="m18 3 3 3-9 9H9v-3z"/></svg>Bài viết</a></li>
+      <li><a href="calendar.html" class="active"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch đăng bài</a></li>
+      <li><a href="approvals.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="m9 13 2 2 4-4M9 4h6v2H9z"/></svg>Duyệt bài</a></li>
+      <li><a href="reports.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><path d="M5 20v-6M11 20V6M17 20v-9M3 20h18"/></svg>Báo cáo & Thống kê</a></li>
+      <li><a href="notifications.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg>Thông báo</a></li>
+      <li><a href="accounts.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6"/></svg>Tài khoản</a></li>
+      <li><a href="settings.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/><circle cx="12" cy="12" r="7.5"/></svg>Cài đặt</a></li>
+    </ul>
+    <div class="side-bottom">
+      <div class="quote">Chăm chút từng điều nhỏ.</div>
+      <button class="help">Bạn cần hỗ trợ?</button>
+    </div>
+  </aside>
 
-    <script src="../../js/components.js"></script>
-    <script src="../../js/layout.js"></script>
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topbar">
+      <label class="search">
+        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="searchInput" placeholder="Tìm kiếm bài viết trên lịch...">
+        <span>⌘ K</span>
+      </label>
+      <div class="top-right">
+        <button class="bell"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6" width="22" height="22"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg></button>
+        <button class="user" id="userBtn">
+          <span class="avatar">MA</span>
+          <span><b>Đoàn Thị Minh Anh</b><small>Marketing Manager</small></span>
+          <svg class="chev" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6" width="16" height="16"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="crumb">Blossom / Quản trị / Lịch xuất bản toàn kênh (FR-11)</div>
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Lịch xuất bản truyền thông đa kênh</h2>
+          <p>Điều phối tần suất đăng bài, kiểm tra và ngăn chặn trùng lịch phát hành sát giờ (< 30 phút).</p>
+        </div>
+        <div class="action-bar">
+          <button class="btn btn-primary" onclick="openNewScheduleModal()">
+            <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Lên lịch bài viết mới
+          </button>
+        </div>
+      </div>
+
+      <!-- CALENDAR TOOLBAR -->
+      <div class="calendar-toolbar">
+        <div class="nav-month-controls">
+          <button class="btn btn-outline btn-sm" id="prevMonthBtn" title="Tháng trước">◀</button>
+          <h3 class="current-month-heading" id="currentMonthHeading">Tháng 11 / 2026</h3>
+          <button class="btn btn-outline btn-sm" id="nextMonthBtn" title="Tháng sau">▶</button>
+          <button class="btn btn-secondary btn-sm" id="todayBtn">Hôm nay</button>
+        </div>
+
+        <div class="toolbar-right">
+          <div class="select">
+            <select class="select-filter" id="platformFilter">
+              <option value="all">Tất cả nền tảng</option>
+              <option value="Facebook">Facebook</option>
+              <option value="Instagram">Instagram</option>
+              <option value="TikTok">TikTok</option>
+            </select>
+          </div>
+
+          <div class="view-toggle">
+            <button class="view-btn active" id="viewMonthBtn">Tháng</button>
+            <button class="view-btn" id="viewListBtn">Danh sách</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CALENDAR GRID -->
+      <div class="calendar-card" id="calendarCard">
+        <div class="calendar-weekdays">
+          <div class="weekday-col">Thứ 2</div>
+          <div class="weekday-col">Thứ 3</div>
+          <div class="weekday-col">Thứ 4</div>
+          <div class="weekday-col">Thứ 5</div>
+          <div class="weekday-col">Thứ 6</div>
+          <div class="weekday-col weekend">Thứ 7</div>
+          <div class="weekday-col weekend">Chủ Nhật</div>
+        </div>
+        <div class="calendar-grid-days" id="calendarDaysGrid"></div>
+      </div>
+
+      <!-- LIST VIEW -->
+      <div class="calendar-card" id="calendarListView" style="display: none;">
+        <div class="calendar-list-view" id="calendarListContent"></div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span>© 2026 Blossom Beauty Store. Đẹp từ những điều nhỏ.</span>
+      <span>Phiên bản 1.0 · Trung tâm trợ giúp</span>
+    </footer>
+  </div>
+
+  <!-- SCHEDULE MODAL -->
+  <div class="modal-overlay" id="scheduleModal">
+    <div class="modal-box" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3 id="scheduleModalTitle">Lên lịch / Đổi giờ xuất bản</h3>
+        <span class="modal-close-btn" onclick="closeScheduleModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="scheduleForm" onsubmit="return false;">
+          <div class="form-group" id="postSelectGroup">
+            <label class="form-label" for="schedulePostSelect">
+              <span>Chọn bài viết cần lên lịch <span class="required">*</span></span>
+            </label>
+            <select class="input-select" id="schedulePostSelect"></select>
+          </div>
+
+          <div id="selectedPostInfoBox" style="background: var(--pink-bg); border: 1px solid var(--pink-line); border-radius: 8px; padding: 12px; margin-bottom: 14px;">
+            <b id="schPostTitle"></b>
+            <div style="font-size: 12.5px; color: var(--muted); margin-top: 4px;" id="schPostMeta"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="scheduleDatetimeInput">
+              <span>Thời gian xuất bản <span class="required">*</span></span>
+            </label>
+            <input type="datetime-local" class="input-text" id="scheduleDatetimeInput">
+            <span class="error-text" id="schDateError">[ERR-02] Không được chọn thời gian trong quá khứ!</span>
+          </div>
+
+          <!-- CONFLICT ALERT BANNER -->
+          <div class="conflict-alert-box" id="conflictAlertBox" style="display: none;">
+            <div class="conflict-alert-header">
+              <span>⚠️ CẢNH BÁO XUNG ĐỘT LỊCH ĐĂNG (< 30 PHÚT)</span>
+            </div>
+            <div class="conflict-alert-body" id="conflictAlertText"></div>
+            <button type="button" class="btn btn-warning btn-sm conflict-alert-action" id="autoFixConflictBtn">
+              💡 Tự động dời sang giờ an toàn (+30 phút)
+            </button>
+          </div>
+
+          <div class="form-group" style="margin-top: 14px;">
+            <label class="form-label">
+              <span>Nhắc nhở xuất bản</span>
+            </label>
+            <div style="display: flex; gap: 16px;">
+              <label style="font-size: 13px;"><input type="checkbox" id="remind30" checked> Nhắc trước 30 phút</label>
+              <label style="font-size: 13px;"><input type="checkbox" id="remind10" checked> Nhắc trước 10 phút</label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeScheduleModal()">Hủy</button>
+        <button class="btn btn-primary" id="saveScheduleBtn">Lưu lịch đăng</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="../../js/posts-store.js"></script>
+  <script src="../../js/staff/calendar.js"></script>
 </body>
 </html>
