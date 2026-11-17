@@ -1,0 +1,118 @@
+/* ==========================================================================
+   BLOSSOM BEAUTY STORE - ADMIN POSTS MANAGEMENT STYLES
+   ========================================================================== */
+
+@import url('../common.css');
+@import url('dashboard.css');
+
+.content {
+  padding: 32px;
+  flex: 1;
+}
+
+.crumb {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-title h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  color: var(--text);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.page-title p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.table-card {
+  background: #fff;
+  border: 1px solid var(--pink-line);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-top: 20px;
+}
+
+.posts-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.posts-table th {
+  background: #fdf6f8;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--pink-line);
+  font-weight: 600;
+}
+
+.posts-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--pink-line);
+  vertical-align: middle;
+}
+
+.posts-table tr:hover td {
+  background: #fffafc;
+}
+
+.post-media-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 260px;
+}
+
+.post-media-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--pink-line);
+}
+
+.post-info-text b {
+  display: block;
+  font-size: 14px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.post-info-text p {
+  color: var(--muted);
+  font-size: 12.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 300px;
+}
+
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  background: #fff;
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--pink-line);
+}

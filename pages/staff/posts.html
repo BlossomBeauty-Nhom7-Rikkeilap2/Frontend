@@ -1,44 +1,209 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Blossom - Bài viết của tôi</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- CSS dùng chung (thêm css riêng của trang bên dưới nếu cần) -->
-    <link rel="stylesheet" href="../../css/common.css">
-    <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/components.css">
-
-    <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
-    <script src="../../js/auth.js"></script>
-    <script src="../../js/permissions.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blossom - Quản lý bài viết của tôi</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Styles -->
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="../../css/staff/dashboard.css">
+  <link rel="stylesheet" href="../../css/staff/posts.css">
 </head>
 <body>
+  <div class="overlay" id="overlay"></div>
 
-    <!-- Sidebar + Header + Footer do js/layout.js render -->
-    <aside class="sidebar" id="sidebar"></aside>
-
-    <div class="main">
-        <header class="topbar" id="topbar"></header>
-
-        <main class="content">
-            <div class="crumb">Blossom / Không gian nhân viên / Bài viết của tôi</div>
-            <h2 class="page-title">Bài viết của tôi</h2>
-            <p class="page-sub">Danh sách bài viết bạn phụ trách.</p>
-
-            <!-- TODO: nội dung trang -->
-            <section class="card">
-                <div class="empty-state"><i data-icon="empty"></i><span>Trang đang được phát triển.</span></div>
-            </section>
-        </main>
-
-        <footer class="footer" id="footer"></footer>
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <h1>Blossom.</h1>
+      <span>BEAUTY STORE</span>
     </div>
+    <div class="side-label">Không gian nhân viên</div>
+    <ul class="nav" id="nav">
+      <li><a href="dashboard.html"><i data-icon="home"></i>Tổng quan</a></li>
+      <li><a href="posts.html" class="active"><i data-icon="doc"></i>Bài viết của tôi</a></li>
+      <li><a href="create-post.html"><i data-icon="plus"></i>Tạo bài viết</a></li>
+      <li><a href="calendar.html"><i data-icon="cal"></i>Lịch đăng bài</a></li>
+      <li><a href="notifications.html"><i data-icon="bell"></i>Thông báo</a></li>
+      <li><a href="profile.html"><i data-icon="user"></i>Hồ sơ cá nhân</a></li>
+    </ul>
+    <div class="side-bottom">
+      <div class="quote">Mỗi bài viết là một câu chuyện.</div>
+      <a href="support.html" class="help"><i data-icon="help"></i>Bạn cần hỗ trợ?</a>
+    </div>
+  </aside>
 
-    <script src="../../js/components.js"></script>
-    <script src="../../js/layout.js"></script>
+  <!-- MAIN WRAPPER -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <button class="menu-btn" id="menuBtn" aria-label="Mở menu"><i data-icon="menu"></i></button>
+
+      <label class="search">
+        <i data-icon="search"></i>
+        <input type="text" id="searchInput" placeholder="Tìm kiếm theo tiêu đề, nội dung bài viết..." autocomplete="off">
+        <kbd>Ctrl K</kbd>
+      </label>
+
+      <div class="top-right">
+        <a href="notifications.html" class="bell" aria-label="Thông báo">
+          <i data-icon="bell"></i><span class="dot"></span>
+        </a>
+
+        <button class="user" id="userBtn" aria-haspopup="true" aria-expanded="false">
+          <span class="avatar">ĐP</span>
+          <span class="user-info"><b>Nguyễn Phát Đạt</b><small>Marketing Staff</small></span>
+          <i data-icon="chev" class="chev"></i>
+        </button>
+
+        <div class="menu" id="menu">
+          <div class="who">
+            <b>Nguyễn Phát Đạt</b>
+            <span>phatdatggg@gmail.com</span>
+            <em>Marketing Staff · ACTIVE</em>
+          </div>
+          <button class="item" onclick="location.href='profile.html'"><i data-icon="user"></i>Hồ sơ cá nhân</button>
+          <button class="item"><i data-icon="key"></i>Đổi mật khẩu</button>
+          <hr>
+          <button class="item logout" id="logout"><i data-icon="logout"></i>Đăng xuất</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content">
+      <div class="crumb">Blossom / Không gian nhân viên / Bài viết của tôi</div>
+
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Danh sách bài viết của tôi</h2>
+          <p>Quản lý toàn bộ vòng đời bài viết từ soạn thảo, gửi duyệt đến xuất bản đa kênh.</p>
+        </div>
+        <div class="action-bar">
+          <a href="create-post.html" class="btn btn-primary">
+            <i data-icon="plus"></i> Tạo bài viết mới
+          </a>
+        </div>
+      </div>
+
+      <!-- STAT CHIPS -->
+      <section class="posts-stats-row" id="statsRow">
+        <div class="stat-chip active" data-filter="all">
+          <div class="chip-icon pink"><i data-icon="doc"></i></div>
+          <div class="chip-info">
+            <small>Tất cả bài viết</small>
+            <strong id="statTotal">0</strong>
+          </div>
+        </div>
+        <div class="stat-chip" data-filter="review">
+          <div class="chip-icon orange"><i data-icon="clock"></i></div>
+          <div class="chip-info">
+            <small>Đang chờ duyệt</small>
+            <strong id="statReview">0</strong>
+          </div>
+        </div>
+        <div class="stat-chip" data-filter="edit">
+          <div class="chip-icon purple"><i data-icon="edit"></i></div>
+          <div class="chip-info">
+            <small>Cần chỉnh sửa</small>
+            <strong id="statEdit">0</strong>
+          </div>
+        </div>
+        <div class="stat-chip" data-filter="ready">
+          <div class="chip-icon pink"><i data-icon="spark"></i></div>
+          <div class="chip-info">
+            <small>Sẵn sàng đăng</small>
+            <strong id="statReady">0</strong>
+          </div>
+        </div>
+        <div class="stat-chip" data-filter="done">
+          <div class="chip-icon green"><i data-icon="check"></i></div>
+          <div class="chip-info">
+            <small>Đã xuất bản</small>
+            <strong id="statDone">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- FILTER CARD -->
+      <div class="filter-card">
+        <div class="filter-row">
+          <div class="tabs-group" id="statusTabs">
+            <button class="tab-btn active" data-status="all">Tất cả</button>
+            <button class="tab-btn" data-status="draft">Bản nháp</button>
+            <button class="tab-btn" data-status="review">Chờ duyệt</button>
+            <button class="tab-btn" data-status="edit">Cần chỉnh sửa</button>
+            <button class="tab-btn" data-status="ready">Sẵn sàng đăng</button>
+            <button class="tab-btn" data-status="done">Đã xuất bản</button>
+          </div>
+
+          <div class="filter-controls">
+            <select class="select-filter" id="platformSelect">
+              <option value="all">Tất cả nền tảng</option>
+              <option value="Facebook">Facebook</option>
+              <option value="Instagram">Instagram</option>
+              <option value="TikTok">TikTok</option>
+            </select>
+
+            <div class="view-toggle">
+              <button class="view-btn active" id="viewTableBtn" title="Xem dạng bảng"><i data-icon="menu"></i></button>
+              <button class="view-btn" id="viewGridBtn" title="Xem dạng thẻ"><i data-icon="spark"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POSTS CONTAINER -->
+      <div id="postsContainer"></div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+      <span>© 2026 Blossom Beauty Store. Đẹp từ những điều nhỏ.</span>
+      <span>Phiên bản 1.0 · Trung tâm trợ giúp</span>
+    </footer>
+  </div>
+
+  <!-- DETAIL & PREVIEW MODAL -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-box" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 id="modalPostTitle">Chi tiết bài viết</h3>
+        <span class="modal-close-btn" onclick="closeDetailModal()">&times;</span>
+      </div>
+      <div class="modal-body" id="modalPostContent">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer" id="modalPostFooter">
+        <button class="btn btn-outline" onclick="closeDetailModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE CONFIRM MODAL -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Xác nhận xóa bài viết</h3>
+        <span class="modal-close-btn" onclick="closeDeleteModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn xóa bài viết "<b id="deletePostTitle"></b>"? Hành động này không thể hoàn tác.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeDeleteModal()">Hủy bỏ</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Xóa bài viết</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- SCRIPTS -->
+  <script src="../../js/posts-store.js"></script>
+  <script src="../../js/staff/posts.js"></script>
 </body>
 </html>
