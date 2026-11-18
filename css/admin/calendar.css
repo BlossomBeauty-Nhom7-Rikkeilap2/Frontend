@@ -1,0 +1,774 @@
+/* ==========================================================
+   FR-11 · CONTENT CALENDAR — QUẢN LÝ LỊCH ĐĂNG BÀI (T06A667)
+   Figma Node: 3:45302
+   Hỗ trợ 3 chế độ: Tháng (Month) / Tuần (Week) / Ngày (Day)
+   Kéo-thả đổi giờ mượt + Cảnh báo xung đột < 30 phút (ERR-03)
+   ========================================================== */
+
+.fr11-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* ---------- 1. PAGE HEADING ---------- */
+.fr11-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fr11-breadcrumb {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #a4989d;
+}
+
+.fr11-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fr11-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fr11-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.35;
+    color: #574b50;
+}
+
+.fr11-subtitle {
+    font-size: 12px;
+    color: #a4989d;
+}
+
+.fr11-heading-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fr11-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #cc618a;
+    color: #ffffff;
+    border: 1px solid #cc618a;
+    border-radius: 6px;
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.12s ease;
+}
+
+.fr11-btn-primary:hover {
+    background: #b84f78;
+    border-color: #b84f78;
+}
+
+/* ---------- 2. TOOLBAR (Figma 3:45312) ---------- */
+.fr11-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fr11-month-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fr11-nav-arrow {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.fr11-nav-arrow:hover {
+    background: #fceef3;
+    border-color: #f2dfe7;
+}
+
+.fr11-period-label {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 1.35;
+    color: #574b50;
+    min-width: 145px;
+    text-align: center;
+}
+
+.fr11-btn-outline {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 6px;
+    padding: 9px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #574b50;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.fr11-btn-outline:hover {
+    border-color: #cc618a;
+    color: #cc618a;
+    background: #fff9fb;
+}
+
+.fr11-view-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.fr11-channel-select {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 6px;
+    padding: 9px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #574b50;
+    cursor: pointer;
+    outline: none;
+}
+
+.fr11-channel-select:focus {
+    border-color: #cc618a;
+}
+
+.fr11-mode-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fr11-mode-btn {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 6px;
+    padding: 9px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #574b50;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.fr11-mode-btn:hover {
+    border-color: #cc618a;
+    color: #cc618a;
+}
+
+.fr11-mode-btn.is-active {
+    background: #fceef3;
+    border-color: #cc618a;
+    color: #cc618a;
+    font-weight: 600;
+}
+
+/* ---------- 3. CONFLICT ALERT BANNER (ERR-03 / BR-12) ---------- */
+.fr11-conflict-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: #fff4f4;
+    border: 1px solid #f3b7b7;
+    border-left: 4px solid #dc3c3c;
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #8a2424;
+    font-size: 12.5px;
+    animation: fr11FadeIn 0.2s ease;
+}
+
+.fr11-conflict-banner[hidden] {
+    display: none !important;
+}
+
+.fr11-conflict-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.fr11-conflict-icon {
+    font-size: 16px;
+    line-height: 1.2;
+}
+
+.fr11-conflict-text strong {
+    display: block;
+    font-weight: 600;
+    color: #b42323;
+    margin-bottom: 2px;
+}
+
+.fr11-conflict-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.fr11-btn-resolve {
+    background: #ffffff;
+    border: 1px solid #e6a2a2;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #b42323;
+    cursor: pointer;
+}
+
+.fr11-btn-resolve:hover {
+    background: #dc3c3c;
+    color: #ffffff;
+    border-color: #dc3c3c;
+}
+
+/* ---------- 4. CALENDAR BOARD (MONTH VIEW - Figma 3:45328) ---------- */
+.fr11-calendar-card {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.fr11-weekday-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #fceef3;
+}
+
+.fr11-weekday-cell {
+    height: 36px;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-right: 1px solid #f2dfe7;
+    border-bottom: 1px solid #f2dfe7;
+    font-size: 11px;
+    font-weight: 500;
+    color: #cc618a;
+}
+
+.fr11-weekday-cell:last-child {
+    border-right: none;
+}
+
+.fr11-month-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.fr11-day-cell {
+    min-height: 92px;
+    padding: 8px;
+    border-right: 1px solid #f2dfe7;
+    border-bottom: 1px solid #f2dfe7;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    background: #ffffff;
+    transition: background 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+}
+
+.fr11-day-cell:nth-child(7n) {
+    border-right: none;
+}
+
+.fr11-day-cell.is-outside .fr11-day-num {
+    color: #e6d1da;
+}
+
+.fr11-day-cell.is-today {
+    background: #fffbfd;
+}
+
+.fr11-day-cell.is-drag-over {
+    background: #fdf0f5 !important;
+    box-shadow: inset 0 0 0 2px #cc618a;
+}
+
+.fr11-day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.fr11-day-num {
+    font-size: 12px;
+    font-weight: 400;
+    color: #574b50;
+    line-height: 1.5;
+}
+
+.fr11-day-cell.is-today .fr11-day-num {
+    font-weight: 700;
+    color: #cc618a;
+}
+
+.fr11-today-tag {
+    font-size: 8px;
+    font-weight: 600;
+    color: #cc618a;
+    letter-spacing: 0.02em;
+}
+
+.fr11-day-events {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+}
+
+/* ---------- 5. SCHEDULED POST ITEM (Figma 3:45390) ---------- */
+.fr11-event-card {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 5px 6px;
+    border-radius: 4px;
+    font-size: 9.5px;
+    line-height: 1.45;
+    cursor: grab;
+    user-select: none;
+    border-left: 3px solid transparent;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.15s ease;
+    position: relative;
+}
+
+.fr11-event-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 8px rgba(87, 75, 80, 0.12);
+}
+
+.fr11-event-card:active,
+.fr11-event-card.is-dragging {
+    cursor: grabbing;
+    opacity: 0.55;
+    transform: scale(0.98);
+}
+
+/* Status Backgrounds (Figma Legend 3:45563) */
+.fr11-event-card.status-scheduled {
+    background: #ebf6ef;
+}
+.fr11-event-card.status-scheduled .fr11-event-meta {
+    color: #4c8e74;
+}
+
+.fr11-event-card.status-pending {
+    background: #fff2e4;
+}
+.fr11-event-card.status-pending .fr11-event-meta {
+    color: #c39359;
+}
+
+.fr11-event-card.status-editing {
+    background: #f3edf8;
+}
+.fr11-event-card.status-editing .fr11-event-meta {
+    color: #9a83b2;
+}
+
+/* Platform Color Left Border */
+.fr11-event-card.platform-fb {
+    border-left-color: #1877F2;
+}
+.fr11-event-card.platform-ig {
+    border-left-color: #E1306C;
+}
+.fr11-event-card.platform-tiktok {
+    border-left-color: #111111;
+}
+.fr11-event-card.platform-fbig {
+    border-left-color: #cc618a;
+}
+
+/* Conflict Highlight on Card */
+.fr11-event-card.has-conflict {
+    background: #fff0f0 !important;
+    border: 1px solid #e46969 !important;
+    border-left: 3px solid #dc3c3c !important;
+}
+
+.fr11-event-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.fr11-platform-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.fr11-event-title {
+    color: #574b50;
+    font-weight: 500;
+    word-break: break-word;
+}
+
+.fr11-conflict-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    background: #dc3c3c;
+    color: #ffffff;
+    font-size: 8px;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+/* ---------- 6. WEEK VIEW (TUẦN) ---------- */
+.fr11-week-grid {
+    display: grid;
+    grid-template-columns: 76px repeat(7, 1fr);
+}
+
+.fr11-week-head-cell {
+    height: 44px;
+    background: #fceef3;
+    border-right: 1px solid #f2dfe7;
+    border-bottom: 1px solid #f2dfe7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 600;
+    color: #cc618a;
+}
+
+.fr11-week-head-cell.is-today {
+    background: #f9dceb;
+}
+
+.fr11-week-head-sub {
+    font-size: 10px;
+    font-weight: 400;
+    color: #7d6b72;
+}
+
+.fr11-time-label-cell {
+    min-height: 68px;
+    padding: 8px 6px;
+    border-right: 1px solid #f2dfe7;
+    border-bottom: 1px solid #f2dfe7;
+    background: #fff9fb;
+    font-size: 11px;
+    font-weight: 600;
+    color: #8f7f85;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.fr11-week-slot {
+    min-height: 68px;
+    padding: 6px;
+    border-right: 1px solid #f2dfe7;
+    border-bottom: 1px solid #f2dfe7;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    transition: background 0.15s ease;
+}
+
+.fr11-week-slot.is-drag-over {
+    background: #fdf0f5 !important;
+    box-shadow: inset 0 0 0 2px #cc618a;
+}
+
+/* ---------- 7. DAY VIEW (NGÀY) ---------- */
+.fr11-day-view-header {
+    padding: 14px 18px;
+    background: #fceef3;
+    border-bottom: 1px solid #f2dfe7;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fr11-day-view-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #cc618a;
+}
+
+.fr11-day-view-hint {
+    font-size: 11px;
+    color: #7d6b72;
+}
+
+.fr11-day-timeline {
+    display: flex;
+    flex-direction: column;
+}
+
+.fr11-day-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    min-height: 62px;
+    border-bottom: 1px solid #f2dfe7;
+}
+
+.fr11-day-row:last-child {
+    border-bottom: none;
+}
+
+.fr11-day-time {
+    background: #fff9fb;
+    border-right: 1px solid #f2dfe7;
+    padding: 12px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #574b50;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.fr11-day-time small {
+    font-size: 9.5px;
+    font-weight: 400;
+    color: #a4989d;
+}
+
+.fr11-day-dropzone {
+    padding: 8px 14px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s ease;
+}
+
+.fr11-day-dropzone.is-drag-over {
+    background: #fdf0f5 !important;
+    box-shadow: inset 0 0 0 2px #cc618a;
+}
+
+.fr11-day-dropzone .fr11-event-card {
+    min-width: 240px;
+    padding: 8px 12px;
+    font-size: 11px;
+}
+
+.fr11-empty-slot-hint {
+    font-size: 11px;
+    color: #c7b8be;
+    font-style: italic;
+}
+
+/* ---------- 8. SCHEDULE LEGEND (Figma 3:45563) ---------- */
+.fr11-legend-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fr11-legend-items {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fr11-legend-pill {
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    line-height: 1.5;
+    font-weight: 500;
+}
+
+.fr11-legend-pill.scheduled {
+    background: #ebf6ef;
+    color: #69a68e;
+}
+
+.fr11-legend-pill.pending {
+    background: #fff2e4;
+    color: #c39359;
+}
+
+.fr11-legend-pill.editing {
+    background: #f3edf8;
+    color: #9a83b2;
+}
+
+.fr11-platform-badges {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: #574b50;
+}
+
+.fr11-plat-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: 100px;
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    font-size: 10.5px;
+    font-weight: 500;
+}
+
+.fr11-legend-summary {
+    font-size: 11px;
+    color: #a4989d;
+}
+
+/* ---------- 9. MODAL LÊN LỊCH / ĐỔI GIỜ ---------- */
+.fr11-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(45, 32, 38, 0.42);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1200;
+    padding: 20px;
+}
+
+.fr11-modal-backdrop[hidden] {
+    display: none !important;
+}
+
+.fr11-modal {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 480px;
+    padding: 24px;
+    box-shadow: 0 20px 45px rgba(87, 75, 80, 0.18);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.fr11-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fr11-modal-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 500;
+    color: #574b50;
+}
+
+.fr11-modal-close {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+}
+
+.fr11-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fr11-form-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #574b50;
+}
+
+.fr11-form-input,
+.fr11-form-select {
+    border: 1px solid #f2dfe7;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: #574b50;
+    outline: none;
+}
+
+.fr11-form-input:focus,
+.fr11-form-select:focus {
+    border-color: #cc618a;
+}
+
+.fr11-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.fr11-modal-error {
+    background: #fff2f2;
+    border: 1px solid #f1b5b5;
+    color: #b42323;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 11.5px;
+}
+
+.fr11-modal-foot {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 4px;
+}
+
+@keyframes fr11FadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
