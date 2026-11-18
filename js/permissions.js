@@ -2,20 +2,6 @@
    PERMISSIONS – Phân quyền truy cập trang giữa Staff và Manager
    Nạp trong <head>, SAU auth.js. Tự chạy guard() ngay khi nạp
    để người không đủ quyền bị chuyển đi trước khi trang kịp hiển thị.
-
-   Quy tắc:
-   1. Mỗi thư mục trong /pages/ có role được phép (AREA_ACCESS):
-        pages/admin/*  -> chỉ MANAGER
-        pages/staff/*  -> chỉ STAFF
-        pages/auth/*   -> công khai
-   2. Trang nào cần ngoại lệ thì khai báo trong PAGE_ACCESS
-      (ưu tiên hơn quy tắc theo thư mục).
-   3. Chưa đăng nhập -> về trang login.
-      Sai quyền      -> về dashboard của role mình + toast báo lỗi.
-   4. Quyền theo chức năng (nút, menu...) khai báo trong FEATURES.
-
-   LƯU Ý: đây là kiểm tra phía giao diện (UX). Khi nối backend,
-   API vẫn phải tự kiểm tra role/JWT ở server.
    ========================================================= */
 (function (global) {
     "use strict";
@@ -31,23 +17,29 @@
     };
 
     /* ---------- 2. Ngoại lệ theo từng trang ----------
-       Khóa là đường dẫn tính từ /pages/. Ví dụ:
-         "admin/posts.html": [M, S],   // cho cả Staff vào
+       Cho phép cả Manager và Staff truy cập luồng Bài viết (FR-04/05/06/07)
+       và Lịch đăng bài (FR-11) để liên kết xuyên suốt giữa các màn hình.
     */
-    const PAGE_ACCESS = {};
+    const PAGE_ACCESS = {
+        "staff/create-post.html": [M, S],
+        "staff/edit-post.html":   [M, S],
+        "staff/posts.html":       [M, S],
+        "admin/posts.html":       [M, S],
+        "staff/calendar.html":    [M, S],
+        "admin/calendar.html":    [M, S]
+    };
 
-    /* ---------- 3. Quyền theo chức năng (ví dụ, chỉnh theo nghiệp vụ) ---------- */
+    /* ---------- 3. Quyền theo chức năng ---------- */
     const FEATURES = {
-        "post:create":    [S],
-        "post:edit":      [S, M],
-        "post:delete":    [M],
-        "post:approve":   [M],
-        "report:view":    [M],
-        "account:manage": [M],
+        "post:create":     [S, M],
+        "post:edit":       [S, M],
+        "post:delete":     [S, M],
+        "post:approve":    [M],
+        "report:view":     [M],
+        "account:manage":  [M],
         "settings:manage": [M]
     };
 
-    // "/Frontend-main/pages/admin/posts.html" -> "admin/posts.html" (null nếu không nằm trong /pages/)
     function pageKey(pathname) {
         const match = (pathname || location.pathname).match(/\/pages\/([^/]+\/[^/?#]+)$/);
         return match ? match[1] : null;
@@ -56,7 +48,7 @@
     function ruleFor(key) {
         if (key in PAGE_ACCESS) return PAGE_ACCESS[key];
         const area = key.split("/")[0];
-        return area in AREA_ACCESS ? AREA_ACCESS[area] : null; // thư mục lạ -> từ chối
+        return area in AREA_ACCESS ? AREA_ACCESS[area] : null;
     }
 
     function canAccessPage(role, key) {
@@ -77,19 +69,19 @@
 
     function guard() {
         const key = pageKey();
-        if (key === null) return true;          // không nằm trong /pages/ (vd: index.html)
+        if (key === null) return true;
 
         if (ruleFor(key) === "public") return true;
 
         const user = Auth.getUser();
 
-        if (!user) {                            // chưa đăng nhập
+        if (!user) {
             hidePage();
             location.replace(Auth.loginUrl());
             return false;
         }
 
-        if (!canAccessPage(user.role, key)) {   // sai quyền
+        if (!canAccessPage(user.role, key)) {
             Auth.setFlash({
                 type: "error",
                 title: "Không có quyền truy cập",
@@ -103,10 +95,6 @@
         return true;
     }
 
-    /* Ẩn phần tử trên giao diện theo role / chức năng:
-         <button data-roles="MANAGER">...</button>
-         <button data-can="post:approve">...</button>
-       Gọi lại apply(container) sau khi render HTML động. */
     function apply(root) {
         const scope = root || document;
         const role = Auth.getRole();
@@ -125,7 +113,6 @@
 
     guard();
 
-    // Nhấn nút Back sau khi đăng xuất: trang lấy từ bộ nhớ đệm -> kiểm tra lại
     window.addEventListener("pageshow", function (e) {
         if (e.persisted) guard();
     });
