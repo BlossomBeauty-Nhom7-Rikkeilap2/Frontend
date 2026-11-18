@@ -1,0 +1,19 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="690" height="190" viewBox="0 0 690 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Plot" clip-path="url(#clip0_0_4)">
+<rect id="Grid line" y="12" width="690" height="1" fill="#F2DFE7"/>
+<rect id="Grid line_2" y="68" width="690" height="1" fill="#F2DFE7"/>
+<rect id="Grid line_3" y="124" width="690" height="1" fill="#F2DFE7"/>
+<rect id="Grid line_4" y="180" width="690" height="1" fill="#F2DFE7"/>
+<path id="Trend area" d="M0 157.804L63 144.549L125 160.013L188 121.353H250L313 73.8562L375 106.993L438 93.7386L500 27.4641L563 16.4183L625 34.0915L690 12V181H0V157.804Z" fill="url(#paint0_linear_0_4)"/>
+<path id="Trend line" d="M0 178.478L63 163.343L125 181L188 136.858H250L313 82.6269L375 120.463L438 105.328L500 29.6567L563 17.0448L625 37.2239L690 12" stroke-width="2" stroke="#CC618A"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_0_4" x1="0" y1="12" x2="0" y2="181" gradientUnits="userSpaceOnUse">
+<stop stop-color="#ECA7C3" stop-opacity="0.419608"/>
+<stop offset="1" stop-color="#ECA7C3" stop-opacity="0"/>
+</linearGradient>
+<clipPath id="clip0_0_4">
+<rect width="690" height="190" fill="white"/>
+</clipPath>
+</defs>
+</svg>
