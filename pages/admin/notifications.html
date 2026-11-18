@@ -17,7 +17,7 @@
     <script src="../../js/auth.js"></script>
     <script>
       // Fallback phiên làm việc nếu mở trực tiếp không qua login
-      if (!Auth.isLoggedIn()) {
+      if (!Auth.isLoggedIn() || Auth.getRole() !== 'MANAGER') {
         localStorage.setItem('blossom_user', JSON.stringify({
           id: 1,
           username: 'admin',

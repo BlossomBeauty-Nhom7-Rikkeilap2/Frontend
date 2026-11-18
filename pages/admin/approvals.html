@@ -8,51 +8,36 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Styles -->
   <link rel="stylesheet" href="../../css/common.css">
-  <link rel="stylesheet" href="../../css/admin/dashboard.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  <link rel="stylesheet" href="../../css/components.css">
   <link rel="stylesheet" href="../../css/admin/approvals.css">
   <link rel="stylesheet" href="../../css/notifications.css">
+
+  <!-- Auth & Permissions -->
+  <script src="../../js/auth.js"></script>
+  <script>
+    if (!Auth.isLoggedIn() || Auth.getRole() !== 'MANAGER') {
+      localStorage.setItem('blossom_user', JSON.stringify({
+        id: 1,
+        username: 'admin',
+        fullName: 'Đoàn Thị Minh Anh',
+        role: 'MANAGER',
+        position: 'Store Manager',
+        email: 'minhanh@blossombeauty.vn'
+      }));
+    }
+  </script>
+  <script src="../../js/permissions.js"></script>
 </head>
-<body>
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="logo">
-      <h1>Blossom.</h1>
-      <span>BEAUTY STORE</span>
-    </div>
-    <div class="side-label">KHÔNG GIAN QUẢN TRỊ</div>
-    <ul class="nav" id="nav">
-      <li><a href="dashboard.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Tổng quan</a></li>
-      <li><a href="posts.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><path d="M11 4H5a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-6"/><path d="m18 3 3 3-9 9H9v-3z"/></svg>Bài viết</a></li>
-      <li><a href="calendar.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Lịch đăng bài</a></li>
-      <li><a href="approvals.html" class="active"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="m9 13 2 2 4-4M9 4h6v2H9z"/></svg>Duyệt bài</a></li>
-      <li><a href="reports.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><path d="M5 20v-6M11 20V6M17 20v-9M3 20h18"/></svg>Báo cáo & Thống kê</a></li>
-      <li><a href="notifications.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg>Thông báo</a></li>
-      <li><a href="accounts.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M16 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-4-6"/></svg>Tài khoản</a></li>
-      <li><a href="settings.html"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/><circle cx="12" cy="12" r="7.5"/></svg>Cài đặt</a></li>
-    </ul>
-    <div class="side-bottom">
-      <div class="quote">Chăm chút từng điều nhỏ.</div>
-      <button class="help">Bạn cần hỗ trợ?</button>
-    </div>
-  </aside>
+<body data-active="approvals.html" data-search="Tìm kiếm bài viết chờ duyệt...">
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Sidebar + Header + Footer do js/layout.js render -->
+  <aside class="sidebar" id="sidebar"></aside>
 
   <!-- MAIN -->
   <div class="main">
-    <header class="topbar">
-      <label class="search">
-        <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6" width="18" height="18"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="searchInput" placeholder="Tìm kiếm bài viết chờ duyệt...">
-        <span>⌘ K</span>
-      </label>
-      <div class="top-right">
-        <button class="bell"><svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6" width="22" height="22"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg></button>
-        <button class="user" id="userBtn">
-          <span class="avatar">MA</span>
-          <span><b>Đoàn Thị Minh Anh</b><small>Marketing Manager</small></span>
-          <svg class="chev" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.6" width="16" height="16"><path d="m6 9 6 6 6-6"/></svg>
-        </button>
-      </div>
-    </header>
+    <header class="topbar" id="topbar"></header>
 
     <main class="content">
       <div class="crumb">Blossom / Quản trị / Phê duyệt bài viết (FR-09 & FR-10)</div>
@@ -128,10 +113,7 @@
       </div>
     </main>
 
-    <footer class="footer">
-      <span>© 2026 Blossom Beauty Store. Đẹp từ những điều nhỏ.</span>
-      <span>Phiên bản 1.0 · Trung tâm trợ giúp</span>
-    </footer>
+    <footer class="footer" id="footer"></footer>
   </div>
 
   <!-- APPROVAL REVIEW MODAL -->
@@ -173,6 +155,8 @@
   <div id="toast-container"></div>
 
   <!-- SCRIPTS -->
+  <script src="../../js/components.js"></script>
+  <script src="../../js/layout.js"></script>
   <script src="../../js/posts-store.js"></script>
   <script src="../../js/notifications-store.js"></script>
   <script src="../../js/post-detail-modal.js"></script>
