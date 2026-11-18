@@ -357,6 +357,10 @@ function renderGridView(container, posts) {
 
 // Actions
 window.viewPostDetail = function(id) {
+  if (window.openPostDetailModal) {
+    window.openPostDetailModal(id);
+    return;
+  }
   const p = PostsStore.getPostById(id);
   if (!p) return;
   const st = STATUS_MAP[p.status] || { label: p.status, class: 'draft' };
