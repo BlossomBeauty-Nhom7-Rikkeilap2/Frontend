@@ -74,7 +74,7 @@ function renderAdminPosts() {
           ${p.status === 'review' ? `
             <a href="approvals.html" class="btn btn-warning btn-sm">Duyệt bài ngay</a>
           ` : `
-            <button class="btn btn-outline btn-sm" onclick="alert('Chi tiết bài: ' + '${escapeHtml(p.title)}')">Xem</button>
+            <button class="btn btn-outline btn-sm" onclick="if(window.openPostDetailModal){openPostDetailModal(${p.id})}else{alert('Chi tiết bài: ' + '${escapeHtml(p.title)}')}">Xem chi tiết</button>
           `}
         </td>
       </tr>

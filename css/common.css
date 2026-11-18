@@ -52,7 +52,11 @@
     /* ----- Radius / Shadow ----- */
     --radius-sm:   6px;
     --radius:      10px;
+    --radius-md:   10px;
     --radius-lg:   16px;
+    --radius-full: 999px;
+    --shadow-sm:   0 1px 3px rgba(59, 49, 64, .05);
+    --shadow-md:   0 4px 12px rgba(217, 70, 122, .08);
     --shadow-pop:  0 10px 30px rgba(217, 70, 122, .12);
 }
 
