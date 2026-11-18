@@ -7,16 +7,18 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CSS dùng chung (thêm css riêng của trang bên dưới nếu cần) -->
+    <!-- CSS dùng chung -->
     <link rel="stylesheet" href="../../css/common.css">
     <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/components.css">
+    <!-- CSS riêng của trang -->
+    <link rel="stylesheet" href="../../css/admin/accounts.css">
 
     <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
 </head>
-<body>
+<body data-search="Tìm kiếm...">
 
     <!-- Sidebar + Header + Footer do js/layout.js render -->
     <aside class="sidebar" id="sidebar"></aside>
@@ -25,20 +27,110 @@
         <header class="topbar" id="topbar"></header>
 
         <main class="content">
-            <div class="crumb">Blossom / Quản trị / Tài khoản &amp; Phân quyền</div>
-            <h2 class="page-title">Tài khoản &amp; Phân quyền</h2>
-            <p class="page-sub">Quản lý tài khoản và vai trò của đội ngũ.</p>
 
-            <!-- TODO: nội dung trang -->
-            <section class="card">
-                <div class="empty-state"><i data-icon="empty"></i><span>Trang đang được phát triển.</span></div>
+            <div class="page-head">
+                <div>
+                    <div class="crumb">Blossom / Quản trị / Tài khoản &amp; Phân quyền</div>
+                    <h2 class="page-title">Tài khoản &amp; Phân quyền</h2>
+                    <p class="page-sub">Kết nối đội ngũ, trao đúng quyền và bảo vệ nội dung của bạn.</p>
+                </div>
+
+                <button type="button" class="btn btn--primary" id="addBtn" data-can="account:manage">
+                    <i data-icon="plus"></i><span>Thêm tài khoản</span>
+                </button>
+            </div>
+
+            <!-- Thống kê (js/admin/accounts.js render) -->
+            <section class="stats" id="stats"></section>
+
+            <div class="acc-layout" id="layout">
+
+                <!-- 1. Danh sách tài khoản -->
+                <section class="card acc-list" aria-labelledby="listTitle">
+                    <div class="acc-list__head">
+                        <h3 class="card__title" id="listTitle">Danh sách tài khoản</h3>
+                        <span class="badge badge--pink" id="countBadge">0 thành viên</span>
+                    </div>
+
+                    <div class="acc-toolbar">
+                        <label class="acc-search">
+                            <i data-icon="search"></i>
+                            <input type="text" class="input" id="q" placeholder="Tìm theo tên hoặc email..." autocomplete="off" aria-label="Tìm tài khoản">
+                        </label>
+
+                        <select class="select" id="roleFilter" aria-label="Lọc theo vai trò">
+                            <option value="">Tất cả vai trò</option>
+                            <option value="MANAGER">Manager</option>
+                            <option value="STAFF">Staff</option>
+                        </select>
+
+                        <select class="select" id="statusFilter" aria-label="Lọc theo trạng thái">
+                            <option value="">Trạng thái</option>
+                            <option value="active">Đang hoạt động</option>
+                            <option value="locked">Đã khóa</option>
+                        </select>
+                    </div>
+
+                    <div class="table-wrap">
+                        <table class="acc-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Nhân viên</th>
+                                    <th scope="col">Vai trò</th>
+                                    <th scope="col">Trạng thái</th>
+                                    <th scope="col">Ngày tạo</th>
+                                    <th scope="col">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="acc-foot">
+                        <span id="rangeText"></span>
+                        <nav class="pager" id="pager" aria-label="Phân trang"></nav>
+                    </div>
+                </section>
+
+                <!-- Chi tiết tài khoản (hiện khi bấm vào một dòng) -->
+                <aside class="card acc-detail" id="detail" aria-live="polite" hidden></aside>
+            </div>
+
+            <!-- Vai trò & phân quyền -->
+            <section class="card perm" aria-labelledby="permTitle">
+                <div class="perm__intro">
+                    <h3 id="permTitle"><i data-icon="shield"></i>Vai trò &amp; phân quyền</h3>
+                    <p>Mỗi vai trò có giới hạn truy cập riêng. Thay đổi vai trò sẽ cập nhật quyền của thành viên.</p>
+                    <div class="perm__legend">
+                        <span class="p-full">Toàn quyền</span>
+                        <span class="p-none">Không có</span>
+                    </div>
+                </div>
+
+                <div class="perm-wrap">
+                    <table class="perm__table">
+                        <thead>
+                            <tr><th scope="col">Chức năng</th><th scope="col">Manager</th><th scope="col">Staff</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Bài viết &amp; Lịch đăng bài</td><td class="p-full">Toàn quyền</td><td>Tạo &amp; chỉnh sửa bài viết</td></tr>
+                            <tr><td>Duyệt bài viết</td><td class="p-full">Toàn quyền (Duyệt / Từ chối)</td><td>Gửi duyệt (Chỉ xem)</td></tr>
+                            <tr><td>Báo cáo &amp; Thống kê</td><td class="p-full">Xem &amp; Xuất báo cáo</td><td class="p-none">Không có quyền</td></tr>
+                            <tr><td>Quản lý tài khoản</td><td class="p-full">Xem &amp; Quản lý vai trò</td><td class="p-none">Không có quyền</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </section>
+
         </main>
 
         <footer class="footer" id="footer"></footer>
     </div>
 
+    <!-- JavaScript: kho dữ liệu → component → layout → logic của trang -->
+    <script src="../../js/account-store.js"></script>
     <script src="../../js/components.js"></script>
     <script src="../../js/layout.js"></script>
+    <script src="../../js/admin/accounts.js"></script>
 </body>
 </html>
