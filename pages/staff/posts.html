@@ -8,69 +8,36 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Styles -->
   <link rel="stylesheet" href="../../css/common.css">
-  <link rel="stylesheet" href="../../css/staff/dashboard.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  <link rel="stylesheet" href="../../css/components.css">
   <link rel="stylesheet" href="../../css/staff/posts.css">
+
+  <!-- Auth & Permissions -->
+  <script src="../../js/auth.js"></script>
+  <script>
+    if (!Auth.isLoggedIn() || Auth.getRole() !== 'STAFF') {
+      localStorage.setItem('blossom_user', JSON.stringify({
+        id: 2,
+        username: 'manh',
+        fullName: 'Nguyễn Phát Đạt',
+        role: 'STAFF',
+        position: 'Marketing Staff',
+        email: 'phatdatggg@gmail.com'
+      }));
+    }
+  </script>
+  <script src="../../js/permissions.js"></script>
 </head>
-<body>
+<body data-active="posts.html" data-search="Tìm kiếm theo tiêu đề, nội dung bài viết...">
   <div class="overlay" id="overlay"></div>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar" id="sidebar">
-    <div class="logo">
-      <h1>Blossom.</h1>
-      <span>BEAUTY STORE</span>
-    </div>
-    <div class="side-label">Không gian nhân viên</div>
-    <ul class="nav" id="nav">
-      <li><a href="dashboard.html"><i data-icon="home"></i>Tổng quan</a></li>
-      <li><a href="posts.html" class="active"><i data-icon="doc"></i>Bài viết của tôi</a></li>
-      <li><a href="create-post.html"><i data-icon="plus"></i>Tạo bài viết</a></li>
-      <li><a href="calendar.html"><i data-icon="cal"></i>Lịch đăng bài</a></li>
-      <li><a href="notifications.html"><i data-icon="bell"></i>Thông báo</a></li>
-      <li><a href="profile.html"><i data-icon="user"></i>Hồ sơ cá nhân</a></li>
-    </ul>
-    <div class="side-bottom">
-      <div class="quote">Mỗi bài viết là một câu chuyện.</div>
-      <a href="support.html" class="help"><i data-icon="help"></i>Bạn cần hỗ trợ?</a>
-    </div>
-  </aside>
+  <!-- Sidebar + Header + Footer do js/layout.js render -->
+  <aside class="sidebar" id="sidebar"></aside>
 
   <!-- MAIN WRAPPER -->
   <div class="main">
     <!-- TOPBAR -->
-    <header class="topbar">
-      <button class="menu-btn" id="menuBtn" aria-label="Mở menu"><i data-icon="menu"></i></button>
-
-      <label class="search">
-        <i data-icon="search"></i>
-        <input type="text" id="searchInput" placeholder="Tìm kiếm theo tiêu đề, nội dung bài viết..." autocomplete="off">
-        <kbd>Ctrl K</kbd>
-      </label>
-
-      <div class="top-right">
-        <a href="notifications.html" class="bell" aria-label="Thông báo">
-          <i data-icon="bell"></i><span class="dot"></span>
-        </a>
-
-        <button class="user" id="userBtn" aria-haspopup="true" aria-expanded="false">
-          <span class="avatar">ĐP</span>
-          <span class="user-info"><b>Nguyễn Phát Đạt</b><small>Marketing Staff</small></span>
-          <i data-icon="chev" class="chev"></i>
-        </button>
-
-        <div class="menu" id="menu">
-          <div class="who">
-            <b>Nguyễn Phát Đạt</b>
-            <span>phatdatggg@gmail.com</span>
-            <em>Marketing Staff · ACTIVE</em>
-          </div>
-          <button class="item" onclick="location.href='profile.html'"><i data-icon="user"></i>Hồ sơ cá nhân</button>
-          <button class="item"><i data-icon="key"></i>Đổi mật khẩu</button>
-          <hr>
-          <button class="item logout" id="logout"><i data-icon="logout"></i>Đăng xuất</button>
-        </div>
-      </div>
-    </header>
+    <header class="topbar" id="topbar"></header>
 
     <!-- CONTENT -->
     <main class="content">
@@ -160,10 +127,7 @@
     </main>
 
     <!-- FOOTER -->
-    <footer class="footer">
-      <span>© 2026 Blossom Beauty Store. Đẹp từ những điều nhỏ.</span>
-      <span>Phiên bản 1.0 · Trung tâm trợ giúp</span>
-    </footer>
+    <footer class="footer" id="footer"></footer>
   </div>
 
   <!-- DETAIL & PREVIEW MODAL -->
@@ -203,6 +167,8 @@
   <div id="toast-container"></div>
 
   <!-- SCRIPTS -->
+  <script src="../../js/components.js"></script>
+  <script src="../../js/layout.js"></script>
   <script src="../../js/posts-store.js"></script>
   <script src="../../js/staff/posts.js"></script>
 </body>
