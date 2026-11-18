@@ -133,6 +133,14 @@
             };
         }
 
+        // Tài khoản đã bị Manager khóa (Tài khoản & Phân quyền) -> không cho đăng nhập
+        if (window.AccountStore && AccountStore.isLocked(user.email)) {
+            return {
+                ok: false,
+                reason: "locked"
+            };
+        }
+
         return {
             ok: true,
             user: user
@@ -194,7 +202,22 @@
             // 5.3 Đăng nhập thất bại
             if (!result.ok) {
 
-                if (result.reason === "email") {
+                if (result.reason === "locked") {
+                    setError(
+                        fieldEmail,
+                        emailError,
+                        "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên."
+                    );
+
+                    showToast(
+                        "error",
+                        "Đăng nhập thất bại",
+                        "Tài khoản của bạn đã bị khóa."
+                    );
+
+                    emailInput.focus();
+
+                } else if (result.reason === "email") {
                     setError(
                         fieldEmail,
                         emailError,
