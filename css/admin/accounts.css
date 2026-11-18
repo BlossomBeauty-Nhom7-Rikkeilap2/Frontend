@@ -1,0 +1,518 @@
+/* ==========================================================
+   ADMIN / MANAGER – Trang Tài khoản & Phân quyền (phần riêng của trang)
+   Sidebar, Header, Button, Stat card, Badge, Modal, Select... nằm trong
+   common.css / layout.css / components.css
+   ========================================================== */
+
+/* ---------- Tiêu đề trang + nút Thêm ---------- */
+.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.page-head .btn {
+    margin-bottom: 22px;
+}
+
+/* ---------- Bố cục: danh sách + chi tiết ---------- */
+.acc-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+}
+
+.acc-layout.has-detail {
+    grid-template-columns: minmax(0, 1fr) 320px;
+}
+
+.acc-list__head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.acc-list__head .card__title {
+    margin-bottom: 0;
+}
+
+/* ---------- Thanh công cụ (tìm kiếm + lọc) ---------- */
+.acc-toolbar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.acc-search {
+    position: relative;
+    display: flex;
+    flex: 1;
+    min-width: 0;
+}
+
+.acc-search .ico {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    width: 17px;
+    height: 17px;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.acc-search .input {
+    padding-left: 40px;
+    font-size: 14.5px;
+}
+
+.acc-toolbar .select {
+    width: auto;
+    min-width: 150px;
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--pink);
+}
+
+/* ---------- Bảng ---------- */
+.table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius);
+}
+
+.acc-table {
+    width: 100%;
+    min-width: 760px;
+    border-collapse: collapse;
+}
+
+.acc-table th {
+    padding: 13px 14px;
+    background: var(--pink-bg);
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+    text-align: left;
+    white-space: nowrap;
+    color: var(--muted);
+}
+
+.acc-table th:last-child,
+.acc-table td:last-child {
+    position: sticky;
+    right: 0;
+    text-align: right;
+}
+
+.acc-table th:last-child {
+    background: var(--pink-bg);
+}
+
+.acc-table td:last-child {
+    background: #fff;
+    box-shadow: -8px 0 8px -8px rgba(217, 70, 122, .18);
+}
+
+.acc-table tbody tr[data-id]:hover td:last-child {
+    background: var(--pink-bg);
+}
+
+.acc-table tbody tr.is-selected,
+.acc-table tbody tr.is-selected:hover,
+.acc-table tbody tr.is-selected td:last-child,
+.acc-table tbody tr.is-selected:hover td:last-child {
+    background: var(--pink-soft);
+}
+
+.acc-table .acc-empty td:last-child {
+    position: static;
+    box-shadow: none;
+}
+
+.acc-table td {
+    padding: 14px;
+    border-bottom: 1px solid var(--pink-line);
+    vertical-align: middle;
+    color: var(--text-2);
+}
+
+.acc-table tbody tr[data-id] {
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.acc-table tbody tr[data-id]:hover {
+    background: var(--pink-bg);
+}
+
+.acc-table tbody tr.is-selected {
+    background: var(--pink-soft);
+}
+
+.acc-table tbody tr.is-locked .acc-user {
+    opacity: .6;
+}
+
+.acc-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.acc-user b {
+    display: block;
+    font-size: 15px;
+    white-space: nowrap;
+    color: var(--text-strong);
+}
+
+.acc-user small {
+    display: block;
+    font-size: 13px;
+    white-space: nowrap;
+    color: var(--muted);
+}
+
+.avatar--sm {
+    width: 38px;
+    height: 38px;
+    flex: none;
+    font-size: 13.5px;
+}
+
+.avatar--lg {
+    width: 52px;
+    height: 52px;
+    flex: none;
+    font-size: 17px;
+}
+
+.acc-date {
+    white-space: nowrap;
+}
+
+.acc-actions {
+    display: inline-flex;
+    gap: 8px;
+}
+
+.btn--danger-outline {
+    background: #fff;
+    color: var(--red);
+    border-color: #f3c4c4;
+}
+
+.btn--danger-outline:hover {
+    background: var(--red-bg);
+}
+
+.acc-empty td {
+    padding: 28px 16px;
+    border-bottom: 0;
+}
+
+/* ---------- Chân bảng + phân trang ---------- */
+.acc-foot {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 14px;
+    font-size: 13.5px;
+    color: var(--muted);
+}
+
+.pager {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.pager button {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: 1px solid var(--pink-line);
+    border-radius: 8px;
+    background: #fff;
+    font-size: 13.5px;
+    color: var(--text-2);
+    transition: .15s;
+}
+
+.pager button:hover:not(:disabled) {
+    border-color: var(--pink-border);
+    color: var(--pink);
+}
+
+.pager button.active {
+    background: var(--pink);
+    border-color: var(--pink);
+    color: #fff;
+}
+
+.pager button:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+}
+
+/* ---------- Panel chi tiết ---------- */
+.acc-detail {
+    position: sticky;
+    top: calc(var(--topbar-h) + 16px);
+}
+
+.acc-detail .card__head {
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.acc-detail .card__title {
+    margin-bottom: 0;
+}
+
+.icon-btn {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 8px;
+    background: none;
+    color: var(--muted);
+}
+
+.icon-btn:hover {
+    background: var(--pink-bg);
+    color: var(--pink);
+}
+
+.icon-btn .ico {
+    width: 16px;
+    height: 16px;
+}
+
+.acc-detail__who {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--pink-line);
+}
+
+.acc-detail__who b {
+    display: block;
+    font-size: 16px;
+    color: var(--text-strong);
+}
+
+.acc-detail__who small {
+    display: block;
+    font-size: 13.5px;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.kv {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 12px 16px;
+    align-items: center;
+    padding: 16px 0;
+    font-size: 14.5px;
+}
+
+.kv dt {
+    color: var(--muted);
+}
+
+.kv dd {
+    text-align: right;
+    font-weight: 500;
+}
+
+.acc-detail__note {
+    margin-bottom: 18px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--muted);
+}
+
+.acc-detail__actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ---------- Bảng vai trò & phân quyền ---------- */
+.perm {
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) 1fr;
+    gap: 32px;
+    margin-top: 16px;
+}
+
+.perm__intro {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.perm__intro h3 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-strong);
+}
+
+.perm__intro h3 .ico {
+    color: var(--pink);
+}
+
+.perm__intro p {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--muted);
+}
+
+.perm__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    margin-top: 6px;
+    font-size: 13px;
+}
+
+.perm__table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.perm__table th {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--pink-line);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--pink);
+}
+
+.perm__table th:first-child {
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.perm__table td {
+    padding: 13px 12px;
+    border-bottom: 1px solid var(--pink-line);
+    color: var(--text-2);
+}
+
+.perm__table td:first-child {
+    color: var(--muted);
+}
+
+.perm__table tr:last-child td {
+    border-bottom: 0;
+}
+
+.p-full { color: var(--green); }
+.p-none { color: var(--muted); }
+
+.perm__table .p-full::before { content: "✓ "; }
+.perm__table .p-none::before { content: "— "; }
+
+/* ---------- Form trong modal ---------- */
+.modal--form {
+    max-width: 520px;
+}
+
+.form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding-top: 6px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
+
+.field__error:empty {
+    display: none;
+}
+
+.modal--form .field__hint {
+    line-height: 1.5;
+}
+
+/* ---------- Responsive ---------- */
+/* Màn vừa + panel chi tiết đang mở: nút Thao tác chỉ còn icon để bảng không bị cuộn ngang */
+@media (min-width: 1101px) and (max-width: 1600px) {
+    .has-detail .acc-actions .btn {
+        width: 34px;
+        padding: 0;
+    }
+
+    .has-detail .acc-actions .btn span {
+        display: none;
+    }
+}
+
+@media (max-width: 1100px) {
+    .acc-layout.has-detail {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .acc-detail {
+        position: static;
+    }
+
+    .perm {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+}
+
+@media (max-width: 720px) {
+    .acc-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .acc-search {
+        flex-basis: 100%;
+    }
+
+    .acc-toolbar .select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .page-head .btn {
+        width: 100%;
+    }
+
+    .perm__table {
+        min-width: 520px;
+    }
+
+    .perm-wrap {
+        overflow-x: auto;
+    }
+}
