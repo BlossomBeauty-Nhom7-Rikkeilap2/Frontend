@@ -199,16 +199,60 @@
                 const parsed = JSON.parse(raw);
                 if (Array.isArray(parsed) && parsed.length > 0) {
                     state.events = parsed;
-                    return;
                 }
             }
         } catch (_) {}
-        state.events = JSON.parse(JSON.stringify(INITIAL_EVENTS));
+        if (!state.events || !state.events.length) {
+            state.events = JSON.parse(JSON.stringify(INITIAL_EVENTS));
+        }
+
+        // Đồng bộ các bài viết mới tạo từ FR-04/05/06/07 (blossom_posts_fr06_07_v1) lên Lịch đăng bài
+        try {
+            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
+            if (Array.isArray(sharedPosts)) {
+                sharedPosts.forEach(function (p) {
+                    if (p.deleted_at || !p.planned_date) return;
+                    const exists = state.events.some(function (e) {
+                        return e.code === p.code || Number(e.id) === Number(p.post_id);
+                    });
+                    if (!exists && Number(p.post_id) > 128) {
+                        state.events.unshift({
+                            id: Number(p.post_id),
+                            code: p.code || ("BL-0" + p.post_id),
+                            title: p.title,
+                            date: p.planned_date,
+                            time: "09:00",
+                            platform: (Array.isArray(p.platforms) && p.platforms.length >= 2) ? "FB & IG" : ((p.platforms && p.platforms[0]) || "FB & IG"),
+                            status: p.status === "PENDING_APPROVAL" ? "PENDING" : (p.status === "DRAFT" ? "EDITING" : "SCHEDULED"),
+                            author: p.author || "Nguyễn Minh Anh"
+                        });
+                    }
+                });
+            }
+        } catch (_) {}
     }
 
     function saveEvents() {
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state.events));
+            // Đồng bộ ngược ngày đăng sang danh sách bài viết FR-07 nếu trùng mã bài viết
+            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
+            if (Array.isArray(sharedPosts) && sharedPosts.length) {
+                let changed = false;
+                state.events.forEach(function (ev) {
+                    const match = sharedPosts.find(function (p) {
+                        return p.code === ev.code || Number(p.post_id) === Number(ev.id);
+                    });
+                    if (match && match.planned_date !== ev.date) {
+                        match.planned_date = ev.date;
+                        match.planned_label = ev.date.split("-").reverse().join("/");
+                        changed = true;
+                    }
+                });
+                if (changed) {
+                    localStorage.setItem("blossom_posts_fr06_07_v1", JSON.stringify(sharedPosts));
+                }
+            }
         } catch (_) {}
     }
 
@@ -563,6 +607,9 @@
         const timeInput = document.getElementById("fr11FormTime");
         const modalTitle = document.getElementById("fr11ModalHeading");
 
+        const editLink = document.getElementById("btnOpenPostEditorFromCal");
+        const baseEditPath = location.pathname.indexOf("/pages/admin/") !== -1 ? "../staff/edit-post.html" : "edit-post.html";
+
         if (ev) {
             modalTitle.textContent = "Điều chỉnh lịch đăng bài (" + ev.code + ")";
             idInput.value = String(ev.id);
@@ -571,6 +618,10 @@
             statusSelect.value = ev.status;
             dateInput.value = ev.date;
             timeInput.value = ev.time;
+            if (editLink) {
+                editLink.href = baseEditPath + "?id=" + encodeURIComponent(ev.id) + "&state=" + encodeURIComponent(ev.status === "PENDING" ? "PENDING_APPROVAL" : "DRAFT");
+                editLink.hidden = false;
+            }
         } else {
             modalTitle.textContent = "Thêm lịch đăng bài mới";
             idInput.value = "";
@@ -579,6 +630,7 @@
             statusSelect.value = "SCHEDULED";
             dateInput.value = TODAY_STR;
             timeInput.value = "08:15";
+            if (editLink) editLink.hidden = true;
         }
 
         modal.hidden = false;

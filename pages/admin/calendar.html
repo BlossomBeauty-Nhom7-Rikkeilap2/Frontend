@@ -16,7 +16,7 @@
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
 </head>
-<body data-search="Tìm kiếm bài viết...   ⌘ K" data-active="calendar.html">
+<body data-search="Tìm kiếm bài viết..." data-active="calendar.html">
 
     <aside class="sidebar" id="sidebar"></aside>
 
@@ -166,8 +166,11 @@
                 <div class="fr11-modal-error" id="fr11ModalError" hidden></div>
 
                 <div class="fr11-modal-foot">
-                    <button type="button" class="fr11-btn-outline" id="btnCancelScheduleModal">Hủy bỏ</button>
-                    <button type="submit" class="fr11-btn-primary">Lưu lịch đăng</button>
+                    <a href="../staff/edit-post.html" class="fr11-btn-outline" id="btnOpenPostEditorFromCal" style="display:inline-flex;align-items:center;text-decoration:none;">Chỉnh sửa bài viết (FR-05) →</a>
+                    <div class="fr11-modal-foot-right">
+                        <button type="button" class="fr11-btn-outline" id="btnCancelScheduleModal">Hủy bỏ</button>
+                        <button type="submit" class="fr11-btn-primary">Lưu lịch đăng</button>
+                    </div>
                 </div>
             </form>
         </div>
