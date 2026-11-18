@@ -279,7 +279,7 @@
                     '</span></div>' +
                     '<span class="fr07-date">' + UI.esc(p.planned_label) + '</span>' +
                     '<div class="fr07-row-actions">' +
-                        '<a href="' + createHref + '?state=' + encodeURIComponent(p.status) + '" class="fr07-icon-btn" title="Chỉnh sửa bài viết (FR-05)">' +
+                        '<a href="' + createHref + '?id=' + encodeURIComponent(p.post_id) + '&state=' + encodeURIComponent(p.status) + '" class="fr07-icon-btn" title="Chỉnh sửa bài viết (FR-05)">' +
                             '<img src="../../assets/figma/pencil-15.svg" alt="Sửa" width="15" height="15">' +
                         '</a>' +
                         '<button type="button" class="fr07-icon-btn" data-delete-id="' + p.post_id + '" title="' +
@@ -398,10 +398,20 @@
                 '</div>' +
             '</div>';
 
+        const editHref = (location.pathname.indexOf("/pages/admin/") !== -1 ? "../staff/edit-post.html" : "edit-post.html") +
+            "?id=" + encodeURIComponent(post.post_id) + "&state=" + encodeURIComponent(post.status);
+
         UI.modal({
             title: "Chi tiết bài viết (FR-07)",
             body: bodyHtml,
-            actions: [{ label: "Đóng", variant: "primary", value: true }]
+            actions: [
+                { label: "Đóng", variant: "ghost", value: false },
+                { label: "Chỉnh sửa bài viết (FR-05)", variant: "primary", value: "EDIT" }
+            ]
+        }).then(function (act) {
+            if (act === "EDIT") {
+                location.href = editHref;
+            }
         });
     }
 
