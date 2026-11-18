@@ -34,7 +34,10 @@
        Khóa là đường dẫn tính từ /pages/. Ví dụ:
          "admin/posts.html": [M, S],   // cho cả Staff vào
     */
-    const PAGE_ACCESS = {};
+    const PAGE_ACCESS = {
+        "staff/create-post.html": [M, S],
+        "staff/edit-post.html": [M, S]
+    };
 
     /* ---------- 3. Quyền theo chức năng (ví dụ, chỉnh theo nghiệp vụ) ---------- */
     const FEATURES = {
