@@ -1,0 +1,736 @@
+/* ==========================================================
+   FR-03 · USER MANAGEMENT — Tài khoản & Phân quyền (Node 3:43801)
+   Chuẩn hóa theo Figma Design System Blossom Beauty Store
+   ========================================================== */
+
+.fr03-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* ---------- 1. PAGE HEADING ---------- */
+.fr03-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fr03-context {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+.fr03-crumb {
+    color: #a4989d;
+}
+
+.fr03-tag {
+    color: #cc618a;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+}
+
+.fr03-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fr03-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fr03-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.35;
+    color: #574b50;
+}
+
+.fr03-subtitle {
+    font-size: 12px;
+    color: #a4989d;
+}
+
+.fr03-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #cc618a;
+    color: #ffffff;
+    border: 1px solid #cc618a;
+    border-radius: 6px;
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+    transition: background 0.2s ease, transform 0.15s ease;
+}
+
+.fr03-btn-primary:hover {
+    background: #b84f78;
+    border-color: #b84f78;
+}
+
+.fr03-btn-primary--full {
+    width: 100%;
+}
+
+/* ---------- 2. METRIC CARDS ---------- */
+.fr03-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.fr03-metric-card {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.fr03-metric-icon {
+    background: #fdedf2;
+    border-radius: 10px;
+    padding: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fr03-metric-details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.fr03-metric-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.fr03-metric-number {
+    font-size: 23px;
+    font-weight: 600;
+    line-height: 1.3;
+    color: #574b50;
+}
+
+.fr03-metric-label {
+    font-size: 10px;
+    color: #a4989d;
+    white-space: nowrap;
+}
+
+.fr03-metric-caption {
+    font-size: 9px;
+    color: #a4989d;
+}
+
+/* ---------- 3. ACCOUNT MANAGEMENT (TABLE + DETAIL) ---------- */
+.fr03-management {
+    display: grid;
+    grid-template-columns: minmax(0, 812fr) minmax(300px, 320fr);
+    gap: 20px;
+    align-items: start;
+}
+
+.fr03-table-card {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fr03-list-heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fr03-list-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #574b50;
+}
+
+.fr03-count-pill {
+    background: #f9dfe9;
+    color: #cc618a;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    line-height: 1.4;
+}
+
+.fr03-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.fr03-search-box {
+    flex: 1;
+    min-width: 200px;
+    height: 36px;
+    border: 1px solid #f2dfe7;
+    border-radius: 5px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #ffffff;
+}
+
+.fr03-search-box:focus-within {
+    border-color: #cc618a;
+}
+
+.fr03-search-box input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 11px;
+    color: #574b50;
+    background: transparent;
+}
+
+.fr03-search-box input::placeholder {
+    color: #a4989d;
+}
+
+.fr03-filter-select {
+    height: 36px;
+    padding: 0 28px 0 14px;
+    border: 1px solid #f2dfe7;
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: #cc618a;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23cc618a' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.fr03-filter-select:focus {
+    outline: none;
+    border-color: #cc618a;
+}
+
+.fr03-columns {
+    display: grid;
+    grid-template-columns: minmax(220px, 400fr) 108fr 98fr 112fr 56px;
+    align-items: center;
+    padding: 8px;
+    font-size: 9px;
+    color: #a4989d;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.fr03-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.fr03-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 400fr) 108fr 98fr 112fr 56px;
+    align-items: center;
+    min-height: 49px;
+    padding: 6px 8px;
+    border-bottom: 1px solid #f2dfe7;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.fr03-row:hover {
+    background: #fff6f9;
+}
+
+.fr03-row.is-selected {
+    background: #fdedf2;
+}
+
+.fr03-member-cell {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-width: 0;
+}
+
+.fr03-checkbox {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #f2dfe7;
+    border-radius: 2px;
+    background: #ffffff;
+    flex-shrink: 0;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.fr03-row.is-selected .fr03-checkbox {
+    background: #cc618a;
+    border-color: #cc618a;
+}
+
+.fr03-avatar {
+    width: 29px;
+    height: 29px;
+    border-radius: 100px;
+    background: #f9dfe9;
+    color: #cc618a;
+    font-size: 9.67px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fr03-avatar--lg {
+    width: 36px;
+    height: 36px;
+    font-size: 12px;
+}
+
+.fr03-member-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.fr03-member-name {
+    font-size: 11px;
+    color: #574b50;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fr03-member-email {
+    font-size: 9px;
+    color: #a4989d;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fr03-role-text {
+    font-size: 10px;
+    color: #574b50;
+}
+
+.fr03-role-text.is-admin {
+    color: #cc618a;
+}
+
+.fr03-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.fr03-status-pill.is-active {
+    background: #ebf6ef;
+    color: #69a68e;
+}
+
+.fr03-status-pill.is-locked {
+    background: #f9dfe9;
+    color: #cc618a;
+}
+
+.fr03-last-login {
+    font-size: 9px;
+    color: #a4989d;
+}
+
+.fr03-edit-btn {
+    border: none;
+    background: transparent;
+    padding: 6px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fr03-edit-btn:hover {
+    background: #f9dfe9;
+}
+
+.fr03-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 4px;
+    font-size: 9px;
+    color: #a4989d;
+}
+
+.fr03-page-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fr03-page-btn {
+    border: none;
+    background: transparent;
+    color: #cc618a;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.fr03-page-btn.is-active {
+    background: #f9dfe9;
+    font-weight: 600;
+}
+
+.fr03-page-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* ---------- 4. ACCOUNT DETAIL PANEL ---------- */
+.fr03-detail-card {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.fr03-detail-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fr03-detail-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #574b50;
+}
+
+.fr03-detail-close {
+    border: none;
+    background: transparent;
+    color: #cc618a;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.fr03-selected-account {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.fr03-selected-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.fr03-selected-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #574b50;
+}
+
+.fr03-selected-email {
+    font-size: 10px;
+    color: #a4989d;
+}
+
+.fr03-divider {
+    height: 1px;
+    background: #f2dfe7;
+    width: 100%;
+}
+
+.fr03-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fr03-field-label {
+    font-size: 12px;
+    color: #574b50;
+}
+
+.fr03-select {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 32px 10px 12px;
+    border: 1px solid #f2dfe7;
+    border-radius: 6px;
+    background-color: #ffffff;
+    font-size: 13px;
+    color: #574b50;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23574b50' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+.fr03-select:focus {
+    outline: none;
+    border-color: #cc618a;
+}
+
+.fr03-role-desc {
+    font-size: 10px;
+    line-height: 1.5;
+    color: #a4989d;
+}
+
+.fr03-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fr03-switch-label {
+    font-size: 11px;
+    color: #574b50;
+}
+
+.fr03-switch {
+    width: 30px;
+    height: 17px;
+    border-radius: 100px;
+    background: #d8ccd1;
+    border: none;
+    padding: 3px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    transition: background 0.2s ease;
+}
+
+.fr03-switch.is-on {
+    background: #cc618a;
+    justify-content: flex-end;
+}
+
+.fr03-switch-knob {
+    width: 11px;
+    height: 11px;
+    border-radius: 100px;
+    background: #ffffff;
+}
+
+.fr03-security-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 9px;
+}
+
+.fr03-text-btn {
+    border: none;
+    background: transparent;
+    font-size: 10px;
+    padding: 2px 0;
+    color: #cc618a;
+}
+
+.fr03-text-btn:hover {
+    text-decoration: underline;
+}
+
+.fr03-text-btn--muted {
+    color: #a4989d;
+}
+
+.fr03-text-btn--muted:hover {
+    color: #cc618a;
+}
+
+.fr03-hash-meta {
+    background: #fff8fa;
+    border: 1px dashed #f2dfe7;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 9.5px;
+    color: #a4989d;
+    word-break: break-all;
+}
+
+.fr03-hash-meta code {
+    color: #cc618a;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* ---------- 5. PERMISSIONS MATRIX PANEL ---------- */
+.fr03-matrix-panel {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 16px;
+    padding: 20px;
+}
+
+.fr03-matrix-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.fr03-matrix-guide {
+    width: 260px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fr03-matrix-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fr03-matrix-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #574b50;
+}
+
+.fr03-matrix-desc {
+    font-size: 11px;
+    line-height: 1.5;
+    color: #a4989d;
+}
+
+.fr03-matrix-legend {
+    font-size: 9px;
+    color: #69a68e;
+    white-space: pre-wrap;
+}
+
+.fr03-matrix-table {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: 9.5px;
+}
+
+.fr03-matrix-row {
+    display: grid;
+    grid-template-columns: minmax(180px, 300fr) repeat(3, minmax(90px, 150fr));
+    align-items: center;
+    height: 27px;
+    border-bottom: 1px solid #f2dfe7;
+}
+
+.fr03-matrix-col-func {
+    color: #a4989d;
+}
+
+.fr03-matrix-col-head {
+    color: #cc618a;
+    font-weight: 500;
+}
+
+.fr03-matrix-col-full {
+    color: #69a68e;
+}
+
+.fr03-matrix-col-limit {
+    color: #a4989d;
+}
+
+/* ---------- 6. FORM MODAL HELPERS ---------- */
+.fr03-form-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.fr03-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.fr03-pw-rules {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #fff8fa;
+    border: 1px solid #f2dfe7;
+    font-size: 11.5px;
+}
+
+.fr03-pw-rule {
+    color: #a4989d;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fr03-pw-rule.is-ok {
+    color: #3f9a65;
+    font-weight: 500;
+}
+
+@media (max-width: 1150px) {
+    .fr03-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .fr03-management {
+        grid-template-columns: 1fr;
+    }
+    .fr03-matrix-layout {
+        flex-direction: column;
+    }
+    .fr03-matrix-guide {
+        width: 100%;
+    }
+}
