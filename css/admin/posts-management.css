@@ -1,0 +1,561 @@
+/* ==========================================================
+   FR-06 & FR-07 · POST MANAGEMENT & DELETE MODAL
+   (Nodes 3:44595 & 3:44393)
+   Chuẩn hóa theo Figma Design System Blossom Beauty Store
+   ========================================================== */
+
+.fr07-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+/* ---------- 1. PAGE HEADING ---------- */
+.fr07-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fr07-context {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #a4989d;
+}
+
+.fr07-latency-pill {
+    background: #ebf6ef;
+    color: #3f9a65;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 10.5px;
+    font-weight: 600;
+}
+
+.fr07-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fr07-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fr07-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.35;
+    color: #574b50;
+}
+
+.fr07-subtitle {
+    font-size: 12px;
+    color: #a4989d;
+}
+
+.fr07-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: #cc618a;
+    color: #ffffff;
+    border: 1px solid #cc618a;
+    border-radius: 6px;
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.5;
+    transition: background 0.2s ease;
+}
+
+.fr07-btn-primary:hover {
+    background: #b84f78;
+    border-color: #b84f78;
+}
+
+/* ---------- 2. POST METRICS (4 CARDS) ---------- */
+.fr07-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.fr07-metric-card {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 12px;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fr07-metric-symbol {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #fdedf2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fr07-metric-info {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.fr07-metric-label {
+    font-size: 11px;
+    color: #a4989d;
+}
+
+.fr07-metric-value {
+    font-size: 25px;
+    font-weight: 600;
+    line-height: 1.25;
+    color: #574b50;
+}
+
+.fr07-metric-note {
+    font-size: 10px;
+    color: #69a68e;
+}
+
+/* ---------- 3. MAIN PANEL (TABS + FILTERS + TABLE + PAGINATION) ---------- */
+.fr07-panel {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.fr07-tabs {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    border-bottom: 1px solid #f2dfe7;
+    padding-bottom: 10px;
+}
+
+.fr07-tab-btn {
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: #a4989d;
+    padding: 4px 2px;
+    position: relative;
+}
+
+.fr07-tab-btn.is-active {
+    color: #cc618a;
+    font-weight: 600;
+}
+
+.fr07-tab-btn.is-active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -11px;
+    height: 2px;
+    background: #cc618a;
+    border-radius: 2px;
+}
+
+.fr07-filters {
+    display: grid;
+    grid-template-columns: minmax(220px, 2fr) repeat(4, minmax(140px, 1fr));
+    gap: 12px;
+    align-items: end;
+}
+
+.fr07-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fr07-filter-label {
+    font-size: 12px;
+    color: #574b50;
+}
+
+.fr07-search-wrap {
+    min-height: 44px;
+    padding: 0 12px;
+    border: 1px solid #f2dfe7;
+    border-radius: 6px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fr07-search-wrap:focus-within {
+    border-color: #cc618a;
+}
+
+.fr07-search-wrap input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 13px;
+    color: #574b50;
+    background: transparent;
+}
+
+.fr07-select,
+.fr07-date-input {
+    width: 100%;
+    min-height: 44px;
+    padding: 8px 12px;
+    border: 1px solid #f2dfe7;
+    border-radius: 6px;
+    background: #ffffff;
+    font-size: 13px;
+    color: #574b50;
+}
+
+.fr07-select:focus,
+.fr07-date-input:focus {
+    outline: none;
+    border-color: #cc618a;
+}
+
+/* ---------- POST TABLE ---------- */
+.fr07-table-head {
+    display: grid;
+    grid-template-columns: minmax(260px, 450fr) 180fr 145fr 130fr 110px;
+    align-items: center;
+    height: 42px;
+    padding: 0 12px;
+    background: #fff8fa;
+    color: #a4989d;
+    font-size: 10px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border-radius: 6px;
+}
+
+.fr07-post-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.fr07-post-row {
+    display: grid;
+    grid-template-columns: minmax(260px, 450fr) 180fr 145fr 130fr 110px;
+    align-items: center;
+    min-height: 76px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #f2dfe7;
+    transition: background 0.15s ease;
+}
+
+.fr07-post-row:hover {
+    background: #fff9fb;
+}
+
+.fr07-post-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.fr07-post-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.fr07-post-title {
+    font-size: 13px;
+    color: #574b50;
+    cursor: pointer;
+}
+
+.fr07-post-title:hover {
+    color: #cc618a;
+    text-decoration: underline;
+}
+
+.fr07-post-meta {
+    font-size: 10px;
+    color: #a4989d;
+}
+
+.fr07-author {
+    font-size: 12px;
+    color: #574b50;
+}
+
+.fr07-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.fr07-status-pill.st-published,
+.fr07-status-pill.st-scheduled,
+.fr07-status-pill.st-approved {
+    background: #ebf6ef;
+    color: #69a68e;
+}
+
+.fr07-status-pill.st-pending {
+    background: #fff2e4;
+    color: #c39359;
+}
+
+.fr07-status-pill.st-draft,
+.fr07-status-pill.st-revision {
+    background: #f3edf8;
+    color: #9a83b2;
+}
+
+.fr07-status-pill.st-rejected,
+.fr07-status-pill.st-deleted {
+    background: #f9dfe9;
+    color: #cc618a;
+}
+
+.fr07-date {
+    font-size: 12px;
+    color: #a4989d;
+}
+
+.fr07-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fr07-icon-btn {
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 6px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fr07-icon-btn:hover {
+    background: #fdedf2;
+    border-color: #f2dfe7;
+}
+
+.fr07-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #a4989d;
+    padding-top: 4px;
+}
+
+.fr07-page-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fr07-page-btn {
+    border: none;
+    background: transparent;
+    color: #cc618a;
+    font-size: 12px;
+    padding: 3px 8px;
+    border-radius: 6px;
+}
+
+.fr07-page-btn.is-active {
+    background: #f9dfe9;
+    font-weight: 600;
+}
+
+.fr07-page-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* ---------- 4. FR-06 DELETE CONFIRMATION MODAL (Node 3:44571) ---------- */
+.fr06-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    background: rgba(73, 52, 59, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.fr06-dialog {
+    width: 100%;
+    max-width: 560px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: 0px 10px 32px rgba(104, 70, 83, 0.09);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.fr06-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.fr06-dialog-symbol {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #fdedf2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fr06-close-btn {
+    border: none;
+    background: transparent;
+    padding: 4px;
+    border-radius: 6px;
+    display: inline-flex;
+}
+
+.fr06-close-btn:hover {
+    background: #fff8fa;
+}
+
+.fr06-dialog-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fr06-dialog-title {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: 27px;
+    line-height: 1.35;
+    color: #574b50;
+}
+
+.fr06-dialog-desc {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #a4989d;
+}
+
+.fr06-target-box {
+    background: #fff8fa;
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fr06-target-code {
+    font-size: 10px;
+    color: #a4989d;
+    text-transform: uppercase;
+}
+
+.fr06-target-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #574b50;
+}
+
+.fr06-target-meta {
+    font-size: 12px;
+    color: #a4989d;
+}
+
+.fr06-warning-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 11px;
+    color: #cc618a;
+    line-height: 1.5;
+}
+
+.fr06-divider {
+    height: 1px;
+    background: #f2dfe7;
+    width: 100%;
+}
+
+.fr06-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.fr06-btn-cancel {
+    background: #ffffff;
+    border: 1px solid #f2dfe7;
+    border-radius: 6px;
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #cc618a;
+}
+
+.fr06-btn-cancel:hover {
+    background: #fff8fa;
+}
+
+.fr06-btn-delete {
+    background: #c75c78;
+    border: 1px solid #c75c78;
+    border-radius: 6px;
+    padding: 11px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fr06-btn-delete:hover {
+    background: #b14a66;
+}
+
+@media (max-width: 1150px) {
+    .fr07-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .fr07-filters {
+        grid-template-columns: 1fr 1fr;
+    }
+}
