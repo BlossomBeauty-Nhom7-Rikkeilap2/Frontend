@@ -1,44 +1,179 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Blossom - Bài viết của tôi</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blossom - Quản lý bài viết của tôi</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Styles -->
+  <link rel="stylesheet" href="../../css/common.css">
+  <link rel="stylesheet" href="../../css/layout.css">
+  <link rel="stylesheet" href="../../css/components.css">
+  <link rel="stylesheet" href="../../css/staff/posts.css">
+  <link rel="stylesheet" href="../../css/notifications.css">
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- CSS dùng chung (thêm css riêng của trang bên dưới nếu cần) -->
-    <link rel="stylesheet" href="../../css/common.css">
-    <link rel="stylesheet" href="../../css/layout.css">
-    <link rel="stylesheet" href="../../css/components.css">
-
-    <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
-    <script src="../../js/auth.js"></script>
-    <script src="../../js/permissions.js"></script>
+  <!-- Auth & Permissions -->
+  <script src="../../js/auth.js"></script>
+  <script>
+    if (!Auth.isLoggedIn() || Auth.getRole() !== 'STAFF') {
+      localStorage.setItem('blossom_user', JSON.stringify({
+        id: 2,
+        username: 'manh',
+        fullName: 'Nguyễn Phát Đạt',
+        role: 'STAFF',
+        position: 'Marketing Staff',
+        email: 'phatdatggg@gmail.com'
+      }));
+    }
+  </script>
+  <script src="../../js/permissions.js"></script>
 </head>
-<body>
+<body data-active="posts.html" data-search="Tìm kiếm theo tiêu đề, nội dung bài viết...">
+  <div class="overlay" id="overlay"></div>
 
-    <!-- Sidebar + Header + Footer do js/layout.js render -->
-    <aside class="sidebar" id="sidebar"></aside>
+  <!-- Sidebar + Header + Footer do js/layout.js render -->
+  <aside class="sidebar" id="sidebar"></aside>
 
-    <div class="main">
-        <header class="topbar" id="topbar"></header>
+  <!-- MAIN WRAPPER -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <header class="topbar" id="topbar"></header>
 
-        <main class="content">
-            <div class="crumb">Blossom / Không gian nhân viên / Bài viết của tôi</div>
-            <h2 class="page-title">Bài viết của tôi</h2>
-            <p class="page-sub">Danh sách bài viết bạn phụ trách.</p>
+    <!-- CONTENT -->
+    <main class="content">
+      <div class="crumb">Blossom / Không gian nhân viên / Bài viết của tôi</div>
 
-            <!-- TODO: nội dung trang -->
-            <section class="card">
-                <div class="empty-state"><i data-icon="empty"></i><span>Trang đang được phát triển.</span></div>
-            </section>
-        </main>
+      <div class="page-header">
+        <div class="page-title">
+          <h2>Danh sách bài viết của tôi</h2>
+          <p>Quản lý toàn bộ vòng đời bài viết từ soạn thảo, gửi duyệt đến xuất bản đa kênh.</p>
+        </div>
+        <div class="action-bar">
+          <a href="create-post.html" class="btn btn-primary">
+            <i data-icon="plus"></i> Tạo bài viết mới
+          </a>
+        </div>
+      </div>
 
-        <footer class="footer" id="footer"></footer>
+      <!-- STAT CHIPS -->
+      <section class="posts-stats-row" id="statsRow">
+        <div class="stat-chip active" data-filter="all">
+          <div class="chip-icon pink"><i data-icon="doc"></i></div>
+          <div class="chip-info">
+            <small>Tất cả bài viết</small>
+            <strong id="statTotal">0</strong>
+          </div>
+        </div>
+        <div class="stat-chip" data-filter="review">
+          <div class="chip-icon orange"><i data-icon="clock"></i></div>
+          <div class="chip-info">
+            <small>Đang chờ duyệt</small>
+            <strong id="statReview">0</strong>
+          </div>
+        </div>
+        <div class="stat-chip" data-filter="edit">
+          <div class="chip-icon purple"><i data-icon="edit"></i></div>
+          <div class="chip-info">
+            <small>Cần chỉnh sửa</small>
+            <strong id="statEdit">0</strong>
+          </div>
+        </div>
+        <div class="stat-chip" data-filter="ready">
+          <div class="chip-icon pink"><i data-icon="spark"></i></div>
+          <div class="chip-info">
+            <small>Sẵn sàng đăng</small>
+            <strong id="statReady">0</strong>
+          </div>
+        </div>
+        <div class="stat-chip" data-filter="done">
+          <div class="chip-icon green"><i data-icon="check"></i></div>
+          <div class="chip-info">
+            <small>Đã xuất bản</small>
+            <strong id="statDone">0</strong>
+          </div>
+        </div>
+      </section>
+
+      <!-- FILTER CARD -->
+      <div class="filter-card">
+        <div class="filter-row">
+          <div class="tabs-group" id="statusTabs">
+            <button class="tab-btn active" data-status="all">Tất cả</button>
+            <button class="tab-btn" data-status="draft">Bản nháp</button>
+            <button class="tab-btn" data-status="review">Chờ duyệt</button>
+            <button class="tab-btn" data-status="edit">Cần chỉnh sửa</button>
+            <button class="tab-btn" data-status="ready">Sẵn sàng đăng</button>
+            <button class="tab-btn" data-status="done">Đã xuất bản</button>
+          </div>
+
+          <div class="filter-controls">
+            <select class="select-filter" id="platformSelect">
+              <option value="all">Tất cả nền tảng</option>
+              <option value="Facebook">Facebook</option>
+              <option value="Instagram">Instagram</option>
+              <option value="TikTok">TikTok</option>
+            </select>
+
+            <div class="view-toggle">
+              <button class="view-btn active" id="viewTableBtn" title="Xem dạng bảng"><i data-icon="menu"></i></button>
+              <button class="view-btn" id="viewGridBtn" title="Xem dạng thẻ"><i data-icon="spark"></i></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- POSTS CONTAINER -->
+      <div id="postsContainer"></div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer" id="footer"></footer>
+  </div>
+
+  <!-- DETAIL & PREVIEW MODAL -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-box" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3 id="modalPostTitle">Chi tiết bài viết</h3>
+        <span class="modal-close-btn" onclick="closeDetailModal()">&times;</span>
+      </div>
+      <div class="modal-body" id="modalPostContent">
+        <!-- Rendered by JS -->
+      </div>
+      <div class="modal-footer" id="modalPostFooter">
+        <button class="btn btn-outline" onclick="closeDetailModal()">Đóng</button>
+      </div>
     </div>
+  </div>
 
-    <script src="../../js/components.js"></script>
-    <script src="../../js/layout.js"></script>
+  <!-- DELETE CONFIRM MODAL -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3>Xác nhận xóa bài viết</h3>
+        <span class="modal-close-btn" onclick="closeDeleteModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>Bạn có chắc chắn muốn xóa bài viết "<b id="deletePostTitle"></b>"? Hành động này không thể hoàn tác.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeDeleteModal()">Hủy bỏ</button>
+        <button class="btn btn-danger" id="confirmDeleteBtn">Xóa bài viết</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST CONTAINER -->
+  <div id="toast-container"></div>
+
+  <!-- SCRIPTS -->
+  <script src="../../js/components.js"></script>
+  <script src="../../js/layout.js"></script>
+  <script src="../../js/posts-store.js"></script>
+  <script src="../../js/notifications-store.js"></script>
+  <script src="../../js/post-detail-modal.js"></script>
+  <script src="../../js/notification-bell.js"></script>
+  <script src="../../js/staff/posts.js"></script>
 </body>
 </html>

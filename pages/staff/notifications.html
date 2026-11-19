@@ -3,20 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Blossom - Thông báo</title>
+    <title>Blossom - Trung tâm thông báo (FR-12)</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CSS dùng chung (thêm css riêng của trang bên dưới nếu cần) -->
+    <!-- CSS dùng chung & CSS trang -->
     <link rel="stylesheet" href="../../css/common.css">
     <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/notifications.css">
 
-    <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
+    <!-- Kiểm tra đăng nhập + phân quyền -->
     <script src="../../js/auth.js"></script>
+    <script>
+      // Fallback phiên làm việc nếu mở trực tiếp không qua login
+      if (!Auth.isLoggedIn() || Auth.getRole() !== 'STAFF') {
+        localStorage.setItem('blossom_user', JSON.stringify({
+          id: 2,
+          username: 'manh',
+          fullName: 'Nguyễn Phát Đạt',
+          role: 'STAFF',
+          position: 'Marketing Staff',
+          email: 'phatdatggg@gmail.com'
+        }));
+      }
+    </script>
     <script src="../../js/permissions.js"></script>
 </head>
-<body>
+<body data-active="notifications.html" data-search="Tìm kiếm thông báo...">
+    <div class="overlay" id="overlay"></div>
 
     <!-- Sidebar + Header + Footer do js/layout.js render -->
     <aside class="sidebar" id="sidebar"></aside>
@@ -24,21 +39,52 @@
     <div class="main">
         <header class="topbar" id="topbar"></header>
 
-        <main class="content">
-            <div class="crumb">Blossom / Không gian nhân viên / Thông báo</div>
-            <h2 class="page-title">Thông báo</h2>
-            <p class="page-sub">Phản hồi và nhắc việc dành cho bạn.</p>
+        <main class="content" style="padding: 32px;">
+            <div class="crumb">Blossom / Không gian nhân viên / Trung tâm thông báo (FR-12)</div>
 
-            <!-- TODO: nội dung trang -->
-            <section class="card">
-                <div class="empty-state"><i data-icon="empty"></i><span>Trang đang được phát triển.</span></div>
-            </section>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 26px; color: var(--text); font-weight: 700; margin-bottom: 4px;">Trung tâm thông báo</h2>
+                    <p style="color: var(--muted); font-size: 14px;">Theo dõi phản hồi phê duyệt bài viết từ Manager và thông báo nhắc nhở lịch đăng bài.</p>
+                </div>
+            </div>
+
+            <!-- TOOLBAR & FILTERS -->
+            <div class="notif-page-toolbar">
+                <div class="notif-filter-tabs" id="notifFilterTabs">
+                    <button type="button" class="notif-tab-btn active" data-filter="all">Tất cả thông báo</button>
+                    <button type="button" class="notif-tab-btn" data-filter="unread">Chưa đọc (<span id="unreadCountBadge">0</span>)</button>
+                    <button type="button" class="notif-tab-btn" data-filter="approved">Đã phê duyệt 🎉</button>
+                    <button type="button" class="notif-tab-btn" data-filter="revision">Cần chỉnh sửa ✍️</button>
+                    <button type="button" class="notif-tab-btn" data-filter="reminder">Nhắc lịch đăng ⏰</button>
+                </div>
+
+                <div class="notif-actions-bar">
+                    <button type="button" class="btn btn-outline btn-sm" id="btnMarkAllRead">
+                        ✓ Đánh dấu tất cả đã đọc
+                    </button>
+                    <button type="button" class="btn btn-outline btn-sm" id="btnClearRead">
+                        🗑️ Xóa thông báo đã đọc
+                    </button>
+                </div>
+            </div>
+
+            <!-- NOTIFICATIONS LIST -->
+            <div class="notif-list-container" id="notifListContainer">
+                <!-- Rendered by JS -->
+            </div>
         </main>
 
         <footer class="footer" id="footer"></footer>
     </div>
 
+    <!-- SCRIPTS -->
     <script src="../../js/components.js"></script>
     <script src="../../js/layout.js"></script>
+    <script src="../../js/posts-store.js"></script>
+    <script src="../../js/notifications-store.js"></script>
+    <script src="../../js/post-detail-modal.js"></script>
+    <script src="../../js/notification-bell.js"></script>
+    <script src="../../js/staff/notifications.js"></script>
 </body>
 </html>

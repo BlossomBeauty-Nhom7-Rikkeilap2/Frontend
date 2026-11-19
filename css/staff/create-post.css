@@ -1,0 +1,349 @@
+/* ==========================================================================
+   BLOSSOM BEAUTY STORE - STAFF POST CREATION & SUBMISSION STYLES
+   ========================================================================== */
+
+@import url('../common.css');
+@import url('dashboard.css');
+
+.content {
+  padding: 32px;
+  flex: 1;
+}
+
+.create-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+@media (max-width: 1080px) {
+  .create-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* FORM CARD */
+.form-card {
+  background: #fff;
+  border: 1px solid var(--pink-line);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-label .required {
+  color: var(--pink);
+  margin-left: 4px;
+}
+
+.form-label small {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.input-text, .input-textarea, .input-select {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--pink-line);
+  background: #fff;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.input-text:focus, .input-textarea:focus, .input-select:focus {
+  border-color: var(--pink);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(217, 70, 122, 0.12);
+}
+
+.input-textarea {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.input-error {
+  border-color: var(--red) !important;
+  background: var(--red-bg) !important;
+}
+
+.error-text {
+  font-size: 12px;
+  color: var(--red);
+  display: none;
+}
+
+.error-text.show {
+  display: block;
+}
+
+/* PLATFORM SELECTOR */
+.platform-options {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.platform-checkbox-label {
+  flex: 1;
+  min-width: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--pink-line);
+  background: #fff;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13.5px;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.platform-checkbox-label input {
+  display: none;
+}
+
+.platform-checkbox-label.checked.fb {
+  border-color: var(--fb-blue);
+  background: #e7f0fd;
+  color: var(--fb-blue);
+}
+
+.platform-checkbox-label.checked.ig {
+  border-color: var(--ig-pink);
+  background: #fbeaf0;
+  color: var(--ig-pink);
+}
+
+.platform-checkbox-label.checked.tiktok {
+  border-color: #000;
+  background: #f2f2f4;
+  color: #000;
+}
+
+/* HASHTAG PILLS */
+.hashtag-chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.chip-tag {
+  background: var(--pink-bg);
+  border: 1px solid var(--pink-line);
+  border-radius: var(--radius-full);
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--pink);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip-tag:hover {
+  background: var(--pink-soft);
+  border-color: var(--pink);
+}
+
+/* UPLOAD DROPZONE */
+.upload-dropzone {
+  border: 2px dashed var(--pink-line);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  background: var(--pink-bg);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--pink);
+  background: #fff;
+}
+
+.upload-dropzone svg {
+  width: 38px;
+  height: 38px;
+  stroke: var(--pink);
+}
+
+.media-preview-box {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--pink-line);
+  margin-top: 10px;
+  max-height: 220px;
+  display: none;
+}
+
+.media-preview-box.show {
+  display: block;
+}
+
+.media-preview-box img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.remove-media-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+/* PREVIEW CARD ON RIGHT SIDE */
+.preview-sticky {
+  position: sticky;
+  top: 100px;
+  background: #fff;
+  border: 1px solid var(--pink-line);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.preview-tabs {
+  display: flex;
+  background: var(--pink-bg);
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid var(--pink-line);
+}
+
+.preview-tab-btn {
+  flex: 1;
+  padding: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-align: center;
+  border-radius: 6px;
+  color: var(--muted);
+}
+
+.preview-tab-btn.active {
+  background: #fff;
+  color: var(--pink);
+  box-shadow: var(--shadow-sm);
+}
+
+/* MOCKUP DISPLAY */
+.mockup-container {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+}
+
+.mockup-header {
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.mockup-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--pink-soft);
+  color: var(--pink-dark);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+
+.mockup-author-info b {
+  display: block;
+  font-size: 13px;
+  line-height: 1.2;
+}
+
+.mockup-author-info small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.mockup-caption {
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-line;
+  word-break: break-word;
+  max-height: 140px;
+  overflow-y: auto;
+}
+
+.mockup-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: #fdf6f8;
+}
+
+.mockup-footer {
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-around;
+  border-top: 1px solid #f3f4f6;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* FORM ACTIONS */
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--pink-line);
+}
