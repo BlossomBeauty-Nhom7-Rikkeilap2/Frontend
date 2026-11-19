@@ -1,0 +1,577 @@
+/* ==========================================================
+   FR-06 & FR-07 · POST MANAGEMENT & DELETE MODAL
+   (Nodes 3:44595 & 3:44393)
+   Đồng bộ kích thước font chữ & trình bày theo Design System
+   common.css / layout.css / components.css của Blossom Beauty
+   ========================================================== */
+
+.fr07-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ---------- 1. PAGE HEADING ---------- */
+.fr07-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fr07-context {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--muted, #8c8294);
+}
+
+.fr07-latency-pill {
+    background: #ebf6ef;
+    color: #3f9a65;
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.fr07-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fr07-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fr07-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 35px;
+    line-height: 1.3;
+    color: var(--text-strong, #24122e);
+}
+
+.fr07-subtitle {
+    font-size: 15.5px;
+    color: var(--muted, #8c8294);
+}
+
+.fr07-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    background: var(--pink, #d9467a);
+    color: #ffffff;
+    border: 1px solid var(--pink, #d9467a);
+    border-radius: 8px;
+    padding: 0 22px;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.45;
+    transition: background 0.2s ease;
+}
+
+.fr07-btn-primary:hover {
+    background: var(--pink-dark, #c33369);
+    border-color: var(--pink-dark, #c33369);
+}
+
+/* ---------- 2. POST METRICS (4 CARDS) ---------- */
+.fr07-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.fr07-metric-card {
+    background: #ffffff;
+    border: 1px solid var(--pink-line, #f4dce4);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.fr07-metric-symbol {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--pink-soft, #fbe4ec);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fr07-metric-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.fr07-metric-label {
+    font-size: 15px;
+    color: var(--muted, #8c8294);
+}
+
+.fr07-metric-value {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-2, #4a3f50);
+}
+
+.fr07-metric-note {
+    font-size: 13.5px;
+    color: #3f9a65;
+}
+
+/* ---------- 3. MAIN PANEL (TABS + FILTERS + TABLE + PAGINATION) ---------- */
+.fr07-panel {
+    background: #ffffff;
+    border: 1px solid var(--pink-line, #f4dce4);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.fr07-tabs {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    border-bottom: 1px solid var(--pink-line, #f4dce4);
+    padding-bottom: 12px;
+}
+
+.fr07-tab-btn {
+    border: none;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--muted, #8c8294);
+    padding: 6px 4px;
+    position: relative;
+}
+
+.fr07-tab-btn.is-active {
+    color: var(--pink, #d9467a);
+    font-weight: 700;
+}
+
+.fr07-tab-btn.is-active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -13px;
+    height: 2px;
+    background: var(--pink, #d9467a);
+    border-radius: 2px;
+}
+
+.fr07-filters {
+    display: grid;
+    grid-template-columns: minmax(240px, 2fr) repeat(4, minmax(150px, 1fr));
+    gap: 14px;
+    align-items: end;
+}
+
+.fr07-filter-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fr07-filter-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-2, #4a3f50);
+}
+
+.fr07-search-wrap {
+    min-height: 46px;
+    padding: 0 14px;
+    border: 1px solid var(--pink-line, #f4dce4);
+    border-radius: 8px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fr07-search-wrap:focus-within {
+    border-color: var(--pink, #d9467a);
+    box-shadow: 0 0 0 3px var(--pink-soft, #fbe4ec);
+}
+
+.fr07-search-wrap input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--text, #3b3140);
+    background: transparent;
+}
+
+.fr07-select,
+.fr07-date-input {
+    width: 100%;
+    min-height: 46px;
+    padding: 8px 14px;
+    border: 1px solid var(--pink-line, #f4dce4);
+    border-radius: 8px;
+    background: #ffffff;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--text, #3b3140);
+}
+
+.fr07-select:focus,
+.fr07-date-input:focus {
+    outline: none;
+    border-color: var(--pink, #d9467a);
+    box-shadow: 0 0 0 3px var(--pink-soft, #fbe4ec);
+}
+
+/* ---------- POST TABLE ---------- */
+.fr07-table-head {
+    display: grid;
+    grid-template-columns: minmax(280px, 450fr) 180fr 155fr 135fr 115px;
+    align-items: center;
+    height: 46px;
+    padding: 0 16px;
+    background: #fff8fa;
+    color: var(--muted, #8c8294);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    border-radius: 8px;
+}
+
+.fr07-post-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.fr07-post-row {
+    display: grid;
+    grid-template-columns: minmax(280px, 450fr) 180fr 155fr 135fr 115px;
+    align-items: center;
+    min-height: 82px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--pink-line, #f4dce4);
+    transition: background 0.15s ease;
+}
+
+.fr07-post-row:hover {
+    background: #fff9fb;
+}
+
+.fr07-post-identity {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+}
+
+.fr07-post-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.fr07-post-title {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--text, #3b3140);
+    cursor: pointer;
+}
+
+.fr07-post-title:hover {
+    color: var(--pink, #d9467a);
+    text-decoration: underline;
+}
+
+.fr07-post-meta {
+    font-size: 13.5px;
+    color: var(--muted, #8c8294);
+}
+
+.fr07-author {
+    font-size: 14.5px;
+    font-weight: 500;
+    color: var(--text-2, #4a3f50);
+}
+
+.fr07-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.fr07-status-pill.st-published,
+.fr07-status-pill.st-scheduled,
+.fr07-status-pill.st-approved {
+    background: #e6f5ec;
+    color: #3f9a65;
+}
+
+.fr07-status-pill.st-pending {
+    background: #fff0e1;
+    color: #d9923a;
+}
+
+.fr07-status-pill.st-draft,
+.fr07-status-pill.st-revision {
+    background: #efeaf8;
+    color: #7a6aa8;
+}
+
+.fr07-status-pill.st-rejected,
+.fr07-status-pill.st-deleted {
+    background: #fbe4ec;
+    color: #d9467a;
+}
+
+.fr07-date {
+    font-size: 14.5px;
+    color: var(--muted, #8c8294);
+}
+
+.fr07-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fr07-icon-btn {
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 8px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fr07-icon-btn:hover {
+    background: var(--pink-soft, #fbe4ec);
+    border-color: var(--pink-line, #f4dce4);
+}
+
+.fr07-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    color: var(--muted, #8c8294);
+    padding-top: 6px;
+}
+
+.fr07-page-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fr07-page-btn {
+    border: none;
+    background: transparent;
+    color: var(--pink, #d9467a);
+    font-size: 14.5px;
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.fr07-page-btn.is-active {
+    background: var(--pink-soft, #fbe4ec);
+    font-weight: 700;
+}
+
+.fr07-page-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* ---------- 4. FR-06 DELETE CONFIRMATION MODAL (Node 3:44571) ---------- */
+.fr06-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 120;
+    background: rgba(73, 52, 59, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.fr06-dialog {
+    width: 100%;
+    max-width: 560px;
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: 0px 10px 32px rgba(104, 70, 83, 0.14);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.fr06-dialog-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.fr06-dialog-symbol {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--pink-soft, #fbe4ec);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fr06-close-btn {
+    border: none;
+    background: transparent;
+    padding: 4px;
+    border-radius: 6px;
+    display: inline-flex;
+}
+
+.fr06-close-btn:hover {
+    background: #fff8fa;
+}
+
+.fr06-dialog-intro {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fr06-dialog-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 28px;
+    line-height: 1.35;
+    color: var(--text-strong, #24122e);
+}
+
+.fr06-dialog-desc {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--muted, #8c8294);
+}
+
+.fr06-target-box {
+    background: #fff8fa;
+    border-radius: 10px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fr06-target-code {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--pink, #d9467a);
+    text-transform: uppercase;
+}
+
+.fr06-target-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text, #3b3140);
+}
+
+.fr06-target-meta {
+    font-size: 13.5px;
+    color: var(--muted, #8c8294);
+}
+
+.fr06-warning-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13.5px;
+    color: var(--pink, #d9467a);
+    line-height: 1.5;
+}
+
+.fr06-divider {
+    height: 1px;
+    background: var(--pink-line, #f4dce4);
+    width: 100%;
+}
+
+.fr06-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.fr06-btn-cancel {
+    background: #ffffff;
+    border: 1px solid var(--pink-border, #f1bfd0);
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--pink, #d9467a);
+}
+
+.fr06-btn-cancel:hover {
+    background: #fff8fa;
+}
+
+.fr06-btn-delete {
+    background: #c75c78;
+    border: 1px solid #c75c78;
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fr06-btn-delete:hover {
+    background: #b14a66;
+}
+
+@media (max-width: 1150px) {
+    .fr07-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .fr07-filters {
+        grid-template-columns: 1fr 1fr;
+    }
+}
