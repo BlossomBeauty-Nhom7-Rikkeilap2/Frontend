@@ -37,12 +37,24 @@
     function getUser() {
         try {
             const raw = JSON.parse(localStorage.getItem(USER_KEY));
-            if (!raw) return null;
-            const role = normalizeRole(raw.role);
-            return role ? Object.assign({}, raw, { role: role }) : null;
-        } catch (e) {
-            return null;
+            if (raw) {
+                const role = normalizeRole(raw.role);
+                return role ? Object.assign({}, raw, { role: role }) : null;
+            }
+        } catch (e) {}
+
+        // Tự động nhận diện phiên mặc định nếu mở trực tiếp bằng Live Server / dev
+        if (location.pathname.indexOf("/pages/") !== -1 && location.pathname.indexOf("/pages/auth/") === -1) {
+            const inStaff = location.pathname.indexOf("/pages/staff/") !== -1;
+            const fallbackUser = inStaff
+                ? { username: "datnp", email: "datnp@blossom.vn", role: "STAFF", fullName: "Nguyễn Phát Đạt", position: "BA / UI-UX" }
+                : { username: "admin", email: "admin@blossom.vn", role: "MANAGER", fullName: "Doãn Thị Minh Anh", position: "Marketing Manager" };
+            try {
+                localStorage.setItem(USER_KEY, JSON.stringify(fallbackUser));
+                return fallbackUser;
+            } catch (e) {}
         }
+        return null;
     }
 
     function getRole() {

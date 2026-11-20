@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="../../assets/logo.png">
     <title>Blossom – Tiến độ bài viết</title>
 
     <!-- Google Fonts -->
@@ -20,7 +21,7 @@
     <script src="../../js/permissions.js"></script>
 </head>
 
-<body data-search="Tìm kiếm bài viết...">
+<body data-search="Tìm kiếm bài viết..." data-active="dashboard.html">
 
     <!-- Sidebar + Header + Footer do js/layout.js render -->
     <aside class="sidebar" id="sidebar"></aside>
@@ -44,36 +45,37 @@
             <div class="bar">
 
                 <div class="tabs">
-                    <button class="tab active">Bảng tiến độ</button>
-                    <button class="tab">Theo thành viên</button>
+                    <button type="button" class="tab active" id="tabProgress">Bảng tiến độ</button>
+                    <button type="button" class="tab" id="tabMembers">Theo thành viên</button>
                 </div>
 
                 <div class="filters">
-                    <select class="select" aria-label="Lọc theo tác giả">
-                        <option>Tất cả tác giả</option>
-                        <option>Minh Anh</option>
+                    <select class="select" id="filterAuthor" aria-label="Lọc theo tác giả">
+                        <option value="ALL">Tất cả tác giả</option>
                     </select>
 
-                    <select class="select" aria-label="Lọc theo chiến dịch">
-                        <option>Tất cả chiến dịch</option>
-                        <option>Chiến dịch hè</option>
+                    <select class="select" id="filterCampaign" aria-label="Lọc theo chiến dịch">
+                        <option value="ALL">Tất cả chiến dịch</option>
+                        <option value="Chăm sóc da thu đông">Chăm sóc da thu đông</option>
+                        <option value="Tuần lễ hoa anh đào">Tuần lễ hoa anh đào</option>
+                        <option value="Bộ sưu tập son thuần chay">Bộ sưu tập son thuần chay</option>
                     </select>
                 </div>
             </div>
 
             <section class="board" id="board"></section>
 
-            <div class="priority">
+            <div class="priority" id="priorityBox">
                 <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 2c.6 5 2.5 7.4 8 8-5.5.6-7.4 3-8 12-.6-9-2.5-11.4-8-12 5.5-.6 7.4-3 8-8z"/>
                 </svg>
 
                 <div>
-                    <b>Ưu tiên hôm nay</b>
-                    <p>Có 1 bài viết đã quá hạn lịch đăng ban đầu. Cần kiểm tra và lên lại lịch phát hành.</p>
+                    <b id="priorityTitle">Ưu tiên hôm nay</b>
+                    <p id="priorityDesc">Đang tải dữ liệu tiến độ công việc...</p>
                 </div>
 
-                <a href="#" class="link">Xem công việc</a>
+                <a href="approvals.html" class="link" id="priorityLink">Xem công việc</a>
             </div>
 
         </main>
