@@ -7,12 +7,15 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CSS dùng chung (thêm css riêng của trang bên dưới nếu cần) -->
+    <!-- CSS dùng chung -->
     <link rel="stylesheet" href="../../css/common.css">
     <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/components.css">
+    <!-- CSS riêng: Hồ sơ cá nhân / Đổi mật khẩu / Cài đặt -->
+    <link rel="stylesheet" href="../../css/account.css">
 
     <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
+    <script src="../../js/api.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
 </head>
@@ -24,14 +27,201 @@
     <div class="main">
         <header class="topbar" id="topbar"></header>
 
-        <main class="content">
+        <main class="content" id="accountPage" data-area="staff">
             <div class="crumb">Blossom / Không gian nhân viên / Hồ sơ cá nhân</div>
             <h2 class="page-title">Hồ sơ cá nhân</h2>
             <p class="page-sub">Thông tin tài khoản và đổi mật khẩu.</p>
 
-            <!-- TODO: nội dung trang -->
-            <section class="card">
-                <div class="empty-state"><i data-icon="empty"></i><span>Trang đang được phát triển.</span></div>
+            <!-- TABS (đồng bộ với URL hash: #profile · #change-password · #system) -->
+            <div class="acc-tabbar">
+                <div class="tabs" role="tablist" aria-label="Hồ sơ cá nhân">
+                    <button type="button" class="tab active" role="tab" data-tab="profile" aria-selected="true" aria-controls="panel-profile">Hồ sơ cá nhân</button>
+                    <button type="button" class="tab" role="tab" data-tab="change-password" aria-selected="false" aria-controls="panel-change-password">Đổi mật khẩu</button>
+                </div>
+            </div>
+
+            <!-- ============ 1. HỒ SƠ CÁ NHÂN ============ -->
+            <section id="panel-profile" role="tabpanel">
+                <div class="acc-grid">
+                    <!-- Trái: tóm tắt + quyền hạn -->
+                    <div class="acc-col">
+                        <section class="card acc-summary">
+                            <div class="acc-avatar-wrap">
+                                <div class="acc-avatar-lg" id="sumAvatar">?</div>
+                                <button type="button" class="acc-avatar-edit" id="avatarEdit" aria-label="Đổi ảnh đại diện">
+                                    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+                                </button>
+                            </div>
+                            <input type="file" id="avatarFile" accept="image/png,image/jpeg,image/webp" hidden>
+                            <h3 class="acc-summary__name" id="sumName"></h3>
+                            <p class="acc-summary__pos" id="sumPos"></p>
+                            <span id="sumRole"></span>
+                            <div class="acc-avatar-actions">
+                                <button type="button" class="btn btn--secondary btn--sm" id="avatarPick">Đổi ảnh đại diện</button>
+                                <button type="button" class="btn btn--ghost btn--sm" id="avatarRemove" hidden>Xóa ảnh</button>
+                            </div>
+                            <p class="field__hint acc-avatar-hint">JPG, PNG hoặc WebP, tối đa 5 MB.</p>
+                            <dl class="acc-facts">
+                                <div><dt>Tên đăng nhập</dt><dd id="sumUsername"></dd></div>
+                                <div><dt>Email</dt><dd id="sumEmail"></dd></div>
+                                <div id="sumJoinedRow" hidden><dt>Tham gia từ</dt><dd id="sumJoined"></dd></div>
+                            </dl>
+                        </section>
+
+                        <section class="card">
+                            <div class="card__head">
+                                <div>
+                                    <h3 class="card__title">Quyền của bạn</h3>
+                                    <p class="card__sub">Theo vai trò được cấp.</p>
+                                </div>
+                            </div>
+                            <ul class="acc-perms" id="permList"></ul>
+                        </section>
+                    </div>
+
+                    <!-- Phải: form chỉnh sửa -->
+                    <section class="card">
+                        <div class="card__head">
+                            <div>
+                                <h3 class="card__title">Thông tin cá nhân</h3>
+                                <p class="card__sub">Cập nhật thông tin hiển thị của bạn trong hệ thống.</p>
+                            </div>
+                        </div>
+
+                        <form id="profileForm" novalidate>
+                            <div class="acc-form-grid">
+                                <div class="field" id="fld-fullName">
+                                    <label class="field__label" for="pfFullName">Họ và tên <span class="req">*</span></label>
+                                    <input class="input" id="pfFullName" name="fullName" type="text" maxlength="60" autocomplete="name" aria-describedby="err-fullName">
+                                    <p class="field__error" id="err-fullName" role="alert"></p>
+                                </div>
+
+                                <div class="field" id="fld-phone">
+                                    <label class="field__label" for="pfPhone">Số điện thoại</label>
+                                    <input class="input" id="pfPhone" name="phone" type="tel" inputmode="tel" maxlength="14" placeholder="0901 234 567" autocomplete="tel" aria-describedby="err-phone">
+                                    <p class="field__error" id="err-phone" role="alert"></p>
+                                </div>
+
+                                <div class="field" id="fld-dob">
+                                    <label class="field__label" for="pfDob">Ngày sinh</label>
+                                    <input class="input" id="pfDob" name="dob" type="date" aria-describedby="err-dob">
+                                    <p class="field__error" id="err-dob" role="alert"></p>
+                                </div>
+
+                                <div class="field" id="fld-position">
+                                    <label class="field__label" for="pfPosition">Chức vụ</label>
+                                    <input class="input" id="pfPosition" type="text" disabled>
+                                </div>
+
+                                <div class="field is-full" id="fld-bio">
+                                    <label class="field__label" for="pfBio">Giới thiệu ngắn</label>
+                                    <textarea class="textarea" id="pfBio" name="bio" maxlength="200" rows="3" placeholder="Vài dòng về bạn và công việc tại Blossom..." aria-describedby="err-bio"></textarea>
+                                    <span class="acc-counter" id="bioCount">0/200</span>
+                                    <p class="field__error" id="err-bio" role="alert"></p>
+                                </div>
+
+                                <h4 class="acc-sub">Thông tin tài khoản</h4>
+
+                                <div class="field">
+                                    <label class="field__label" for="pfUsername">Tên đăng nhập</label>
+                                    <input class="input" id="pfUsername" type="text" disabled>
+                                </div>
+
+                                <div class="field">
+                                    <label class="field__label" for="pfEmail">Email</label>
+                                    <input class="input" id="pfEmail" type="email" disabled>
+                                </div>
+
+                                <div class="field is-full">
+                                    <label class="field__label" for="pfRole">Vai trò</label>
+                                    <input class="input" id="pfRole" type="text" disabled>
+                                    <p class="field__hint">Tên đăng nhập, email, chức vụ và vai trò do quản trị viên cấp, không thể tự thay đổi tại đây.</p>
+                                </div>
+                            </div>
+
+                            <div class="acc-actions">
+                                <span class="acc-note" id="profileDirty" hidden><i data-icon="alert"></i>Có thay đổi chưa lưu</span>
+                                <button type="button" class="btn btn--secondary" id="profileReset" disabled>Hủy thay đổi</button>
+                                <button type="submit" class="btn btn--primary" id="profileSave" disabled>Lưu thay đổi</button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+            </section>
+
+            <!-- ============ 2. ĐỔI MẬT KHẨU ============ -->
+            <section id="panel-change-password" role="tabpanel" hidden>
+                <div class="acc-grid acc-grid--form-first">
+                    <section class="card">
+                        <div class="card__head">
+                            <div>
+                                <h3 class="card__title">Đổi mật khẩu</h3>
+                                <p class="card__sub" id="pwdLastChanged">Dùng mật khẩu mạnh và không chia sẻ cho người khác.</p>
+                            </div>
+                        </div>
+
+                        <form id="passwordForm" novalidate>
+                            <div class="acc-form-grid acc-form-grid--single">
+                                <div class="field" id="fld-current">
+                                    <label class="field__label" for="pwCurrent">Mật khẩu hiện tại <span class="req">*</span></label>
+                                    <div class="acc-pass">
+                                        <input class="input" id="pwCurrent" type="password" autocomplete="current-password" aria-describedby="err-current">
+                                        <button type="button" class="acc-eye" data-eye="pwCurrent" aria-label="Hiện mật khẩu"></button>
+                                    </div>
+                                    <p class="field__error" id="err-current" role="alert"></p>
+                                </div>
+
+                                <div class="field" id="fld-new">
+                                    <label class="field__label" for="pwNew">Mật khẩu mới <span class="req">*</span></label>
+                                    <div class="acc-pass">
+                                        <input class="input" id="pwNew" type="password" autocomplete="new-password" aria-describedby="err-new">
+                                        <button type="button" class="acc-eye" data-eye="pwNew" aria-label="Hiện mật khẩu"></button>
+                                    </div>
+                                    <div class="acc-meter" id="pwMeter" data-level="0" aria-live="polite">
+                                        <div class="acc-meter__bars"><i></i><i></i><i></i><i></i></div>
+                                        <span class="acc-meter__text" id="pwMeterText">Chưa nhập</span>
+                                    </div>
+                                    <p class="field__error" id="err-new" role="alert"></p>
+                                </div>
+
+                                <div class="field" id="fld-confirm">
+                                    <label class="field__label" for="pwConfirm">Nhập lại mật khẩu mới <span class="req">*</span></label>
+                                    <div class="acc-pass">
+                                        <input class="input" id="pwConfirm" type="password" autocomplete="new-password" aria-describedby="err-confirm">
+                                        <button type="button" class="acc-eye" data-eye="pwConfirm" aria-label="Hiện mật khẩu"></button>
+                                    </div>
+                                    <p class="field__error" id="err-confirm" role="alert"></p>
+                                </div>
+                            </div>
+
+                            <div class="acc-actions">
+                                <button type="button" class="btn btn--secondary" id="passwordClear">Xóa nội dung</button>
+                                <button type="submit" class="btn btn--primary" id="passwordSave"><i data-icon="key"></i><span>Cập nhật mật khẩu</span></button>
+                            </div>
+                        </form>
+                    </section>
+
+                    <div class="acc-col">
+                        <section class="card">
+                            <div class="card__head">
+                                <div>
+                                    <h3 class="card__title">Yêu cầu mật khẩu</h3>
+                                    <p class="card__sub">Tự động kiểm tra khi bạn nhập.</p>
+                                </div>
+                            </div>
+                            <ul class="acc-rules" id="pwRules">
+                                <li data-rule="minLength">Tối thiểu 8 ký tự</li>
+                                <li data-rule="hasUpper">Có chữ hoa (A–Z)</li>
+                                <li data-rule="hasLower">Có chữ thường (a–z)</li>
+                                <li data-rule="hasDigit">Có chữ số (0–9)</li>
+                            </ul>
+                            <div class="acc-tip">
+                                <i data-icon="spark"></i>
+                                <span>Nên dùng mật khẩu khác với các tài khoản khác và thêm ký tự đặc biệt để tăng độ mạnh.</span>
+                            </div>
+                        </section>
+                    </div>
+                </div>
             </section>
         </main>
 
@@ -40,5 +230,7 @@
 
     <script src="../../js/components.js"></script>
     <script src="../../js/layout.js"></script>
+    <script src="../../js/account-store.js"></script>
+    <script src="../../js/account.js"></script>
 </body>
 </html>

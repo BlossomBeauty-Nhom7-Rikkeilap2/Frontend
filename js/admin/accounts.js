@@ -1,509 +1,653 @@
 /* =========================================================
-   MANAGER – Trang Tài khoản & Phân quyền (logic riêng của trang)
-   Sidebar / Header / đăng xuất: js/layout.js
-   Component: js/components.js (UI.*)
-   Dữ liệu:   js/account-store.js (AccountStore) – demo localStorage
+   ACCOUNT – Hồ sơ cá nhân, Đổi mật khẩu, Cài đặt hệ thống
+   Dùng cho pages/admin/settings.html (Manager) và
+   pages/staff/profile.html (Staff).
 
-   Chức năng:
-   1. Danh sách (tìm kiếm, lọc vai trò / trạng thái, phân trang)
-   2. Thêm tài khoản
-   3. Sửa tài khoản (họ tên, email, vai trò, mật khẩu tùy chọn)
-   4. Khóa / Mở khóa tài khoản
+   Nạp CUỐI <body>, sau components.js, layout.js và account-store.js.
+   Phụ thuộc: Auth, Permissions, UI, BlossomAPI (api.js), AccountStore (tùy chọn).
+
+   Dữ liệu demo lưu ở localStorage (cùng cách login.js / auth.js đang làm):
+     blossom_user                 phiên đăng nhập (cập nhật fullName để header đổi theo)
+     blossom_profile_<username>   phone, dob, bio
+     blossom_avatar_<username>    ảnh đại diện (data URL JPG 256x256, layout.js đọc để hiện ở header)
+     blossom_pwd_changed_<username>  thời điểm đổi mật khẩu gần nhất (KHÔNG lưu mật khẩu)
+     blossom_settings             cài đặt hệ thống (Manager)
+     blossom_accounts             kho tài khoản (js/account-store.js) – họ tên được đồng bộ vào đây
+
+   Mật khẩu: theo quy ước của account-store.js, KHÔNG lưu mật khẩu / hash ở trình duyệt.
+   Ở chế độ demo, mật khẩu hiện tại được đối chiếu với mật khẩu demo của login.js;
+   khi có backend, server băm và kiểm tra.
+
+   Khi nối FastAPI: thay thế 3 hàm saveProfileRemote / changePasswordRemote /
+   saveSettingsRemote ở mục 2 bằng BlossomAPI.request(...).
    ========================================================= */
 (function () {
     "use strict";
 
-    const ROLES = Auth.ROLES;
-    const ROLE_LABEL = Auth.ROLE_LABEL;
-    const esc = UI.esc;
-    const icon = UI.icon;
-    const pad = UI.pad;
-
-    const PAGE_SIZE = 6;
-    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    const ROLE_INFO = {
-        MANAGER: "Quản lý bài viết, lịch đăng, duyệt nội dung, xem báo cáo và quản lý tài khoản.",
-        STAFF: "Tạo, chỉnh sửa bài viết và gửi duyệt. Không có quyền quản lý tài khoản."
-    };
-
-    let me = Auth.getUser();
-    let accounts = AccountStore.load();
-    const state = { q: "", role: "", status: "", page: 1, selectedId: null };
+    const user = Auth.getUser();
+    if (!user || !document.getElementById("accountPage")) return;
 
     const $ = function (id) { return document.getElementById(id); };
+    const esc = UI.esc;
 
-    /* =========================================================
-       TIỆN ÍCH
-       ========================================================= */
-    // Bỏ dấu để tìm "minh anh" ra "Minh Anh"
-    function fold(s) {
-        return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-            .replace(/đ/g, "d").replace(/Đ/g, "D").toLowerCase();
-    }
+    /* ---------- 1. LƯU TRỮ ---------- */
+    const USERNAME = user.username || "user";
+    const KEY = {
+        profile:   "blossom_profile_" + USERNAME,
+        avatar:    "blossom_avatar_" + USERNAME,
+        pwdAt:     "blossom_pwd_changed_" + USERNAME,
+        settings:  "blossom_settings"
+    };
 
-    function fmtDate(iso) {
-        const p = String(iso || "").split("-");
-        return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : "—";
-    }
+    // Mật khẩu demo ban đầu của từng role (khớp tài khoản demo trong login.js)
+    const DEMO_PASSWORD = { MANAGER: "Blossom@123", STAFF: "Manh@2026" };
 
-    function todayISO() {
-        const t = new Date();
-        return t.getFullYear() + "-" + pad(t.getMonth() + 1) + "-" + pad(t.getDate());
-    }
+    const DEFAULT_SETTINGS = {
+        storeName: "Blossom Beauty Store",
+        contactEmail: "admin@blossom.vn",
+        timezone: "Asia/Ho_Chi_Minh",
+        requireApproval: true,
+        defaultTime: "09:00",
+        platforms: ["Facebook", "Instagram", "TikTok"],
+        notifyPending: true,
+        notifyRevision: true,
+        notifyPublished: true,
+        remindBefore: "30"
+    };
 
-    function find(id) {
-        return accounts.find(function (a) { return a.id === id; });
-    }
-
-    function isSelf(acc) {
-        return !!me && AccountStore.normEmail(acc.email) === AccountStore.normEmail(me.email);
-    }
-
-    function otherActiveManagers(id) {
-        return accounts.filter(function (a) {
-            return a.id !== id && a.role === ROLES.MANAGER && a.status === "active";
-        }).length;
-    }
-
-    function persist() {
-        AccountStore.save(accounts);
-    }
-
-    function roleBadge(role) {
-        return UI.badge(ROLE_LABEL[role] || role, role === ROLES.MANAGER ? "pink" : "purple");
-    }
-
-    function statusBadge(status) {
-        return status === "locked" ? UI.badge("Đã khóa", "red") : UI.badge("Đang hoạt động", "green");
-    }
-
-    function avatar(acc, cls) {
-        return '<span class="avatar ' + cls + '">' + esc(Auth.initials({ fullName: acc.fullName })) + "</span>";
-    }
-
-    // Nút Khóa / Mở khóa dùng chung cho bảng và panel chi tiết
-    function toggleButton(acc, extra) {
-        const locked = acc.status === "locked";
-        return '<button type="button" class="btn btn--sm ' + (locked ? "btn--secondary" : "btn--danger-outline") + (extra || "") + '" data-act="toggle" data-id="' + esc(acc.id) + '" title="' + (locked ? "Mở khóa" : "Khóa") + '" aria-label="' + (locked ? "Mở khóa " : "Khóa ") + esc(acc.fullName) + '">' +
-            icon(locked ? "unlock" : "lock") + "<span>" + (locked ? "Mở khóa" : "Khóa") + "</span></button>";
-    }
-
-    /* =========================================================
-       RENDER
-       ========================================================= */
-    function filtered() {
-        const q = fold(state.q.trim());
-        return accounts.filter(function (a) {
-            if (state.role && a.role !== state.role) return false;
-            if (state.status && a.status !== state.status) return false;
-            if (!q) return true;
-            return fold(a.fullName).indexOf(q) !== -1 || fold(a.email).indexOf(q) !== -1;
-        });
-    }
-
-    function renderStats() {
-        const active = accounts.filter(function (a) { return a.status === "active"; }).length;
-        const locked = accounts.length - active;
-        const stats = [
-            { icon: "users",     tone: "pink", label: "Tổng tài khoản",   value: pad(accounts.length), note: "Thành viên trong đội ngũ" },
-            { icon: "userCheck", tone: "pink", label: "Đang hoạt động",   value: pad(active),          note: "Sẵn sàng truy cập hệ thống", noteTone: "green" },
-            { icon: "lock",      tone: "pink", label: "Đã khóa",          value: pad(locked),          note: "Tạm ngừng quyền truy cập",   noteTone: locked ? "pink" : "" },
-            { icon: "shield",    tone: "pink", label: "Nhóm vai trò",     value: pad(Object.keys(ROLES).length), note: "Manager & Staff" }
-        ];
-        $("stats").innerHTML = stats.map(UI.statCard).join("");
-    }
-
-    function renderTable() {
-        const list = filtered();
-        const total = list.length;
-        const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-        state.page = Math.min(state.page, pages);
-
-        const start = (state.page - 1) * PAGE_SIZE;
-        const rows = list.slice(start, start + PAGE_SIZE);
-
-        $("countBadge").textContent = accounts.length + " thành viên";
-
-        $("tbody").innerHTML = rows.length
-            ? rows.map(function (a) {
-                const locked = a.status === "locked";
-                return '<tr data-id="' + esc(a.id) + '" tabindex="0" class="' + (a.id === state.selectedId ? "is-selected " : "") + (locked ? "is-locked" : "") + '">' +
-                    '<td><div class="acc-user">' + avatar(a, "avatar--sm") +
-                    "<div><b>" + esc(a.fullName) + "</b><small>" + esc(a.email) + "</small></div></div></td>" +
-                    "<td>" + roleBadge(a.role) + "</td>" +
-                    "<td>" + statusBadge(a.status) + "</td>" +
-                    '<td class="acc-date">' + fmtDate(a.createdAt) + "</td>" +
-                    '<td><div class="acc-actions">' +
-                    '<button type="button" class="btn btn--secondary btn--sm" data-act="edit" data-id="' + esc(a.id) + '" title="Sửa" aria-label="Sửa ' + esc(a.fullName) + '">' + icon("edit") + "<span>Sửa</span></button>" +
-                    toggleButton(a) +
-                    "</div></td></tr>";
-            }).join("")
-            : '<tr class="acc-empty"><td colspan="5">' + UI.emptyState({
-                text: accounts.length
-                    ? "Không tìm thấy tài khoản phù hợp với bộ lọc."
-                    : 'Chưa có tài khoản người dùng nào. Nhấn "+ Thêm tài khoản" ở trên để tạo thành viên mới.'
-            }) + "</td></tr>";
-
-        $("rangeText").textContent = total
-            ? "Hiển thị " + (start + 1) + "–" + (start + rows.length) + " trên " + total + " tài khoản"
-            : "Không có tài khoản nào";
-
-        renderPager(pages);
-    }
-
-    function renderPager(pages) {
-        const pager = $("pager");
-        if (pages <= 1) { pager.innerHTML = ""; return; }
-
-        let html = '<button type="button" data-page="' + (state.page - 1) + '" aria-label="Trang trước"' + (state.page === 1 ? " disabled" : "") + ">‹</button>";
-        for (let i = 1; i <= pages; i++) {
-            html += '<button type="button" data-page="' + i + '"' + (i === state.page ? ' class="active" aria-current="page"' : "") + ">" + i + "</button>";
-        }
-        html += '<button type="button" data-page="' + (state.page + 1) + '" aria-label="Trang sau"' + (state.page === pages ? " disabled" : "") + ">›</button>";
-        pager.innerHTML = html;
-    }
-
-    function renderDetail() {
-        const panel = $("detail");
-        const acc = state.selectedId && find(state.selectedId);
-
-        if (!acc) {
-            state.selectedId = null;
-            panel.hidden = true;
-            $("layout").classList.remove("has-detail");
-            return;
-        }
-
-        $("layout").classList.add("has-detail");
-        panel.hidden = false;
-        panel.innerHTML =
-            '<div class="card__head"><h3 class="card__title">Chi tiết tài khoản</h3>' +
-            '<button type="button" class="icon-btn" data-act="close" aria-label="Đóng">' + icon("close") + "</button></div>" +
-            '<div class="acc-detail__who">' + avatar(acc, "avatar--lg") +
-            "<div><b>" + esc(acc.fullName) + "</b><small>" + esc(acc.email) + "</small></div></div>" +
-            '<dl class="kv">' +
-            "<dt>Vai trò</dt><dd>" + roleBadge(acc.role) + "</dd>" +
-            "<dt>Trạng thái</dt><dd>" + statusBadge(acc.status) + "</dd>" +
-            "<dt>Ngày tạo</dt><dd>" + fmtDate(acc.createdAt) + "</dd></dl>" +
-            '<p class="acc-detail__note">' + esc(ROLE_INFO[acc.role] || "") + "</p>" +
-            '<div class="acc-detail__actions">' +
-            '<button type="button" class="btn btn--primary btn--block" data-act="edit" data-id="' + esc(acc.id) + '">' + icon("edit") + "<span>Sửa tài khoản</span></button>" +
-            toggleButton(acc, " btn--block") +
-            "</div>";
-    }
-
-    function renderAll() {
-        renderStats();
-        renderTable();
-        renderDetail();
-    }
-
-    /* =========================================================
-       FORM (thêm / sửa) – modal có kiểm tra dữ liệu
-       Dùng lại class .modal của components.css; UI.modal không chặn được
-       nút bấm khi dữ liệu sai nên form được dựng riêng ở đây.
-       ========================================================= */
-    function field(o) {
-        return '<div class="field" data-field="' + o.name + '">' +
-            '<label class="field__label" for="f-' + o.name + '">' + esc(o.label) + "</label>" +
-            '<input class="input" id="f-' + o.name + '" name="' + o.name + '" type="' + (o.type || "text") + '"' +
-            ' value="' + esc(o.value || "") + '" placeholder="' + esc(o.placeholder || "") + '" autocomplete="' + (o.autocomplete || "off") + '">' +
-            (o.hint ? '<span class="field__hint">' + esc(o.hint) + "</span>" : "") +
-            '<span class="field__error" role="alert"></span></div>';
-    }
-
-    function formModal(o) {
-        const v = o.values || {};
-        const editing = o.mode === "edit";
-
-        return new Promise(function (resolve) {
-            const previous = document.activeElement;
-            const backdrop = document.createElement("div");
-            backdrop.className = "modal-backdrop";
-            backdrop.innerHTML =
-                '<form class="modal modal--form" role="dialog" aria-modal="true" aria-labelledby="formTitle" novalidate>' +
-                '<div class="modal__head"><h3 class="modal__title" id="formTitle">' + esc(o.title) + "</h3>" +
-                '<button type="button" class="modal__close" data-close aria-label="Đóng">' + icon("close") + "</button></div>" +
-                '<div class="modal__body"><div class="form-grid">' +
-                field({ name: "fullName", label: "Họ và tên", value: v.fullName, placeholder: "Ví dụ: Nguyễn Thu Hà", autocomplete: "name" }) +
-                field({ name: "email", label: "Email", type: "email", value: v.email, placeholder: "ten@blossom.vn", autocomplete: "off" }) +
-                '<div class="form-row">' +
-                field({ name: "password", label: editing ? "Mật khẩu mới" : "Mật khẩu", type: "password", placeholder: editing ? "Để trống nếu không đổi" : "Tối thiểu 8 ký tự", autocomplete: "new-password" }) +
-                field({ name: "confirm", label: "Nhập lại mật khẩu", type: "password", placeholder: "Nhập lại mật khẩu", autocomplete: "new-password" }) +
-                "</div>" +
-                '<div class="field" data-field="role"><label class="field__label" for="f-role">Vai trò</label>' +
-                '<select class="select" id="f-role" name="role"' + (o.lockRole ? " disabled" : "") + ">" +
-                Object.keys(ROLES).map(function (k) {
-                    return '<option value="' + k + '"' + (v.role === k ? " selected" : "") + ">" + ROLE_LABEL[k] + "</option>";
-                }).join("") + "</select>" +
-                '<span class="field__hint" id="roleHint"></span>' +
-                '<span class="field__error" role="alert"></span></div>' +
-                "</div></div>" +
-                '<div class="modal__foot">' +
-                '<button type="button" class="btn btn--secondary" data-close>Hủy</button>' +
-                '<button type="submit" class="btn btn--primary">' + esc(o.submitText) + "</button></div></form>";
-
-            const form = backdrop.querySelector("form");
-
-            function close(value) {
-                document.removeEventListener("keydown", onKey, true);
-                backdrop.remove();
-                document.body.classList.remove("modal-open");
-                if (previous && previous.focus) previous.focus();
-                resolve(value);
-            }
-
-            function onKey(e) {
-                if (e.key === "Escape") { e.stopPropagation(); close(null); return; }
-                if (e.key !== "Tab") return;
-                const items = form.querySelectorAll("button, input, select");
-                const list = Array.prototype.filter.call(items, function (el) { return !el.disabled; });
-                const first = list[0], last = list[list.length - 1];
-                if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-                else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-            }
-
-            function setError(name, message) {
-                const wrap = form.querySelector('[data-field="' + name + '"]');
-                wrap.classList.toggle("is-error", !!message);
-                wrap.querySelector(".field__error").textContent = message || "";
-            }
-
-            function updateRoleHint() {
-                const hint = o.lockRole
-                    ? "Bạn không thể tự đổi vai trò của chính mình."
-                    : ROLE_INFO[form.elements.role.value];
-                $("roleHint").textContent = hint;
-            }
-
-            form.addEventListener("input", function (e) {
-                const wrap = e.target.closest("[data-field]");
-                if (wrap) setError(wrap.dataset.field, "");
-            });
-            form.elements.role.addEventListener("change", updateRoleHint);
-
-            form.addEventListener("submit", function (e) {
-                e.preventDefault();
-                const values = {
-                    fullName: form.elements.fullName.value.trim(),
-                    email: form.elements.email.value.trim(),
-                    password: form.elements.password.value,
-                    confirm: form.elements.confirm.value,
-                    role: form.elements.role.value
-                };
-                const errors = o.validate(values);
-                const names = Object.keys(errors);
-
-                ["fullName", "email", "password", "confirm", "role"].forEach(function (n) { setError(n, errors[n]); });
-
-                if (names.length) {
-                    const target = form.elements[["fullName", "email", "password", "confirm", "role"].filter(function (n) { return errors[n]; })[0]];
-                    if (target) target.focus();
-                    return;
-                }
-                close(values);
-            });
-
-            backdrop.addEventListener("mousedown", function (e) { if (e.target === backdrop) close(null); });
-            backdrop.addEventListener("click", function (e) { if (e.target.closest("[data-close]")) close(null); });
-
-            document.addEventListener("keydown", onKey, true);
-            document.body.classList.add("modal-open");
-            document.body.appendChild(backdrop);
-            updateRoleHint();
-            form.elements.fullName.focus();
-        });
-    }
-
-    // Kiểm tra dữ liệu form. acc = null khi thêm mới.
-    function validate(v, acc) {
-        const e = {};
-
-        if (!v.fullName) e.fullName = "Vui lòng nhập họ và tên.";
-        else if (v.fullName.length < 2) e.fullName = "Họ và tên quá ngắn.";
-
-        if (!v.email) e.email = "Vui lòng nhập email.";
-        else if (!EMAIL_RE.test(v.email)) e.email = "Email không đúng định dạng.";
-        else if (accounts.some(function (a) {
-            return (!acc || a.id !== acc.id) && AccountStore.normEmail(a.email) === AccountStore.normEmail(v.email);
-        })) e.email = "Email này đã được sử dụng.";
-
-        const needPassword = !acc || v.password || v.confirm;   // khi sửa: bỏ trống = giữ mật khẩu cũ
-        if (needPassword) {
-            if (!v.password) e.password = "Vui lòng nhập mật khẩu.";
-            else if (v.password.length < 8 || !/[A-Za-z]/.test(v.password) || !/\d/.test(v.password)) {
-                e.password = "Tối thiểu 8 ký tự, gồm cả chữ và số.";
-            }
-            if (!v.confirm) e.confirm = "Vui lòng nhập lại mật khẩu.";
-            else if (v.password !== v.confirm) e.confirm = "Mật khẩu nhập lại không khớp.";
-        }
-
-        if (!ROLES[v.role]) e.role = "Vui lòng chọn vai trò.";
-        else if (acc && acc.role === ROLES.MANAGER && acc.status === "active" && v.role !== ROLES.MANAGER && !otherActiveManagers(acc.id)) {
-            e.role = "Hệ thống cần ít nhất một Manager đang hoạt động.";
-        }
-
-        return e;
-    }
-
-    /* =========================================================
-       HÀNH ĐỘNG
-       ========================================================= */
-    async function addAccount() {
-        const v = await formModal({
-            mode: "add",
-            title: "Thêm tài khoản",
-            submitText: "Tạo tài khoản",
-            values: { role: ROLES.STAFF },
-            validate: function (values) { return validate(values, null); }
-        });
-        if (!v) return;
-
-        // TODO(API): gửi v.password lên server để băm – không lưu mật khẩu ở trình duyệt.
-        const acc = {
-            id: "acc-" + Date.now().toString(36),
-            fullName: v.fullName,
-            email: v.email,
-            role: v.role,
-            status: "active",
-            createdAt: todayISO()
-        };
-        accounts.unshift(acc);
-        persist();
-
-        state.page = 1;
-        state.selectedId = acc.id;
-        renderAll();
-        UI.toast("success", "Đã thêm tài khoản", acc.fullName + " (" + ROLE_LABEL[acc.role] + ")");
-    }
-
-    async function editAccount(id) {
-        const acc = find(id);
-        if (!acc) return;
-        const self = isSelf(acc);
-
-        const v = await formModal({
-            mode: "edit",
-            title: "Sửa tài khoản",
-            submitText: "Lưu thay đổi",
-            lockRole: self,
-            values: { fullName: acc.fullName, email: acc.email, role: acc.role },
-            validate: function (values) { return validate(values, acc); }
-        });
-        if (!v) return;
-
-        acc.fullName = v.fullName;
-        acc.email = v.email;
-        if (!self) acc.role = v.role;
-        // TODO(API): nếu v.password có giá trị thì gửi lên server để đổi mật khẩu.
-        persist();
-
-        if (self) syncCurrentUser(acc);
-
-        state.selectedId = acc.id;
-        renderAll();
-        UI.toast("success", "Đã cập nhật tài khoản", v.password ? "Thông tin và mật khẩu đã được lưu." : "Thông tin đã được lưu.");
-    }
-
-    // Manager tự sửa tên/email của mình: cập nhật phiên đăng nhập để khớp
-    function syncCurrentUser(acc) {
+    function read(key, fallback) {
         try {
-            const raw = JSON.parse(localStorage.getItem(Auth.USER_KEY));
-            if (raw) {
-                raw.fullName = acc.fullName;
-                raw.email = acc.email;
-                localStorage.setItem(Auth.USER_KEY, JSON.stringify(raw));
+            const v = JSON.parse(localStorage.getItem(key));
+            return v == null ? fallback : v;
+        } catch (e) { return fallback; }
+    }
+
+    function write(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+        catch (e) { return false; }
+    }
+
+    /* ---------- 2. "API" (demo) – thay bằng BlossomAPI.request khi có backend ---------- */
+    function delay(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+
+    // Bản ghi của người đang đăng nhập trong AccountStore (khớp theo email); null nếu không có
+    function findStoreAccount() {
+        if (!window.AccountStore || !user.email) return null;
+        const key = AccountStore.normEmail(user.email);
+        return AccountStore.load().filter(function (a) { return AccountStore.normEmail(a.email) === key; })[0] || null;
+    }
+
+    function saveProfileRemote(data) {
+        return delay(500).then(function () {
+            if (!write(KEY.profile, { phone: data.phone, dob: data.dob, bio: data.bio })) {
+                throw new Error("Không thể lưu dữ liệu trên trình duyệt này.");
             }
-        } catch (e) { /* bỏ qua */ }
-        me = Auth.getUser();
-    }
-
-    async function toggleAccount(id) {
-        const acc = find(id);
-        if (!acc) return;
-
-        // Mở khóa: chuyển về Đang hoạt động, đăng nhập lại được
-        if (acc.status === "locked") {
-            acc.status = "active";
-            persist();
-            renderAll();
-            UI.toast("success", "Đã mở khóa", acc.fullName + " có thể đăng nhập lại.");
-            return;
-        }
-
-        // Khóa
-        if (isSelf(acc)) {
-            UI.toast("warning", "Không thể khóa", "Bạn không thể khóa tài khoản đang đăng nhập.");
-            return;
-        }
-        if (acc.role === ROLES.MANAGER && !otherActiveManagers(acc.id)) {
-            UI.toast("warning", "Không thể khóa", "Hệ thống cần ít nhất một Manager đang hoạt động.");
-            return;
-        }
-
-        const ok = await UI.confirm({
-            title: "Khóa tài khoản?",
-            message: 'Tài khoản "' + acc.fullName + '" sẽ chuyển sang trạng thái Đã khóa và không thể đăng nhập cho đến khi được mở khóa.',
-            confirmText: "Khóa tài khoản",
-            cancelText: "Hủy",
-            tone: "danger"
+            // Cập nhật phiên đăng nhập để header / menu hiển thị tên mới
+            let raw = {};
+            try { raw = JSON.parse(localStorage.getItem(Auth.USER_KEY)) || {}; } catch (e) { /* bỏ qua */ }
+            raw.fullName = data.fullName;
+            localStorage.setItem(Auth.USER_KEY, JSON.stringify(raw));
+            // Đồng bộ họ tên sang kho tài khoản để trang Tài khoản & Phân quyền hiển thị khớp
+            const acc = findStoreAccount();
+            if (acc) {
+                const list = AccountStore.load();
+                const rec = list.filter(function (a) { return a.id === acc.id; })[0];
+                if (rec) { rec.fullName = data.fullName; AccountStore.save(list); }
+            }
         });
-        if (!ok) return;
-
-        acc.status = "locked";
-        persist();
-        renderAll();
-        UI.toast("success", "Đã khóa tài khoản", acc.fullName + " không thể đăng nhập.");
     }
 
-    /* =========================================================
-       SỰ KIỆN
-       ========================================================= */
-    function select(id) {
-        state.selectedId = id;
-        renderTable();
-        renderDetail();
+    function changePasswordRemote(current, next) {
+        // TODO(API): gửi { current, next } lên server – server băm và kiểm tra, không lưu ở trình duyệt.
+        return delay(600).then(function () {
+            if (current !== DEMO_PASSWORD[user.role]) {
+                const err = new Error("Mật khẩu hiện tại không chính xác.");
+                err.field = "current";
+                throw err;
+            }
+            write(KEY.pwdAt, new Date().toISOString());   // chỉ ghi thời điểm đổi
+        });
     }
 
-    function handleAction(btn) {
-        const act = btn.dataset.act;
-        if (act === "edit") editAccount(btn.dataset.id);
-        else if (act === "toggle") toggleAccount(btn.dataset.id);
-        else if (act === "close") select(null);
+    function saveSettingsRemote(data) {
+        return delay(500).then(function () {
+            if (!write(KEY.settings, data)) throw new Error("Không thể lưu dữ liệu trên trình duyệt này.");
+        });
     }
 
-    $("tbody").addEventListener("click", function (e) {
-        const btn = e.target.closest("button[data-act]");
-        if (btn) { handleAction(btn); return; }
-        const row = e.target.closest("tr[data-id]");
-        if (row) select(row.dataset.id);
+    /* ---------- 3. TIỆN ÍCH FORM ---------- */
+    function setError(name, message) {
+        const wrap = $("fld-" + name);
+        const msg = $("err-" + name);
+        if (wrap) wrap.classList.toggle("is-error", !!message);
+        if (msg) msg.textContent = message || "";
+    }
+
+    function clearErrors(names) { names.forEach(function (n) { setError(n, ""); }); }
+
+    function setBusy(btn, busy, busyText) {
+        if (!btn) return;
+        if (busy) {
+            btn.dataset.label = btn.innerHTML;
+            btn.innerHTML = "<span>" + esc(busyText || "Đang xử lý...") + "</span>";
+            btn.disabled = true;
+        } else {
+            if (btn.dataset.label) {
+                btn.innerHTML = btn.dataset.label;
+                delete btn.dataset.label;
+                UI.renderIcons(btn);
+            }
+            btn.disabled = false;
+        }
+    }
+
+    function formatDateTime(iso) {
+        const d = new Date(iso);
+        if (isNaN(d)) return "";
+        return UI.pad(d.getDate()) + "/" + UI.pad(d.getMonth() + 1) + "/" + d.getFullYear() +
+            " " + UI.pad(d.getHours()) + ":" + UI.pad(d.getMinutes());
+    }
+
+    /* ---------- 4. TABS + URL HASH ---------- */
+    const tabsEl = document.querySelector(".acc-tabbar .tabs");
+    const tabs = Array.prototype.slice.call(tabsEl.querySelectorAll(".tab"));
+    const TAB_KEYS = tabs.map(function (t) { return t.dataset.tab; });
+
+    function showTab(key, updateUrl) {
+        if (TAB_KEYS.indexOf(key) === -1) key = TAB_KEYS[0];
+        tabs.forEach(function (t) {
+            const on = t.dataset.tab === key;
+            t.classList.toggle("active", on);
+            t.setAttribute("aria-selected", String(on));
+        });
+        TAB_KEYS.forEach(function (k) {
+            const panel = $("panel-" + k);
+            if (panel) panel.hidden = k !== key;
+        });
+        if (updateUrl) history.replaceState(null, "", "#" + key);
+    }
+
+    // components.js đã bật/tắt .active; ở đây chỉ đồng bộ panel + URL
+    tabsEl.addEventListener("tabchange", function (e) { showTab(e.detail.tab.dataset.tab, true); });
+
+    // Bấm "Hồ sơ cá nhân" / "Đổi mật khẩu" ở menu người dùng (cùng trang, khác hash)
+    window.addEventListener("hashchange", function () {
+        showTab(location.hash.slice(1), false);
+        const menu = $("menu"), btn = $("userBtn");
+        if (menu) menu.classList.remove("open");
+        if (btn) btn.setAttribute("aria-expanded", "false");
     });
 
-    $("tbody").addEventListener("keydown", function (e) {
-        if (e.key !== "Enter" || e.target.closest("button")) return;
-        const row = e.target.closest("tr[data-id]");
-        if (row) select(row.dataset.id);
+    /* ---------- 5. HỒ SƠ CÁ NHÂN ---------- */
+    const profileForm = $("profileForm");
+    const positionText = user.position || Auth.ROLE_LABEL[user.role];
+    const roleTone = user.role === Auth.ROLES.MANAGER ? "pink" : "purple";
+    let profileSaved = {};
+
+    function currentUser() { return Auth.getUser() || user; }
+
+    function renderSummary() {
+        const u = currentUser();
+        $("sumAvatar").innerHTML = avatarInner(u, false);
+        $("avatarRemove").hidden = !getAvatar();
+        $("sumName").textContent = u.fullName || u.username;
+        $("sumPos").textContent = positionText;
+        $("sumRole").innerHTML = UI.badge(Auth.ROLE_LABEL[u.role], roleTone);
+        $("sumUsername").textContent = u.username || "—";
+        $("sumEmail").textContent = u.email || "—";
+
+        const acc = findStoreAccount();
+        const joined = $("sumJoinedRow");
+        if (acc && acc.createdAt) {
+            const p = String(acc.createdAt).split("-");
+            $("sumJoined").textContent = p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : acc.createdAt;
+            joined.hidden = false;
+        } else {
+            joined.hidden = true;
+        }
+    }
+
+    // Header (topbar) được render một lần bởi layout.js → cập nhật tại chỗ sau khi lưu
+    function refreshHeader() {
+        const u = currentUser();
+        const avatar = document.querySelector("#topbar .avatar");
+        const short = document.querySelector("#topbar .user-info b");
+        const full = document.querySelector("#topbar .menu .who b");
+        if (avatar) avatar.innerHTML = avatarInner(u, true);
+        if (short) short.textContent = Auth.shortName(u);
+        if (full) full.textContent = u.fullName || u.username;
+    }
+
+    /* ---------- 5a. ẢNH ĐẠI DIỆN ---------- */
+    const AVATAR_SIZE = 256;                 // px, cắt vuông ở giữa
+    const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+    const AVATAR_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
+    function getAvatar() {
+        try { return localStorage.getItem(KEY.avatar) || ""; } catch (e) { return ""; }
+    }
+
+    // Ảnh nếu có, ngược lại chữ cái viết tắt (cùng cách layout.js hiển thị)
+    function avatarInner(u, inline) {
+        const src = getAvatar();
+        if (!src) return esc(Auth.initials(u));
+        return '<img src="' + esc(src) + '" alt=""' +
+            (inline ? ' style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block"' : "") + ">";
+    }
+
+    // Đọc file -> cắt vuông giữa ảnh -> JPG 256x256 (nhỏ gọn để lưu localStorage)
+    function processAvatar(file) {
+        return new Promise(function (resolve, reject) {
+            const reader = new FileReader();
+            reader.onerror = function () { reject(new Error("Không đọc được tệp ảnh.")); };
+            reader.onload = function () {
+                const img = new Image();
+                img.onerror = function () { reject(new Error("Tệp không phải ảnh hợp lệ.")); };
+                img.onload = function () {
+                    const side = Math.min(img.width, img.height);
+                    const canvas = document.createElement("canvas");
+                    canvas.width = canvas.height = AVATAR_SIZE;
+                    const ctx = canvas.getContext("2d");
+                    ctx.fillStyle = "#fff";                       // PNG trong suốt -> nền trắng
+                    ctx.fillRect(0, 0, AVATAR_SIZE, AVATAR_SIZE);
+                    ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+                    resolve(canvas.toDataURL("image/jpeg", 0.86));
+                };
+                img.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function applyAvatarChange() {
+        renderSummary();
+        refreshHeader();
+    }
+
+    function onAvatarChosen(file) {
+        if (!file) return;
+        if (AVATAR_TYPES.indexOf(file.type) === -1) {
+            UI.toast("error", "Ảnh không hợp lệ", "Chỉ hỗ trợ ảnh JPG, PNG hoặc WebP.");
+            return;
+        }
+        if (file.size > AVATAR_MAX_BYTES) {
+            UI.toast("error", "Ảnh quá lớn", "Vui lòng chọn ảnh nhỏ hơn 5 MB.");
+            return;
+        }
+        processAvatar(file).then(function (dataUrl) {
+            return UI.modal({
+                title: "Ảnh đại diện mới",
+                body: '<div class="acc-avatar-preview"><img src="' + esc(dataUrl) + '" alt="Xem trước ảnh đại diện"><p>Ảnh được cắt vuông ở giữa. Bạn có muốn dùng ảnh này?</p></div>',
+                actions: [
+                    { label: "Hủy", variant: "secondary", value: false },
+                    { label: "Dùng ảnh này", variant: "primary", value: true }
+                ]
+            }).then(function (ok) {
+                if (!ok) return;
+                try { localStorage.setItem(KEY.avatar, dataUrl); }
+                catch (e) { UI.toast("error", "Không thể lưu ảnh", "Bộ nhớ trình duyệt đã đầy."); return; }
+                applyAvatarChange();
+                UI.toast("success", "Đã đổi ảnh đại diện", "Ảnh mới đã được áp dụng.");
+            });
+        }).catch(function (err) {
+            UI.toast("error", "Không thể xử lý ảnh", err.message);
+        });
+    }
+
+    $("avatarPick").addEventListener("click", function () { $("avatarFile").click(); });
+    $("avatarEdit").addEventListener("click", function () { $("avatarFile").click(); });
+    $("avatarFile").addEventListener("change", function (e) {
+        const file = e.target.files && e.target.files[0];
+        e.target.value = "";                 // cho phép chọn lại cùng một tệp
+        onAvatarChosen(file);
+    });
+    $("avatarRemove").addEventListener("click", function () {
+        UI.confirm({
+            title: "Xóa ảnh đại diện?",
+            message: "Ảnh sẽ được thay bằng chữ cái viết tắt của bạn.",
+            confirmText: "Xóa ảnh",
+            cancelText: "Giữ lại",
+            tone: "danger"
+        }).then(function (ok) {
+            if (!ok) return;
+            try { localStorage.removeItem(KEY.avatar); } catch (e) { /* bỏ qua */ }
+            applyAvatarChange();
+            UI.toast("success", "Đã xóa ảnh đại diện", "");
+        });
     });
 
-    $("detail").addEventListener("click", function (e) {
-        const btn = e.target.closest("button[data-act]");
-        if (btn) handleAction(btn);
+    function renderPermissions() {
+        const items = [
+            ["post:create",     "Tạo, sửa, xóa bài viết"],
+            ["post:approve",    "Duyệt bài viết"],
+            ["report:view",     "Xem báo cáo & thống kê"],
+            ["account:manage",  "Quản lý tài khoản & phân quyền"],
+            ["settings:manage", "Thiết lập hệ thống"]
+        ];
+        $("permList").innerHTML = items.map(function (it) {
+            const ok = Permissions.can(it[0]);
+            return '<li class="' + (ok ? "" : "is-off") + '"><span class="acc-perm__ico">' + UI.icon(ok ? "tick" : "close") +
+                "</span><span>" + esc(it[1]) + "</span></li>";
+        }).join("");
+    }
+
+    function fillProfile() {
+        const u = currentUser();
+        profileSaved = Object.assign({ phone: "", dob: "", bio: "" }, read(KEY.profile, {}));
+        profileSaved.fullName = u.fullName || "";
+
+        $("pfFullName").value = profileSaved.fullName;
+        $("pfPhone").value = profileSaved.phone;
+        $("pfDob").value = profileSaved.dob;
+        $("pfBio").value = profileSaved.bio;
+        $("pfPosition").value = positionText;
+        $("pfUsername").value = u.username || "";
+        $("pfEmail").value = u.email || "";
+        $("pfRole").value = Auth.ROLE_LABEL[u.role];
+        $("pfDob").max = new Date().toISOString().slice(0, 10);
+
+        updateBioCount();
+        syncProfileDirty();
+    }
+
+    function profileValues() {
+        return {
+            fullName: $("pfFullName").value.trim().replace(/\s+/g, " "),
+            phone: $("pfPhone").value.trim(),
+            dob: $("pfDob").value,
+            bio: $("pfBio").value.trim()
+        };
+    }
+
+    function isProfileDirty() {
+        const v = profileValues();
+        return Object.keys(v).some(function (k) { return v[k] !== (profileSaved[k] || ""); });
+    }
+
+    function syncProfileDirty() {
+        const dirty = isProfileDirty();
+        $("profileSave").disabled = !dirty;
+        $("profileReset").disabled = !dirty;
+        $("profileDirty").hidden = !dirty;
+    }
+
+    function updateBioCount() { $("bioCount").textContent = $("pfBio").value.length + "/200"; }
+
+    function validateProfile(v) {
+        let ok = true;
+        clearErrors(["fullName", "phone", "dob", "bio"]);
+
+        if (!v.fullName) { setError("fullName", "Vui lòng nhập họ và tên."); ok = false; }
+        else if (v.fullName.length < 2) { setError("fullName", "Họ và tên phải có ít nhất 2 ký tự."); ok = false; }
+
+        if (v.phone && !/^(0|\+84)\d{9}$/.test(v.phone.replace(/[\s.\-]/g, ""))) {
+            setError("phone", "Số điện thoại không hợp lệ (ví dụ: 0901 234 567)."); ok = false;
+        }
+
+        if (v.dob && new Date(v.dob) > new Date()) {
+            setError("dob", "Ngày sinh không được ở tương lai."); ok = false;
+        }
+        return ok;
+    }
+
+    profileForm.addEventListener("input", function (e) {
+        const map = { pfFullName: "fullName", pfPhone: "phone", pfDob: "dob", pfBio: "bio" };
+        if (map[e.target.id]) setError(map[e.target.id], "");
+        if (e.target.id === "pfBio") updateBioCount();
+        syncProfileDirty();
     });
 
-    $("pager").addEventListener("click", function (e) {
-        const btn = e.target.closest("button[data-page]");
-        if (!btn || btn.disabled) return;
-        state.page = Number(btn.dataset.page);
-        renderTable();
+    $("profileReset").addEventListener("click", function () {
+        clearErrors(["fullName", "phone", "dob", "bio"]);
+        fillProfile();
     });
 
-    $("q").addEventListener("input", function (e) { state.q = e.target.value; state.page = 1; renderTable(); });
-    $("roleFilter").addEventListener("change", function (e) { state.role = e.target.value; state.page = 1; renderTable(); });
-    $("statusFilter").addEventListener("change", function (e) { state.status = e.target.value; state.page = 1; renderTable(); });
+    profileForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const v = profileValues();
+        if (!validateProfile(v)) {
+            const first = profileForm.querySelector(".field.is-error .input, .field.is-error .textarea");
+            if (first) first.focus();
+            return;
+        }
+        const btn = $("profileSave");
+        setBusy(btn, true, "Đang lưu...");
+        saveProfileRemote(v).then(function () {
+            setBusy(btn, false);
+            renderSummary();
+            refreshHeader();
+            fillProfile();
+            UI.toast("success", "Đã lưu hồ sơ", "Thông tin cá nhân của bạn đã được cập nhật.");
+        }).catch(function (err) {
+            setBusy(btn, false);
+            syncProfileDirty();
+            UI.toast("error", "Không thể lưu hồ sơ", err.message);
+        });
+    });
 
-    const addBtn = $("addBtn");
-    if (addBtn) addBtn.addEventListener("click", addAccount);
+    /* ---------- 6. ĐỔI MẬT KHẨU ---------- */
+    const pwdForm = $("passwordForm");
+    const PWD_FIELDS = ["current", "new", "confirm"];
+    const ICON_EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const ICON_EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 6.1A10 10 0 0112 5c6.5 0 10 7 10 7a17 17 0 01-3.2 4.1M6.6 6.6A17 17 0 002 12s3.5 7 10 7a9.7 9.7 0 004.4-1"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/></svg>';
+    const METER_TEXT = ["Chưa nhập", "Yếu", "Trung bình", "Khá", "Mạnh"];
 
-    renderAll();
+    function rulesOf(pwd) {
+        if (window.BlossomAPI && BlossomAPI.validatePasswordComplexity) {
+            return BlossomAPI.validatePasswordComplexity(pwd);
+        }
+        const rules = {
+            minLength: pwd.length >= 8, hasUpper: /[A-Z]/.test(pwd),
+            hasLower: /[a-z]/.test(pwd), hasDigit: /[0-9]/.test(pwd)
+        };
+        const valid = rules.minLength && rules.hasUpper && rules.hasLower && rules.hasDigit;
+        return { valid: valid, rules: rules, message: valid ? "" : "Mật khẩu chưa đủ mạnh." };
+    }
+
+    function strengthLevel(pwd) {
+        if (!pwd) return 0;
+        const r = rulesOf(pwd);
+        const met = Object.keys(r.rules).filter(function (k) { return r.rules[k]; }).length;
+        if (!r.valid) return met >= 3 ? 2 : 1;
+        return (pwd.length >= 12 || /[^A-Za-z0-9]/.test(pwd)) ? 4 : 3;
+    }
+
+    function updateStrength() {
+        const pwd = $("pwNew").value;
+        const r = rulesOf(pwd);
+        document.querySelectorAll("#pwRules li").forEach(function (li) {
+            li.classList.toggle("is-ok", !!r.rules[li.dataset.rule]);
+        });
+        const level = strengthLevel(pwd);
+        $("pwMeter").dataset.level = String(level);
+        $("pwMeterText").textContent = METER_TEXT[level];
+    }
+
+    function renderLastChanged() {
+        const at = read(KEY.pwdAt, null);
+        $("pwdLastChanged").textContent = at
+            ? "Lần đổi gần nhất: " + formatDateTime(at)
+            : "Dùng mật khẩu mạnh và không chia sẻ cho người khác.";
+    }
+
+    function resetPasswordForm() {
+        pwdForm.reset();
+        clearErrors(PWD_FIELDS);
+        document.querySelectorAll(".acc-eye").forEach(function (b) { setEye(b, false); });
+        updateStrength();
+    }
+
+    function setEye(btn, visible) {
+        const input = $(btn.dataset.eye);
+        input.type = visible ? "text" : "password";
+        btn.innerHTML = visible ? ICON_EYE : ICON_EYE_OFF;
+        btn.setAttribute("aria-label", visible ? "Ẩn mật khẩu" : "Hiện mật khẩu");
+    }
+
+    document.querySelectorAll(".acc-eye").forEach(function (btn) {
+        setEye(btn, false);
+        btn.addEventListener("click", function () { setEye(btn, $(btn.dataset.eye).type === "password"); });
+    });
+
+    pwdForm.addEventListener("input", function (e) {
+        const map = { pwCurrent: "current", pwNew: "new", pwConfirm: "confirm" };
+        if (map[e.target.id]) setError(map[e.target.id], "");
+        if (e.target.id === "pwNew") updateStrength();
+    });
+
+    $("passwordClear").addEventListener("click", resetPasswordForm);
+
+    function validatePassword(cur, next, again) {
+        let ok = true;
+        clearErrors(PWD_FIELDS);
+
+        if (!cur) { setError("current", "Vui lòng nhập mật khẩu hiện tại."); ok = false; }
+
+        if (!next) { setError("new", "Vui lòng nhập mật khẩu mới."); ok = false; }
+        else if (!rulesOf(next).valid) { setError("new", rulesOf(next).message); ok = false; }
+        else if (cur && next === cur) { setError("new", "Mật khẩu mới phải khác mật khẩu hiện tại."); ok = false; }
+
+        if (!again) { setError("confirm", "Vui lòng nhập lại mật khẩu mới."); ok = false; }
+        else if (next && again !== next) { setError("confirm", "Mật khẩu nhập lại không khớp."); ok = false; }
+        return ok;
+    }
+
+    pwdForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const cur = $("pwCurrent").value, next = $("pwNew").value, again = $("pwConfirm").value;
+
+        if (!validatePassword(cur, next, again)) {
+            const first = pwdForm.querySelector(".field.is-error input");
+            if (first) first.focus();
+            return;
+        }
+
+        const btn = $("passwordSave");
+        setBusy(btn, true, "Đang cập nhật...");
+        changePasswordRemote(cur, next).then(function () {
+            setBusy(btn, false);
+            resetPasswordForm();
+            renderLastChanged();
+            UI.toast("success", "Đổi mật khẩu thành công", "Hãy dùng mật khẩu mới ở lần đăng nhập tiếp theo.", 4000);
+        }).catch(function (err) {
+            setBusy(btn, false);
+            if (err.field === "current") {
+                setError("current", err.message);
+                $("pwCurrent").select();
+            } else {
+                UI.toast("error", "Không thể đổi mật khẩu", err.message);
+            }
+        });
+    });
+
+    /* ---------- 7. CÀI ĐẶT HỆ THỐNG (Manager) ---------- */
+    const systemForm = $("systemForm");
+    let settingsSaved = null;
+
+    function platformInputs() {
+        return Array.prototype.slice.call(systemForm.querySelectorAll('input[name="platform"]'));
+    }
+
+    function fillSettings() {
+        settingsSaved = Object.assign({}, DEFAULT_SETTINGS, read(KEY.settings, {}));
+        const s = settingsSaved;
+        $("sysStoreName").value = s.storeName;
+        $("sysContactEmail").value = s.contactEmail;
+        $("sysTimezone").value = s.timezone;
+        $("sysRequireApproval").checked = !!s.requireApproval;
+        $("sysDefaultTime").value = s.defaultTime;
+        $("sysNotifyPending").checked = !!s.notifyPending;
+        $("sysNotifyRevision").checked = !!s.notifyRevision;
+        $("sysNotifyPublished").checked = !!s.notifyPublished;
+        $("sysRemind").value = String(s.remindBefore);
+        platformInputs().forEach(function (i) { i.checked = s.platforms.indexOf(i.value) !== -1; });
+        syncSettingsDirty();
+    }
+
+    function settingsValues() {
+        return {
+            storeName: $("sysStoreName").value.trim(),
+            contactEmail: $("sysContactEmail").value.trim(),
+            timezone: $("sysTimezone").value,
+            requireApproval: $("sysRequireApproval").checked,
+            defaultTime: $("sysDefaultTime").value,
+            platforms: platformInputs().filter(function (i) { return i.checked; }).map(function (i) { return i.value; }),
+            notifyPending: $("sysNotifyPending").checked,
+            notifyRevision: $("sysNotifyRevision").checked,
+            notifyPublished: $("sysNotifyPublished").checked,
+            remindBefore: $("sysRemind").value
+        };
+    }
+
+    function syncSettingsDirty() {
+        const dirty = JSON.stringify(settingsValues()) !== JSON.stringify(settingsSaved);
+        $("systemSave").disabled = !dirty;
+        $("systemReset").disabled = !dirty;
+        $("systemDirty").hidden = !dirty;
+    }
+
+    function validateSettings(v) {
+        let ok = true;
+        clearErrors(["storeName", "contactEmail", "platforms"]);
+        if (!v.storeName) { setError("storeName", "Vui lòng nhập tên cửa hàng."); ok = false; }
+        if (!v.contactEmail) { setError("contactEmail", "Vui lòng nhập email liên hệ."); ok = false; }
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.contactEmail)) { setError("contactEmail", "Email không đúng định dạng."); ok = false; }
+        if (!v.platforms.length) { setError("platforms", "Chọn ít nhất một nền tảng đăng bài."); ok = false; }
+        return ok;
+    }
+
+    if (systemForm) {
+        systemForm.addEventListener("input", function (e) {
+            if (e.target.id === "sysStoreName") setError("storeName", "");
+            if (e.target.id === "sysContactEmail") setError("contactEmail", "");
+            syncSettingsDirty();
+        });
+        systemForm.addEventListener("change", function (e) {
+            if (e.target.name === "platform") setError("platforms", "");
+            syncSettingsDirty();
+        });
+
+        $("systemReset").addEventListener("click", function () {
+            clearErrors(["storeName", "contactEmail", "platforms"]);
+            fillSettings();
+        });
+
+        systemForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (!Permissions.can("settings:manage")) return;
+            const v = settingsValues();
+            if (!validateSettings(v)) {
+                const first = systemForm.querySelector(".field.is-error input");
+                if (first) first.focus();
+                return;
+            }
+            const btn = $("systemSave");
+            setBusy(btn, true, "Đang lưu...");
+            saveSettingsRemote(v).then(function () {
+                setBusy(btn, false);
+                fillSettings();
+                UI.toast("success", "Đã lưu cài đặt", "Cài đặt hệ thống đã được cập nhật.");
+            }).catch(function (err) {
+                setBusy(btn, false);
+                syncSettingsDirty();
+                UI.toast("error", "Không thể lưu cài đặt", err.message);
+            });
+        });
+    }
+
+    /* ---------- 8. Cảnh báo khi rời trang với thay đổi chưa lưu ---------- */
+    window.addEventListener("beforeunload", function (e) {
+        const dirty = isProfileDirty() || (systemForm && !$("systemSave").disabled);
+        if (dirty) { e.preventDefault(); e.returnValue = ""; }
+    });
+
+    /* ---------- 9. KHỞI TẠO ---------- */
+    renderSummary();
+    renderPermissions();
+    fillProfile();
+    updateStrength();
+    renderLastChanged();
+    if (systemForm) fillSettings();
+    UI.renderIcons();
+    showTab(location.hash.slice(1), false);
 })();

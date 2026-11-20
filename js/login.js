@@ -30,7 +30,7 @@
             email: "admin@blossom.vn",
             password: "Blossom@123",
             role: "MANAGER",
-            fullName: "Doãn Thị Minh Anh",
+            fullName: "Đoàn Thị Minh Anh",
             position: "Marketing Manager"
         },
         {
