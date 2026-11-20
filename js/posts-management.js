@@ -284,7 +284,7 @@
                         '</a>' +
                         '<button type="button" class="fr07-icon-btn" data-delete-id="' + p.post_id + '" title="' +
                             (canSoftDelete ? "Xóa bài viết" : "Không thể xóa bài viết này") + '">' +
-                            '<img src="../../assets/figma/ellipsis.svg" alt="Tùy chọn / Xóa" width="15" height="15">' +
+                            '<img src="../../assets/figma/trash-2-pink.svg" alt="Xóa" width="16" height="16">' +
                         '</button>' +
                     '</div>' +
                 '</div>';
