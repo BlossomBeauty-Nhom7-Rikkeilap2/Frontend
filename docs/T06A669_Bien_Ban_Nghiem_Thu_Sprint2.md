@@ -38,7 +38,7 @@ flowchart LR
     D --> E["[Hệ thống] Nhắc lịch & Chuông thông báo<br/>FR-12 (Notification Bell & Actions)"]
 ```
 
-1. **Staff tạo bài viết (FR-08):** Tạo bài viết đa kênh (Facebook, Instagram, TikTok), nhập tiêu đề, tải lên hình ảnh/video, quan sát live preview chân thực từng nền tảng, đếm ký tự caption và hashtag.
+1. **Staff tạo bài viết (FR-08):** Tạo bài viết đa kênh (Facebook, Instagram, Threads), nhập tiêu đề, tải lên hình ảnh/video, quan sát live preview chân thực từng nền tảng, đếm ký tự caption và hashtag.
 2. **Gửi duyệt & Hàng đợi (FR-09):** Nhân viên chuyển bài viết từ trạng thái `DRAFT` sang `PENDING_REVIEW`. Hệ thống đồng bộ bài viết vào Hàng đợi phê duyệt của Quản lý.
 3. **Manager xét duyệt & Lịch sử (FR-10):** Quản lý mở modal xem chi tiết nội dung; phê duyệt bài viết (`APPROVED`) hoặc từ chối (`REJECTED`) bắt buộc nhập lý do tối thiểu 10 ký tự. Hệ thống tự động ghi nhận nhật ký kiểm duyệt (Audit Log).
 4. **Lên lịch đăng bài & Cảnh báo xung đột (FR-11):** Bài viết đã duyệt được đưa lên Lịch biểu đa kênh. Hệ thống kiểm tra khoảng cách thời gian giữa các bài cùng kênh: nếu nhỏ hơn 30 phút, kích hoạt cảnh báo xung đột màu đỏ `[ERR-03]` và cung cấp nút giãn cách tự động.
@@ -78,7 +78,7 @@ Trong quá trình chạy thử tích hợp E2E, nhóm đã phát hiện và kh�
 | **BUG-INT-05** | MOD-06 / Notification | Nút "Sao chép Caption" bị lỗi trên trình duyệt/mạng không có HTTPS | Moderate | `navigator.clipboard` chỉ khả dụng trên secure context (HTTPS/localhost) | Bổ sung fallback tự động sử dụng `document.execCommand('copy')` thông qua textarea ẩn khi clipboard API không hỗ trợ. | **Fixed** |
 | **BUG-INT-06** | MOD-06 / Post Detail | Tác vụ "Tải xuống Media" chỉ tải duy nhất 1 ảnh đầu tiên khi bài viết có nhiều ảnh | Moderate | Hàm tải chỉ gọi phần tử `mediaUrls[0]` thay vì duyệt qua toàn bộ mảng | Viết lại vòng lặp tải toàn bộ tệp đính kèm kèm delay 300ms giữa các file để tránh bị trình duyệt chặn popup. | **Fixed** |
 | **BUG-INT-07** | MOD-02 -> MOD-03 | Badge số lượng bài chờ duyệt bên Manager không tự động cập nhật sau khi Staff gửi duyệt | Minor | Trang Manager chưa lắng nghe sự kiện thay đổi dữ liệu từ trang Staff | Tích hợp sự kiện `StorageEvent` lắng nghe cập nhật `localStorage` để auto-refresh số lượng badge tức thì. | **Fixed** |
-| **BUG-INT-08** | MOD-02 / Preview | Khung mô phỏng TikTok (9:16) bị tràn chiều dọc màn hình trên laptop HD 1366x768 | Minor | Khung preview đặt chiều cao cố định 720px khiến người dùng phải cuộn trang | Cập nhật `max-height: calc(100vh - 160px)` kèm CSS scale tự động co giãn theo kích thước màn hình. | **Fixed** |
+| **BUG-INT-08** | MOD-02 / Preview | Khung mô phỏng Threads bị tràn chiều dọc màn hình trên laptop HD 1366x768 | Minor | Khung preview đặt chiều cao cố định 720px khiến người dùng phải cuộn trang | Cập nhật `max-height: calc(100vh - 160px)` kèm CSS scale tự động co giãn theo kích thước màn hình. | **Fixed** |
 
 > **Ghi chú:** File dữ liệu chi tiết danh sách bug chuẩn OpenXML đã được xuất tại [`Bug_Log_Sprint2_T06A669.xlsx`](file:///home/nguyendat/Desktop/Project_Thuc_Tap_Rikkei/Frontend/docs/Bug_Log_Sprint2_T06A669.xlsx) và [`Bug_Log_Sprint2_T06A669.csv`](file:///home/nguyendat/Desktop/Project_Thuc_Tap_Rikkei/Frontend/docs/Bug_Log_Sprint2_T06A669.csv).
 
@@ -92,7 +92,7 @@ Nhóm 7 đã tiến hành buổi họp Retrospective vào chiều ngày 18/11/20
 1. **Hoàn thành 100% phạm vi chức năng Sprint 2:** Toàn bộ 4 module UI lớn (`FR-07/08/09/10/11`) và tính năng mở rộng `FR-12` (Notification Bell) đều đã được hiện thực hóa đầy đủ, chạy mượt mà trên môi trường tích hợp.
 2. **Đồng bộ hóa Design System xuất sắc:** Giao diện người dùng mang nét thẩm mỹ cao, đồng nhất tông màu thương hiệu Blossom Beauty Store (hồng pastel `#F43F5E`, `#FB7185`), các nút bấm, typography và card layout đều nhất quán.
 3. **Tính năng điểm nhấn hoạt động ấn tượng:**
-   - Khung Live Preview đa kênh mô phỏng chính xác giao diện Facebook, Instagram và TikTok.
+   - Khung Live Preview đa kênh mô phỏng chính xác giao diện Facebook, Instagram và Threads.
    - Thuật toán kiểm soát xung đột lịch đăng dưới 30 phút hoạt động chính xác và trực quan.
    - Luồng phê duyệt bài viết có modal bắt buộc nhập lý do từ chối và lưu vết Audit Trail chuyên nghiệp.
 4. **Phối hợp nhóm chủ động:** Đã có sự kết nối chặt chẽ giữa BA/UI-UX (Đạt), Backend (Huy, Khánh, Tiến) và Quản lý (Minh Anh) để kiểm thử chéo liên tục.
