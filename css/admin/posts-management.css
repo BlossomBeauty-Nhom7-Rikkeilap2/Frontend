@@ -362,22 +362,51 @@
 .fr07-row-actions {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
 }
 
 .fr07-icon-btn {
-    border: 1px solid transparent;
-    background: transparent;
-    padding: 8px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid #f6dbe4;
+    background: #ffffff;
     border-radius: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease-in-out;
+    box-sizing: border-box;
 }
 
 .fr07-icon-btn:hover {
     background: var(--pink-soft, #fbe4ec);
-    border-color: var(--pink-line, #f4dce4);
+    border-color: #f0c3d4;
+    transform: translateY(-1px);
+}
+
+/* Nút xóa mềm với icon thùng rác nổi bật, sắc nét, không bao giờ trùng nền trắng */
+.fr07-icon-btn[data-delete-id] {
+    background: #fff5f7;
+    border-color: #fcd3dc;
+}
+
+.fr07-icon-btn[data-delete-id]:hover {
+    background: #fee2e8;
+    border-color: #f7aab7;
+    transform: translateY(-1px);
+}
+
+.fr07-icon-btn.is-disabled,
+.fr07-icon-btn:disabled,
+.fr07-icon-btn[data-delete-id].is-disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: #fbf9fa;
+    border-color: #eee7ea;
+    box-shadow: none;
+    transform: none;
+    pointer-events: none;
 }
 
 .fr07-pagination {
@@ -561,6 +590,10 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+}
+
+.fr06-btn-delete img {
+    filter: brightness(0) invert(1);
 }
 
 .fr06-btn-delete:hover {

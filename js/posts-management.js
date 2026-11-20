@@ -358,7 +358,7 @@
                     actionsHtml = '<a href="' + editBaseHref + '?id=' + encodeURIComponent(p.post_id) + '&state=' + encodeURIComponent(p.status) + '" class="fr07-icon-btn" title="Chỉnh sửa bài viết">' +
                         '<img src="../../assets/figma/pencil-15.svg" alt="Sửa" width="15" height="15">' +
                     '</a>' +
-                    '<button type="button" class="fr07-icon-btn" data-delete-id="' + p.post_id + '" title="' +
+                    '<button type="button" class="fr07-icon-btn' + (canAdminDelete ? "" : " is-disabled") + '" data-delete-id="' + p.post_id + '" title="' +
                         (canAdminDelete ? "Xóa mềm bài viết" : "Chỉ xóa được bài Bản nháp hoặc Bị từ chối") + '">' +
                         '<img src="../../assets/figma/trash-2-16.svg" alt="Xóa" width="15" height="15">' +
                     '</button>';
