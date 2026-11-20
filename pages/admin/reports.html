@@ -158,21 +158,19 @@
                         </div>
 
                         <div class="fr15-trend-summary">
-                            <span class="fr15-trend-big">128 bài viết</span>
-                            <span class="fr15-trend-up">↑ 12,8%</span>
+                            <span class="fr15-trend-big" id="trendTotalPosts">6 bài viết</span>
+                            <span class="fr15-trend-up" id="trendDeltaBadge">↑ 12,8%</span>
                         </div>
 
                         <div class="fr15-plot-box">
                             <div class="fr15-plot-area">
-                                <div class="fr15-y-axis">
-                                    <span>150</span>
-                                    <span>100</span>
-                                    <span>50</span>
+                                <div class="fr15-y-axis" id="trendYAxis">
+                                    <span>6</span>
+                                    <span>4</span>
+                                    <span>2</span>
                                     <span>0</span>
                                 </div>
-                                <div class="fr15-plot-canvas">
-                                    <img src="../../assets/figma/plot.svg" alt="Biểu đồ hiệu quả nội dung 12 tháng" width="690" height="190">
-                                </div>
+                                <div class="fr15-plot-canvas" id="trendPlotCanvas"></div>
                             </div>
                             <div class="fr15-x-axis">
                                 <span>T1</span><span>T2</span><span>T3</span><span>T4</span>
@@ -189,49 +187,15 @@
                         </div>
 
                         <div class="fr15-donut-wrap" data-node-id="3:46274">
-                            <img class="fr15-donut-base" src="../../assets/figma/channel-base.svg" alt="" width="170" height="170">
-                            <img class="fr15-donut-segment" src="../../assets/figma/facebook-segment.svg" alt="" width="154" height="170">
-                            <img class="fr15-donut-hole" src="../../assets/figma/donut-center.svg" alt="" width="122" height="122">
+                            <div class="fr15-donut-ring" id="donutRing"></div>
+                            <div class="fr15-donut-hole-inner"></div>
                             <div class="fr15-donut-center-text">
-                                <b id="donutTotalText">24,8K</b>
+                                <b id="donutTotalText">4.763</b>
                                 <small>Tương tác</small>
                             </div>
                         </div>
 
-                        <div class="fr15-channel-list" data-node-id="3:46281">
-                            <div class="fr15-channel-row">
-                                <span class="fr15-channel-name">
-                                    <span class="fr15-channel-dot" style="background:#cc618a"></span>
-                                    Facebook
-                                </span>
-                                <span class="fr15-channel-stats">
-                                    <span class="fr15-channel-val">16.120</span>
-                                    <span class="fr15-channel-pct">65%</span>
-                                </span>
-                            </div>
-
-                            <div class="fr15-channel-row">
-                                <span class="fr15-channel-name">
-                                    <span class="fr15-channel-dot" style="background:#f9dfe9"></span>
-                                    Instagram
-                                </span>
-                                <span class="fr15-channel-stats">
-                                    <span class="fr15-channel-val">6.200</span>
-                                    <span class="fr15-channel-pct">25%</span>
-                                </span>
-                            </div>
-
-                            <div class="fr15-channel-row">
-                                <span class="fr15-channel-name">
-                                    <span class="fr15-channel-dot" style="background:#9a83b2"></span>
-                                    TikTok
-                                </span>
-                                <span class="fr15-channel-stats">
-                                    <span class="fr15-channel-val">2.480</span>
-                                    <span class="fr15-channel-pct">10%</span>
-                                </span>
-                            </div>
-                        </div>
+                        <div class="fr15-channel-list" id="fr15ChannelList" data-node-id="3:46281"></div>
                     </div>
                 </section>
 
