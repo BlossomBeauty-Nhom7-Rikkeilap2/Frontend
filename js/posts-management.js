@@ -391,7 +391,7 @@
                     '<div style="font-size:12px;color:#a4989d;margin-top:4px;">Tác giả: <b>' + UI.esc(post.author) + '</b> · Lịch đăng: ' + UI.esc(post.planned_label) + ' · Trạng thái: <b>' + UI.esc(st.label) + '</b></div>' +
                 '</div>' +
                 '<div>' +
-                    '<b style="display:block;margin-bottom:4px;color:#574b50;">Nội dung bài viết (Caption):</b>' +
+                    '<b style="display:block;margin-bottom:4px;color:#574b50;">Nội dung bài viết:</b>' +
                     '<p style="color:#574b50;line-height:1.6;">' + UI.esc(post.caption || "") + '</p>' +
                 '</div>' +
             '</div>';
