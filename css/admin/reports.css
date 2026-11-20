@@ -1,0 +1,596 @@
+/* ==========================================================
+   FR-15 · STATISTICS DASHBOARD — BÁO CÁO & THỐNG KÊ (T06A66E)
+   Figma Node: 3:46193
+   Đồng bộ cỡ chữ to rõ theo common.css / components.css
+   - 4 KPI Cards, Bộ lọc (Thời gian, Nền tảng, Nhân sự)
+   - Biểu đồ xu hướng 12 tháng & Donut 3 kênh (FB, IG, TikTok)
+   - Bảng xếp hạng Bài viết nổi bật (liên kết FR-05/07)
+   - Xuất báo cáo Excel / CSV / PDF < 5 giây & Empty State (ERR-01)
+   ========================================================== */
+
+.fr15-workspace {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* ---------- 1. PAGE HEADING (Figma 3:46194) ---------- */
+.fr15-heading {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.fr15-breadcrumb {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--muted, #8c8294);
+}
+
+.fr15-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.fr15-title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.fr15-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 35px;
+    line-height: 1.3;
+    color: var(--text-strong, #24122e);
+}
+
+.fr15-subtitle {
+    font-size: 15.5px;
+    color: var(--muted, #8c8294);
+}
+
+.fr15-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.fr15-filter-select {
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid var(--pink-line, #f4dce4);
+    background: #ffffff;
+    font-family: var(--font-body);
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text, #3b3140);
+    cursor: pointer;
+    outline: none;
+}
+
+.fr15-filter-select.is-accent {
+    color: var(--pink, #d9467a);
+}
+
+.fr15-filter-select:focus {
+    border-color: var(--pink, #d9467a);
+    box-shadow: 0 0 0 3px var(--pink-soft, #fbe4ec);
+}
+
+.fr15-export-wrap {
+    position: relative;
+}
+
+.fr15-btn-export {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 8px;
+    border: 1px solid var(--pink, #d9467a);
+    background: var(--pink, #d9467a);
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.fr15-btn-export:hover {
+    background: var(--pink-dark, #c33369);
+}
+
+.fr15-export-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 230px;
+    background: #ffffff;
+    border: 1px solid var(--pink-line, #f4dce4);
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 14px 36px rgba(59, 49, 64, 0.16);
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.fr15-export-menu[hidden] {
+    display: none !important;
+}
+
+.fr15-export-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text, #3b3140);
+    cursor: pointer;
+    text-align: left;
+}
+
+.fr15-export-item:hover {
+    background: var(--pink-soft, #fbe4ec);
+    color: var(--pink, #d9467a);
+}
+
+.fr15-export-item small {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted, #8c8294);
+}
+
+/* ---------- 2. KPI SUMMARY (4 CARDS - Figma 3:46206) ---------- */
+.fr15-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.fr15-kpi-card {
+    background: #ffffff;
+    border: 1px solid var(--pink-line, #f4dce4);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.fr15-kpi-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--pink-soft, #fbe4ec);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fr15-kpi-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.fr15-kpi-label {
+    font-size: 15px;
+    color: var(--muted, #8c8294);
+}
+
+.fr15-kpi-value {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-2, #4a3f50);
+}
+
+.fr15-kpi-delta {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #3f9a65;
+}
+
+/* ---------- 3. EMPTY STATE BANNER (ERR-01) ---------- */
+.fr15-empty-card {
+    background: #ffffff;
+    border: 1px dashed var(--pink-border, #f1bfd0);
+    border-radius: 16px;
+    padding: 48px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.fr15-empty-card[hidden] {
+    display: none !important;
+}
+
+.fr15-empty-title {
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-strong, #24122e);
+}
+
+.fr15-empty-desc {
+    font-size: 15px;
+    color: var(--muted, #8c8294);
+    max-width: 520px;
+}
+
+/* ---------- 4. VISUALIZATIONS (Figma 3:46238) ---------- */
+.fr15-charts-row {
+    display: grid;
+    grid-template-columns: minmax(0, 798fr) minmax(300px, 314fr);
+    gap: 18px;
+}
+
+.fr15-card {
+    background: #ffffff;
+    border: 1px solid var(--pink-line, #f4dce4);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.fr15-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.fr15-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-strong, #24122e);
+}
+
+.fr15-card-sub {
+    font-size: 14px;
+    color: var(--muted, #8c8294);
+    margin-top: 3px;
+}
+
+.fr15-pill-badge {
+    background: var(--pink-soft, #fbe4ec);
+    color: var(--pink, #d9467a);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 100px;
+}
+
+.fr15-trend-summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.fr15-trend-big {
+    font-family: var(--font-display);
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--text-strong, #24122e);
+}
+
+.fr15-trend-up {
+    background: #e6f5ec;
+    color: #3f9a65;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.fr15-plot-box {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 6px;
+}
+
+.fr15-plot-area {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.fr15-y-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 12.5px;
+    color: var(--muted, #8c8294);
+    padding: 2px 0;
+}
+
+.fr15-plot-canvas {
+    position: relative;
+    height: 190px;
+    display: flex;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--pink-line, #f4dce4);
+}
+
+.fr15-plot-canvas img {
+    width: 100%;
+    height: 190px;
+    object-fit: fill;
+    display: block;
+}
+
+.fr15-x-axis {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    padding-left: 48px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--muted, #8c8294);
+    text-align: center;
+}
+
+/* ---------- DONUT CHART 3 CHANNELS (Figma 3:46271) ---------- */
+.fr15-donut-wrap {
+    position: relative;
+    width: 170px;
+    height: 170px;
+    margin: 4px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fr15-donut-base {
+    position: absolute;
+    inset: 0;
+    width: 170px;
+    height: 170px;
+}
+
+.fr15-donut-segment {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 153.766px;
+    height: 170px;
+}
+
+.fr15-donut-hole {
+    position: absolute;
+    width: 122px;
+    height: 122px;
+}
+
+.fr15-donut-center-text {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.fr15-donut-center-text b {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-strong, #24122e);
+}
+
+.fr15-donut-center-text small {
+    font-size: 12.5px;
+    color: var(--muted, #8c8294);
+}
+
+.fr15-channel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.fr15-channel-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14.5px;
+}
+
+.fr15-channel-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+    color: var(--text, #3b3140);
+}
+
+.fr15-channel-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.fr15-channel-stats {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.fr15-channel-val {
+    font-weight: 700;
+    color: var(--text, #3b3140);
+}
+
+.fr15-channel-pct {
+    font-size: 13px;
+    color: var(--muted, #8c8294);
+    min-width: 36px;
+    text-align: right;
+}
+
+/* ---------- 5. TOP POSTS RANKING TABLE (Figma 3:46294) ---------- */
+.fr15-table-head {
+    display: grid;
+    grid-template-columns: minmax(280px, 520fr) 140fr 140fr 120fr 130px;
+    align-items: center;
+    padding: 12px 16px;
+    background: #fff8fa;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted, #8c8294);
+    text-transform: uppercase;
+}
+
+.fr15-top-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.fr15-top-row {
+    display: grid;
+    grid-template-columns: minmax(280px, 520fr) 140fr 140fr 120fr 130px;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--pink-line, #f4dce4);
+    transition: background 0.15s ease;
+}
+
+.fr15-top-row:hover {
+    background: #fff9fb;
+}
+
+.fr15-top-post-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.fr15-top-post-title {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: var(--text, #3b3140);
+    text-decoration: none;
+}
+
+.fr15-top-post-title:hover {
+    color: var(--pink, #d9467a);
+    text-decoration: underline;
+}
+
+.fr15-top-post-meta {
+    font-size: 13.5px;
+    color: var(--muted, #8c8294);
+}
+
+.fr15-top-num {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text, #3b3140);
+}
+
+.fr15-top-rate {
+    font-size: 15px;
+    font-weight: 700;
+    color: #3f9a65;
+}
+
+.fr15-top-channel {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: var(--text-2, #4a3f50);
+}
+
+.fr15-note-footer {
+    font-size: 13.5px;
+    color: var(--muted, #8c8294);
+}
+
+@media (max-width: 1150px) {
+    .fr15-kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .fr15-charts-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- T06A671: RESPONSIVE TABLET & MOBILE (<= 850px / <= 600px) ---------- */
+@media (max-width: 850px) {
+    .fr15-breadcrumb {
+        font-size: 16px;
+    }
+    .fr15-title {
+        font-size: 28px;
+    }
+    .fr15-card {
+        padding: 18px;
+    }
+    .fr15-table-head {
+        display: none;
+    }
+    .fr15-top-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px 12px;
+        padding: 14px;
+        border: 1px solid var(--pink-line, #f4dce4);
+        border-radius: 12px;
+        margin-bottom: 10px;
+    }
+    .fr15-top-post-info {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+    .fr15-kpi-grid {
+        grid-template-columns: 1fr;
+    }
+    .fr15-header-actions {
+        width: 100%;
+    }
+    .fr15-filter-select,
+    .fr15-export-wrap,
+    .fr15-btn-export {
+        width: 100%;
+    }
+    .fr15-export-menu {
+        left: 0;
+        right: 0;
+    }
+    .fr15-plot-canvas img {
+        height: 150px;
+    }
+    .fr15-x-axis {
+        padding-left: 36px;
+        font-size: 10.5px;
+    }
+}
