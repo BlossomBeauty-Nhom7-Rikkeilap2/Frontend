@@ -1,0 +1,47 @@
+﻿TỔNG QUAN & MA TRẬN TRUY VẾT KIỂM THỬ (TEST TRACEABILITY MATRIX) — MÃ TASK: T06A66C
+Dự án: Hệ thống Quản lý Truyền thông Đa kênh — Blossom Beauty Store | Người thực hiện: Nguyễn Phát Đạt (N25DTCN082) - Role: BA / UI-UX | Nhóm 7 (RikkeiLab 2) | Ngày: 19/11/2026
+
+=== BẢNG 1: THỐNG KÊ BAO PHỦ 15 YÊU CẦU CHỨC NĂNG (15 FUNCTIONAL REQUIREMENTS) ===
+Mã FR,Tên Yêu cầu Chức năng (Functional Requirement),Module Phụ trách,Tổng số Test Cases,Luồng chính (Main),Luồng thay thế (Alt),Ngoại lệ (Exception),Quy tắc (BR),Mã BR / EX Bao phủ,Độ bao phủ (Coverage)
+FR-01,Xác thực & Đăng nhập người dùng,MOD-01,4,1,1,1,1,"BR-01, EX-01 (Brute-force)",100%
+FR-02,Đăng xuất & Quản lý phiên làm việc (Session),MOD-01,3,1,1,1,0,EX-07 (Session Timeout),100%
+FR-03,Quản lý tài khoản người dùng & Phân quyền RBAC,MOD-02,4,1,1,1,1,"BR-01, EX-08 (Duplicate Email)",100%
+FR-04,Soạn thảo & Tạo bài viết mới đa kênh,MOD-03,4,1,1,1,1,"BR-03, EX-05 (Media Limit)",100%
+FR-05,Chỉnh sửa nội dung bài viết & Kiểm soát vòng đời,MOD-03,4,1,1,1,1,"BR-04, BR-05, EX-06 (Post State)",100%
+FR-06,Xóa mềm bài viết & Lưu trữ an toàn,MOD-03,3,1,1,1,0,"BR-05, EX-06 (Soft Delete)",100%
+FR-07,Quản lý danh sách & Xem chi tiết bài viết,MOD-03,4,2,2,0,0,"UI Grid/Table, Status Filter",100%
+FR-08,Gửi phê duyệt bài viết & Xem trước (Live Preview),MOD-04,4,1,1,1,1,"BR-01, EX-08 (Validation)",100%
+FR-09,Phê duyệt bài viết (Manager Approve Workflow),MOD-04,4,1,1,1,1,"BR-01, BR-07 (ACID Transaction)",100%
+FR-10,Từ chối bài viết & Nhật ký kiểm duyệt (Audit Log),MOD-04,4,1,1,1,1,"BR-02, BR-07, EX-09 (Reject Reason)",100%
+FR-11,Lên lịch xuất bản đa kênh & Cảnh báo xung đột 30p,MOD-05,4,1,1,1,1,"BR-10, EX-02, EX-03 (30m Conflict)",100%
+FR-12,Nhắc lịch đăng & Trung tâm thông báo (Notification),MOD-05,4,2,1,0,1,"BR-09 (is_read), Clipboard & Media Download",100%
+FR-13,Theo dõi tiến độ & Xác nhận đã đăng bài thủ công,MOD-06,3,1,0,1,1,"BR-06, EX-10 (Domain Validation)",100%
+FR-14,Cập nhật & Tự động đồng bộ số liệu bài đăng,MOD-07,4,1,1,1,1,"BR-08, EX-04 (OAuth Token Expire)",100%
+FR-15,Dashboard Phân tích đa kênh & Xuất báo cáo số liệu,MOD-07,4,1,2,1,0,"NFR-01 (Export < 5s), Empty State",100%
+TỔNG CỘNG,15 YÊU CẦU CHỨC NĂNG HỆ THỐNG,7 MODULES,56,17,15,12,12,100% MÃ BR (10/10) & 100% MÃ EX (10/10),100%
+
+=== BẢNG 2: MA TRẬN TRUY VẾT QUY TẮC NGHIỆP VỤ (BUSINESS RULES — BR-01 ĐẾN BR-10) ===
+Mã Quy tắc (BR),Tên Quy tắc Nghiệp vụ,Mô tả Chi tiết Quy tắc,Mã FR Áp dụng,Các Test Case Kiểm tra,Kết quả Xác minh
+BR-01,Phân quyền RBAC nghiêm ngặt,"Manager có toàn quyền quản trị và phê duyệt; Staff chỉ được tạo, sửa bài nháp của mình và xem lịch.","FR-01, FR-03, FR-08, FR-09","TC_FR01_04, TC_FR03_04, TC_FR08_04, TC_FR09_03",PASS
+BR-02,Bắt buộc nhập lý do khi Từ chối bài viết,"Khi Quản lý từ chối duyệt bài, bắt buộc phải nhập lý do chi tiết có độ dài tối thiểu 10 ký tự.",FR-10,"TC_FR10_01, TC_FR10_03",PASS
+BR-03,Giới hạn dung lượng và định dạng Media,"Hình ảnh tối đa 10MB (.jpg, .png, .webp); Video ngắn tối đa 50MB (.mp4, .mov).",FR-04,"TC_FR04_03, TC_FR04_04",PASS
+BR-04,Chuyển trạng thái khi sửa bài đã duyệt,Bài viết đã ở trạng thái Approved nếu bị chỉnh sửa nội dung phải tự động chuyển về Pending Review.,FR-05,TC_FR05_04,PASS
+BR-05,Bảo vệ bài viết đã xuất bản (Published),"Bài viết đã Published bị khóa hoàn toàn, không được phép chỉnh sửa nội dung hoặc xóa.","FR-05, FR-06","TC_FR05_03, TC_FR06_03",PASS
+BR-06,Xác thực URL bài viết thực tế,"Xác nhận đã đăng bài thủ công bắt buộc URL phải thuộc tên miền chính thức của Facebook, Instagram hoặc TikTok.",FR-13,"TC_FR13_01, TC_FR13_02, TC_FR13_03",PASS
+BR-07,Ghi nhận Audit Trail lịch sử kiểm duyệt,"Mọi thao tác phê duyệt, từ chối, yêu cầu chỉnh sửa đều phải ghi vết: người thực hiện, thời gian, lý do.","FR-09, FR-10","TC_FR09_04, TC_FR10_04",PASS
+BR-08,Ràng buộc cập nhật chỉ số thống kê,Chỉ các bài viết ở trạng thái Published mới được phép nhập hoặc đồng bộ chỉ số tương tác.,FR-14,"TC_FR14_01, TC_FR14_04",PASS
+BR-09,Đánh dấu trạng thái thông báo (is_read),Người dùng đọc thông báo hoặc nhấn 'Đánh dấu tất cả đã đọc' sẽ cập nhật is_read = True và tắt badge.,FR-12,TC_FR12_03,PASS
+BR-10,Cảnh báo xung đột lịch đăng < 30 phút,Hai bài viết trên cùng một nền tảng mạng xã hội có thời gian đăng cách nhau dưới 30 phút bị coi là xung đột.,FR-11,TC_FR11_04,PASS
+
+=== BẢNG 3: MA TRẬN TRUY VẾT MÃ NGOẠI LỆ & LỖI (EXCEPTION / ERROR CODES — EX-01 ĐẾN EX-10) ===
+Mã Ngoại lệ (EX/ERR),Tên Ngoại lệ / Lỗi,Mô tả Hành vi Ngoại lệ,Mã FR Xử lý,Các Test Case Kiểm tra,Kết quả Xử lý Ngoại lệ
+EX-01 / ERR-01,Khóa tài khoản do Brute-force,Đăng nhập sai mật khẩu quá 5 lần liên tiếp -> Khóa tài khoản tạm thời 15 phút.,FR-01,TC_FR01_03,PASS
+EX-02 / ERR-02,Đặt lịch trong quá khứ,Người dùng chọn thời gian xuất bản nhỏ hơn hoặc bằng thời điểm hiện tại -> Báo lỗi chặn lưu.,FR-11,TC_FR11_03,PASS
+EX-03 / ERR-03,Xung đột lịch đăng < 30 phút,Phát hiện 2 sự kiện cùng kênh cách nhau < 30 phút -> Hiển thị banner đỏ ERR-03 và nút giãn cách.,FR-11,TC_FR11_04,PASS
+EX-04 / ERR-04,Hết hạn Token OAuth mạng xã hội,Token Facebook/TikTok hết hạn khi đồng bộ số liệu -> Bắt lỗi ERR-04 và thông báo kết nối lại.,FR-14,TC_FR14_03,PASS
+EX-05 / ERR-05,Vượt giới hạn kích thước Media,Tải lên tệp ảnh > 10MB hoặc video > 50MB -> Hệ thống từ chối nạp file và báo lỗi ERR-05.,FR-04,TC_FR04_03,PASS
+EX-06 / ERR-06,Vi phạm trạng thái vòng đời bài viết,"Thao tác sửa/xóa bài viết vi phạm máy trạng thái (sửa bài Published, xóa bài Pending) -> Báo lỗi.","FR-05, FR-06","TC_FR05_03, TC_FR06_03",PASS
+EX-07 / ERR-07,Hết hạn phiên làm việc (Session Expired),JWT Token hết hạn sau 60 phút hoặc Cookie bị xóa -> Chặn truy cập và redirect về Login.,FR-02,TC_FR02_03,PASS
+EX-08 / ERR-08,Lỗi kiểm tra tính hợp lệ dữ liệu (Validation),"Bỏ trống trường bắt buộc (tiêu đề, kênh) hoặc trùng email người dùng -> Báo lỗi nhập liệu.","FR-03, FR-08, FR-15","TC_FR03_03, TC_FR08_03, TC_FR15_04",PASS
+EX-09 / ERR-09,Lý do từ chối không đạt chuẩn,Để trống hoặc nhập lý do từ chối dưới 10 ký tự -> Chặn gửi form và viền đỏ trường nhập.,FR-10,TC_FR10_03,PASS
+EX-10 / ERR-10,URL đăng bài thực tế không hợp lệ,Nhập đường link không đúng định dạng URL hoặc sai tên miền mạng xã hội đích -> Báo lỗi domain.,FR-13,TC_FR13_02,PASS
