@@ -7,32 +7,221 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CSS dùng chung (thêm css riêng của trang bên dưới nếu cần) -->
     <link rel="stylesheet" href="../../css/common.css">
     <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/admin/reports.css">
 
-    <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
+    <script src="../../js/api.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
 </head>
-<body>
+<body data-search="Tìm kiếm bài viết..." data-active="reports.html">
 
-    <!-- Sidebar + Header + Footer do js/layout.js render -->
     <aside class="sidebar" id="sidebar"></aside>
 
     <div class="main">
         <header class="topbar" id="topbar"></header>
 
-        <main class="content">
-            <div class="crumb">Blossom / Quản trị / Báo cáo &amp; Thống kê</div>
-            <h2 class="page-title">Báo cáo &amp; Thống kê</h2>
-            <p class="page-sub">Số liệu hiệu quả nội dung theo thời gian.</p>
+        <main class="content fr15-workspace" data-node-id="3:46194">
+            <!-- 1. PAGE HEADING & FILTERS (Figma 3:46195) -->
+            <section class="fr15-heading" data-node-id="3:46195">
+                <div class="fr15-breadcrumb" data-node-id="3:46196">
+                    <span data-node-id="3:46197">Blossom / Báo cáo &amp; Thống kê</span>
+                    <button type="button" class="btn btn--secondary btn--sm" onclick="history.length > 1 ? history.back() : (location.href='dashboard.html')">← Quay lại</button>
+                </div>
 
-            <!-- TODO: nội dung trang -->
-            <section class="card">
-                <div class="empty-state"><i data-icon="empty"></i><span>Trang đang được phát triển.</span></div>
+                <div class="fr15-title-row" data-node-id="3:46198">
+                    <div class="fr15-title-block">
+                        <h2 class="fr15-title" data-node-id="3:46199">Báo cáo &amp; thống kê</h2>
+                        <p class="fr15-subtitle">Lắng nghe những con số, nuôi dưỡng nội dung chạm đến khách hàng.</p>
+                    </div>
+
+                    <div class="fr15-header-actions" data-node-id="3:46200">
+                        <select class="fr15-filter-select is-accent" id="reportPeriodSelect" aria-label="Lọc theo kỳ báo cáo">
+                            <option value="2026-11" selected>Tháng 11, 2026 ⌄</option>
+                            <option value="2026-10">Tháng 10, 2026</option>
+                            <option value="2026-Q4">Quý 4, 2026</option>
+                            <option value="EMPTY">Tháng 01, 2025</option>
+                        </select>
+
+                        <select class="fr15-filter-select" id="reportPlatformSelect" aria-label="Lọc theo nền tảng">
+                            <option value="ALL" selected>Tất cả kênh</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="TikTok">TikTok</option>
+                        </select>
+
+                        <select class="fr15-filter-select" id="reportStaffSelect" aria-label="Lọc theo nhân sự">
+                            <option value="ALL" selected>Tất cả nhân sự</option>
+                            <option value="Nguyễn Hà Linh">Nguyễn Hà Linh</option>
+                            <option value="Trần Ngọc Mai">Trần Ngọc Mai</option>
+                            <option value="Lê Thu Hương">Lê Thu Hương</option>
+                        </select>
+
+                        <div class="fr15-export-wrap">
+                            <button type="button" class="fr15-btn-export" id="btnExportReport" data-node-id="3:46202">
+                                <img src="../../assets/figma/download.svg" alt="" width="16" height="16">
+                                <span>Xuất báo cáo</span>
+                            </button>
+
+                            <div class="fr15-export-menu" id="fr15ExportMenu" hidden>
+                                <button type="button" class="fr15-export-item" data-export-fmt="xlsx">
+                                    <span>Xuất file Excel</span>
+                                    <small>.xlsx</small>
+                                </button>
+                                <button type="button" class="fr15-export-item" data-export-fmt="csv">
+                                    <span>Xuất file CSV</span>
+                                    <small>.csv</small>
+                                </button>
+                                <button type="button" class="fr15-export-item" data-export-fmt="pdf">
+                                    <span>Xuất file PDF</span>
+                                    <small>.pdf</small>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
+
+            <!-- 2. KPI SUMMARY (4 CARDS - Figma 3:46206) -->
+            <section class="fr15-kpi-grid" data-node-id="3:46206">
+                <div class="fr15-kpi-card" data-node-id="3:46207">
+                    <div class="fr15-kpi-icon">
+                        <img src="../../assets/figma/send.svg" alt="" width="18" height="18">
+                    </div>
+                    <div class="fr15-kpi-info">
+                        <span class="fr15-kpi-label">Bài viết đã xuất bản</span>
+                        <span class="fr15-kpi-value" id="kpiPublishedPosts">96</span>
+                        <span class="fr15-kpi-delta">↑ 15,2% so với tháng trước</span>
+                    </div>
+                </div>
+
+                <div class="fr15-kpi-card" data-node-id="3:46215">
+                    <div class="fr15-kpi-icon">
+                        <img src="../../assets/figma/users.svg" alt="" width="18" height="18">
+                    </div>
+                    <div class="fr15-kpi-info">
+                        <span class="fr15-kpi-label">Tổng lượt tiếp cận</span>
+                        <span class="fr15-kpi-value" id="kpiTotalReach">248,6K</span>
+                        <span class="fr15-kpi-delta">↑ 18,4% so với tháng trước</span>
+                    </div>
+                </div>
+
+                <div class="fr15-kpi-card" data-node-id="3:46223">
+                    <div class="fr15-kpi-icon">
+                        <img src="../../assets/figma/heart.svg" alt="" width="18" height="18">
+                    </div>
+                    <div class="fr15-kpi-info">
+                        <span class="fr15-kpi-label">Tổng tương tác</span>
+                        <span class="fr15-kpi-value" id="kpiTotalEngagement">24,8K</span>
+                        <span class="fr15-kpi-delta">↑ 6,4% so với tháng trước</span>
+                    </div>
+                </div>
+
+                <div class="fr15-kpi-card" data-node-id="3:46231">
+                    <div class="fr15-kpi-icon">
+                        <img src="../../assets/figma/chart-metric.svg" alt="" width="18" height="18">
+                    </div>
+                    <div class="fr15-kpi-info">
+                        <span class="fr15-kpi-label">Tỷ lệ tương tác</span>
+                        <span class="fr15-kpi-value" id="kpiEngagementRate">9,98%</span>
+                        <span class="fr15-kpi-delta">↑ 1,2% so với tháng trước</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. EMPTY STATE (ERR-01: Chưa có dữ liệu thống kê trong khoảng thời gian đã chọn) -->
+            <section class="fr15-empty-card" id="fr15EmptyState" hidden>
+                <div class="fr15-kpi-icon" style="width:56px;height:56px;">
+                    <img src="../../assets/figma/chart-metric.svg" alt="" width="24" height="24">
+                </div>
+                <h3 class="fr15-empty-title">Chưa có dữ liệu thống kê</h3>
+                <p class="fr15-empty-desc">
+                    Chưa có bài viết nào được đăng trong khoảng thời gian này.
+                </p>
+                <button type="button" class="fr15-btn-export" id="btnResetReportFilters">
+                    Xem tháng này
+                </button>
+            </section>
+
+            <!-- 4. MAIN DASHBOARD CHARTS & RANKING TABLE -->
+            <div id="fr15MainDashboard" style="display:flex;flex-direction:column;gap:24px;">
+                <section class="fr15-charts-row" data-node-id="3:46238">
+                    <!-- LEFT: HIỆU QUẢ NỘI DUNG THEO THÁNG (Figma 3:46239) -->
+                    <div class="fr15-card" data-node-id="3:46239">
+                        <div class="fr15-card-head">
+                            <div>
+                                <h3 class="fr15-card-title">Hiệu quả nội dung theo tháng</h3>
+                                <p class="fr15-card-sub">Tổng quan bài viết trong năm 2026</p>
+                            </div>
+                            <span class="fr15-pill-badge">12 tháng</span>
+                        </div>
+
+                        <div class="fr15-trend-summary">
+                            <span class="fr15-trend-big" id="trendTotalPosts">6 bài viết</span>
+                            <span class="fr15-trend-up" id="trendDeltaBadge">↑ 12,8%</span>
+                        </div>
+
+                        <div class="fr15-plot-box">
+                            <div class="fr15-plot-area">
+                                <div class="fr15-y-axis" id="trendYAxis">
+                                    <span>6</span>
+                                    <span>4</span>
+                                    <span>2</span>
+                                    <span>0</span>
+                                </div>
+                                <div class="fr15-plot-canvas" id="trendPlotCanvas"></div>
+                            </div>
+                            <div class="fr15-x-axis">
+                                <span>T1</span><span>T2</span><span>T3</span><span>T4</span>
+                                <span>T5</span><span>T6</span><span>T7</span><span>T8</span>
+                                <span>T9</span><span>T10</span><span>T11</span><span>T12</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT: TƯƠNG TÁC THEO KÊNH (Figma 3:46271) -->
+                    <div class="fr15-card" data-node-id="3:46271">
+                        <div class="fr15-card-head">
+                            <h3 class="fr15-card-title">Tương tác theo kênh</h3>
+                        </div>
+
+                        <div class="fr15-donut-wrap" data-node-id="3:46274">
+                            <div class="fr15-donut-ring" id="donutRing"></div>
+                            <div class="fr15-donut-hole-inner"></div>
+                            <div class="fr15-donut-center-text">
+                                <b id="donutTotalText">4.763</b>
+                                <small>Tương tác</small>
+                            </div>
+                        </div>
+
+                        <div class="fr15-channel-list" id="fr15ChannelList" data-node-id="3:46281"></div>
+                    </div>
+                </section>
+
+                <!-- 5. TOP POSTS RANKING TABLE (Figma 3:46294) -->
+                <section class="fr15-card" data-node-id="3:46294">
+                    <div class="fr15-card-head">
+                        <h3 class="fr15-card-title">Bài viết nổi bật</h3>
+                        <a href="posts.html" class="link" style="font-size:14.5px;font-weight:600;">Xem tất cả</a>
+                    </div>
+
+                    <div class="fr15-table-head">
+                        <span>BÀI VIẾT</span>
+                        <span>TIẾP CẬN</span>
+                        <span>TƯƠNG TÁC</span>
+                        <span>TỶ LỆ</span>
+                        <span>KÊNH</span>
+                    </div>
+
+                    <div class="fr15-top-rows" id="fr15TopPostsBody"></div>
+                </section>
+            </div>
+
+            <p class="fr15-note-footer" data-node-id="3:46334">
+                Cập nhật gần nhất: 04/11/2026 · 18:00 · Số liệu được tổng hợp từ các bài viết đã xuất bản.
+            </p>
         </main>
 
         <footer class="footer" id="footer"></footer>
@@ -40,5 +229,6 @@
 
     <script src="../../js/components.js"></script>
     <script src="../../js/layout.js"></script>
+    <script src="../../js/admin/reports.js"></script>
 </body>
 </html>
