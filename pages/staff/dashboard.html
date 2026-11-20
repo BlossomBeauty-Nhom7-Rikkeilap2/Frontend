@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Blossom - Dashboard Nhân viên</title>
+    <link rel="icon" type="image/png" href="../../assets/logo.png">
+    <title>Blossom – Tổng quan Nhân viên</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -13,12 +14,13 @@
     <link rel="stylesheet" href="../../css/components.css">
     <!-- CSS riêng của trang -->
     <link rel="stylesheet" href="../../css/staff/dashboard.css">
+    <link rel="stylesheet" href="../../css/notifications.css">
 
     <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
 </head>
-<body data-search="Tìm kiếm bài viết...">
+<body data-search="Tìm kiếm bài viết..." data-active="dashboard.html">
 
     <!-- Sidebar + Header + Footer do js/layout.js render -->
     <aside class="sidebar" id="sidebar"></aside>
@@ -91,6 +93,8 @@
     <!-- JavaScript: component → layout → logic của trang -->
     <script src="../../js/components.js"></script>
     <script src="../../js/layout.js"></script>
+    <script src="../../js/notifications-store.js"></script>
+    <script src="../../js/post-detail-modal.js"></script>
     <script src="../../js/staff/dashboard.js"></script>
 </body>
 </html>

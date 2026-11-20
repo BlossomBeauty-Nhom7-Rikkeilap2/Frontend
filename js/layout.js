@@ -72,7 +72,7 @@
                     icon(it.icon) + "<span>" + esc(it.name) + "</span></a></li>";
             }).join("");
 
-        return '<div class="logo"><h1>Blossom.</h1><span>BEAUTY STORE</span></div>' +
+        return '<div class="logo"><div class="logo__circle"><img src="../../assets/logo.png" alt="Logo Blossom Beauty"></div><h1>Blossom.</h1><span>BEAUTY STORE</span></div>' +
             '<div class="side-label">' + esc(cfg.label) + "</div>" +
             '<ul class="nav" id="nav">' + items + "</ul>" +
             '<div class="side-bottom"><div class="quote">' + esc(cfg.quote) + "</div>" +

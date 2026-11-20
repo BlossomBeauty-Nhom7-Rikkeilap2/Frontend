@@ -31,19 +31,31 @@
     };
 
     /* ---------- 2. Ngoại lệ theo từng trang ----------
-       Khóa là đường dẫn tính từ /pages/. Ví dụ:
-         "admin/posts.html": [M, S],   // cho cả Staff vào
+       Cho phép cả Manager và Staff truy cập luồng Bài viết (FR-04/05/06/07),
+       Lịch đăng bài (FR-11) và Thông báo (FR-12) để liên kết xuyên suốt.
     */
-    const PAGE_ACCESS = {};
+    const PAGE_ACCESS = {
+        "staff/create-post.html": [M, S],
+        "staff/edit-post.html":   [M, S],
+        "staff/approvals.html":   [M, S],
+        "admin/create-post.html": [M, S],
+        "admin/edit-post.html":   [M, S],
+        "staff/posts.html":       [M, S],
+        "admin/posts.html":       [M, S],
+        "staff/calendar.html":    [M, S],
+        "admin/calendar.html":    [M, S],
+        "staff/notifications.html": [M, S],
+        "admin/notifications.html": [M]
+    };
 
-    /* ---------- 3. Quyền theo chức năng (ví dụ, chỉnh theo nghiệp vụ) ---------- */
+    /* ---------- 3. Quyền theo chức năng ---------- */
     const FEATURES = {
-        "post:create":    [S],
-        "post:edit":      [S, M],
-        "post:delete":    [M],
-        "post:approve":   [M],
-        "report:view":    [M],
-        "account:manage": [M],
+        "post:create":     [S, M],
+        "post:edit":       [S, M],
+        "post:delete":     [S, M],
+        "post:approve":    [M],
+        "report:view":     [M],
+        "account:manage":  [M],
         "settings:manage": [M]
     };
 

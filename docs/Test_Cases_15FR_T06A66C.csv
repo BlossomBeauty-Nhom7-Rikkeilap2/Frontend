@@ -1,0 +1,141 @@
+﻿BẢNG KỊCH BẢN KIỂM THỬ HỆ THỐNG CHI TIẾT (SYSTEM TEST CASES SPECIFICATION) — MÃ TASK: T06A66C
+Dự án: Hệ thống Quản lý Truyền thông Đa kênh — Blossom Beauty Store | Người thực hiện: Nguyễn Phát Đạt (N25DTCN082) - Role: BA / UI-UX | Nhóm 7 (RikkeiLab 2) | Ngày: 19/11/2026
+
+Mã Test Case,Mã Yêu cầu (FR),Mã BR / EX,Phân loại luồng (Flow),Tiêu đề Kịch bản kiểm thử (Test Scenario),Tiền điều kiện (Pre-conditions),Các bước thực hiện (Test Steps),Dữ liệu kiểm thử (Test Data),Kết quả mong đợi (Expected Result),Mức độ ưu tiên,Trạng thái thực thi,Ghi chú (Notes)
+TC_FR01_01,FR-01,BR-01,Luồng chính (Main Flow),Đăng nhập thành công với tài khoản Manager hợp lệ,Tài khoản Manager đã kích hoạt trong CSDL.,"1. Truy cập trang /login.html.
+2. Nhập Username và Mật khẩu chính xác.
+3. Bấm 'Đăng nhập'.","Username: manager, Pass: Manager@123","Hệ thống xác thực thành công, cấp JWT Token và HttpOnly Cookie, chuyển hướng sang /pages/admin/dashboard.html.",High,PASS,Kiểm tra bảo mật JWT
+TC_FR01_02,FR-01,-,Luồng thay thế (Alternative Flow),Đăng nhập thành công bằng địa chỉ Email thay vì Username,Tài khoản Staff tồn tại trong hệ thống.,"1. Truy cập /login.html.
+2. Nhập Email vào ô tài khoản.
+3. Nhập mật khẩu đúng.
+4. Bấm 'Đăng nhập'.","Email: staff1@rikkeilab.vn, Pass: Staff@123","Hệ thống tự động tra cứu người dùng qua email, đăng nhập thành công và chuyển hướng về /pages/staff/dashboard.html.",Medium,PASS,Hỗ trợ cả email và username
+TC_FR01_03,FR-01,EX-01 / ERR-01,Luồng ngoại lệ (Exception Flow),Khóa tài khoản 15 phút khi nhập sai mật khẩu liên tiếp 5 lần,Tài khoản đang ở trạng thái ACTIVE.,"1. Nhập Username đúng và Mật khẩu sai 5 lần liên tiếp.
+2. Quan sát thông báo ở lần thứ 5.
+3. Thử đăng nhập lần thứ 6 với mật khẩu đúng.","Username: staff1, Pass: SaiPass1 -> SaiPass5",Lần thứ 5 hiển thị cảnh báo tài khoản bị tạm khóa 15 phút [ERR-01] do Brute-force. Lần thứ 6 bị chặn kể cả khi nhập đúng mật khẩu.,High,PASS,Bảo vệ chống Brute-force
+TC_FR01_04,FR-01,BR-01,Quy tắc nghiệp vụ (Business Rule),Chặn đăng nhập đối với tài khoản đã bị vô hiệu hóa (DEACTIVATED),Tài khoản có status = 'DEACTIVATED' trong CSDL.,"1. Nhập thông tin tài khoản bị vô hiệu hóa.
+2. Bấm nút 'Đăng nhập'.","Username: former_staff, Pass: Pass@123","Hệ thống từ chối đăng nhập (HTTP 403), hiển thị thông báo: 'Tài khoản đã bị vô hiệu hóa. Vui lòng liên hệ Quản lý!'.",High,PASS,Quy tắc phân quyền BR-01
+TC_FR02_01,FR-02,-,Luồng chính (Main Flow),Đăng xuất an toàn và xóa bỏ toàn bộ phiên làm việc,Người dùng đang đăng nhập trong hệ thống.,"1. Bấm vào avatar người dùng trên Topbar.
+2. Chọn 'Đăng xuất'.
+3. Xác nhận đăng xuất.",Tài khoản đang đăng nhập bất kỳ,"Hệ thống xóa Cookie HttpOnly, xóa Token trong SessionStorage và điều hướng người dùng về trang /login.html.",High,PASS,Dọn dẹp phiên triệt để
+TC_FR02_02,FR-02,-,Luồng thay thế (Alternative Flow),Lấy thông tin hồ sơ người dùng hiện tại (GET /api/auth/me),Người dùng đã gửi kèm JWT Bearer Token hợp lệ.,1. Gửi request GET /api/auth/me kèm Authorization header.,Bearer <valid_token>,"Trả về HTTP 200 kèm JSON thông tin: id, username, email, full_name, role_name, avatar_url.",Medium,PASS,API Profile Header
+TC_FR02_03,FR-02,EX-07 / ERR-07,Luồng ngoại lệ (Exception Flow),Tự động chuyển hướng về đăng nhập khi phiên JWT hết hạn,Token JWT đã hết hạn (> 60 phút) hoặc không hợp lệ.,"1. Đang mở trang /pages/staff/posts.html.
+2. Token JWT hết hạn.
+3. Thao tác click một chức năng hoặc tải lại trang.",Token hết hạn,"AuthMiddleware bắt lỗi 401 Unauthorized, hiển thị Toast 'Phiên đăng nhập đã hết hạn' và tự động chuyển về trang /login.html.",High,PASS,Bảo vệ phiên người dùng
+TC_FR03_01,FR-03,BR-01,Luồng chính (Main Flow),Manager tạo mới tài khoản Nhân viên (Staff) hợp lệ,Đăng nhập tài khoản Manager.,"1. Vào menu 'Người dùng' -> Bấm 'Thêm tài khoản'.
+2. Điền đầy đủ: Tên, Email, Username, Mật khẩu, Chọn vai trò: STAFF.
+3. Bấm 'Lưu'.","Họ tên: Lê Thu Trang, Email: tranglt@rikkei.vn, User: tranglt, Role: STAFF","Tạo thành công, mật khẩu được băm Bcrypt lưu vào CSDL, danh sách người dùng hiển thị tài khoản mới.",High,PASS,Băm mật khẩu Bcrypt
+TC_FR03_02,FR-03,-,Luồng thay thế (Alternative Flow),"Cập nhật thông tin hồ sơ người dùng (Họ tên, Số điện thoại)",Tài khoản người dùng cần sửa tồn tại trong CSDL.,"1. Bấm icon Chỉnh sửa tại tài khoản staff1.
+2. Thay đổi Họ tên và Số điện thoại.
+3. Bấm 'Cập nhật'.",Họ tên mới: Nguyễn Văn A (Lead Staff),"Cập nhật thành công, bảng danh sách phản ánh thông tin mới ngay lập tức.",Medium,PASS,Update profile
+TC_FR03_03,FR-03,EX-08 / ERR-08,Luồng ngoại lệ (Exception Flow),Báo lỗi trùng lặp khi tạo tài khoản với Email đã tồn tại,Email manager@rikkeilab.vn đã có trong CSDL.,"1. Mở form thêm người dùng.
+2. Nhập Email trùng với email đã có.
+3. Bấm 'Lưu'.",Email: manager@rikkeilab.vn,"Hệ thống chặn submit, trả về mã lỗi HTTP 409 Conflict: 'Email đã được sử dụng trong hệ thống!'.",High,PASS,Kiểm tra trùng lặp Email
+TC_FR03_04,FR-03,BR-01,Quy tắc nghiệp vụ (Business Rule),Vô hiệu hóa tài khoản theo cơ chế mềm (Soft Deactivate),Tài khoản Staff đã tạo nhiều bài viết trong quá khứ.,"1. Manager nhấn nút 'Khóa tài khoản' tại user staff1.
+2. Xác nhận vô hiệu hóa.",User ID: 2 (staff1),Cập nhật trường status = 'DEACTIVATED'. Bản ghi người dùng KHÔNG bị xóa khỏi DB; toàn bộ bài viết của nhân viên này được bảo toàn toàn vẹn.,High,PASS,Bảo toàn toàn vẹn dữ liệu
+TC_FR04_01,FR-04,BR-03,Luồng chính (Main Flow),Soạn bài viết mới đa kênh kèm hình ảnh và lưu nháp (Draft),Đăng nhập tài khoản Staff.,"1. Vào trang 'Tạo bài viết'.
+2. Nhập tiêu đề, chọn kênh FB và IG.
+3. Nhập Caption và tải lên ảnh serum.jpg (2MB).
+4. Bấm 'Lưu nháp'.","Tiêu đề: Serum Dưỡng Trắng Blossom, Kênh: FB + IG, Dung lượng: 2.1MB",Bài viết được lưu thành công với trạng thái DRAFT; trả về mã bài viết mới (ví dụ BL-0130); hiển thị thông báo thành công.,High,PASS,Vòng đời DRAFT ban đầu
+TC_FR04_02,FR-04,-,Luồng thay thế (Alternative Flow),Tạo bài viết chỉ chứa nội dung văn bản và link liên kết (Text & Link),Trang tạo bài viết đang mở.,"1. Nhập tiêu đề và nội dung chứa link website.
+2. Không đính kèm tệp media.
+3. Bấm 'Lưu nháp'.",Nội dung: 'Khám phá bộ sưu tập son mới tại https://blossombeauty.vn',Hệ thống lưu thành công bài viết text-only không bắt buộc có media.,Medium,PASS,Hỗ trợ text-only post
+TC_FR04_03,FR-04,EX-05 / ERR-05,Luồng ngoại lệ (Exception Flow),Chặn tải lên hình ảnh vượt quá dung lượng 10MB hoặc video > 50MB,Form tạo bài viết đang mở.,"1. Nhấn nút chọn tệp đính kèm.
+2. Chọn tệp ảnh dung lượng 14.5MB.
+3. Quan sát phản hồi của hệ thống.",File: high_res_banner.png (14.5 MB),"Hệ thống chặn tải lên, hiển thị thông báo lỗi màu đỏ [ERR-05]: 'Kích thước tệp ảnh vượt quá giới hạn cho phép (tối đa 10MB)'.",High,PASS,Giới hạn dung lượng BR-03
+TC_FR04_04,FR-04,BR-03,Quy tắc nghiệp vụ (Business Rule),"Chặn tải lên tệp định dạng không được hỗ trợ (.exe, .zip, .pdf)",Form tạo bài viết đang mở.,"1. Chọn tệp có đuôi mở rộng .zip hoặc .exe.
+2. Thử đính kèm vào bài viết.",File: asset_archive.zip,"Hệ thống từ chối file ngay tại tầng Client và Server, thông báo định dạng hỗ trợ: jpg, png, webp, mp4, mov.",Medium,PASS,Kiểm tra MIME type
+TC_FR05_01,FR-05,-,Luồng chính (Main Flow),Chỉnh sửa nội dung bài viết đang ở trạng thái DRAFT,Bài viết BL-0125 đang ở trạng thái DRAFT.,"1. Từ danh sách bài viết, click icon Chỉnh sửa bài BL-0125.
+2. Sửa lại tiêu đề và bổ sung hashtag.
+3. Bấm 'Lưu thay đổi'.",Tiêu đề mới: 'Ưu đãi Cuối tuần Blossom Beauty - Giảm 30%',"Thông tin cập nhật thành công, trạng thái bài viết vẫn giữ nguyên là DRAFT.",High,PASS,Sửa bài nháp
+TC_FR05_02,FR-05,-,Luồng thay thế (Alternative Flow),Chỉnh sửa bài viết bị Từ chối (REJECTED) sau khi tiếp thu phản hồi,Bài viết BL-0124 bị từ chối với lý do 'Cần thêm thông tin xuất xứ'.,"1. Mở bài viết BL-0124.
+2. Xem lý do từ chối từ Manager.
+3. Bổ sung xuất xứ sản phẩm vào caption.
+4. Bấm 'Lưu'.",Thêm caption: 'Sản phẩm nhập khẩu chính ngạch 100% Hàn Quốc',"Dữ liệu cập nhật thành công, bài viết sẵn sàng để gửi duyệt lại lần 2.",Medium,PASS,Sửa bài rejected
+TC_FR05_03,FR-05,EX-06 / ERR-06,Luồng ngoại lệ (Exception Flow),Khóa toàn bộ trường nhập liệu đối với bài viết đã Published,Bài viết BL-0128 đã ở trạng thái PUBLISHED.,"1. Mở trang chi tiết hoặc chỉnh sửa bài BL-0128.
+2. Thử nhấp vào ô tiêu đề hoặc caption.",Bài viết BL-0128 (PUBLISHED),"Toàn bộ input bị khóa (disabled/readonly), hệ thống hiển thị banner cảnh báo [ERR-01]: 'Bài viết đã xuất bản, không thể chỉnh sửa nội dung!'.",High,PASS,Bảo vệ bài viết đã xuất bản
+TC_FR05_04,FR-05,BR-04,Quy tắc nghiệp vụ (Business Rule),Tự động chuyển về PENDING_REVIEW khi sửa bài viết đã Approved,Bài viết BL-0127 đang ở trạng thái APPROVED.,"1. Mở bài viết BL-0127.
+2. Thay đổi nội dung Caption.
+3. Bấm 'Lưu thay đổi'.",Sửa nội dung bài viết đã duyệt,"Hệ thống hiển thị modal cảnh báo BR-04. Khi xác nhận, trạng thái bài viết tự động chuyển từ APPROVED về PENDING_REVIEW và gỡ khỏi lịch đăng để duyệt lại.",High,PASS,Quy tắc chuyển trạng thái BR-04
+TC_FR06_01,FR-06,-,Luồng chính (Main Flow),Xóa mềm bài viết nháp (DRAFT) thành công,Bài viết BL-0125 đang ở trạng thái DRAFT.,"1. Tại dòng bài viết BL-0125, nhấn icon Xóa (Thùng rác).
+2. Xác nhận modal 'Bạn có chắc chắn muốn xóa bài viết này?'.",Post ID: BL-0125,Bài viết biến mất khỏi bảng danh sách chính; trường deleted_at được gán thời gian hiện tại trong CSDL.,High,PASS,Soft Delete
+TC_FR06_02,FR-06,-,Luồng thay thế (Alternative Flow),Xem và khôi phục bài viết đã xóa mềm từ tab 'Đã lưu trữ',Bài viết BL-0125 đang nằm trong tab Lưu trữ (đã xóa mềm).,"1. Chuyển sang tab 'Lưu trữ'.
+2. Nhấn nút 'Khôi phục' tại bài BL-0125.",Post ID: BL-0125,"Trường deleted_at được cập nhật về NULL, bài viết xuất hiện trở lại danh sách bài viết hoạt động.",Medium,PASS,Khôi phục bài xóa
+TC_FR06_03,FR-06,EX-06 / ERR-06,Luồng ngoại lệ (Exception Flow),Chặn xóa bài viết đang ở trạng thái PENDING_REVIEW hoặc PUBLISHED,Bài viết BL-0129 đang ở trạng thái PENDING_REVIEW.,"1. Thử nhấn nút xóa hoặc gửi request DELETE /api/posts/129.
+2. Quan sát phản hồi.",Post ID: 129 (PENDING_REVIEW),"Hệ thống chặn thao tác, trả về mã lỗi HTTP 400 Bad Request: 'Không thể xóa bài viết đang chờ phê duyệt hoặc đã xuất bản!'.",High,PASS,Bảo vệ vòng đời bài viết
+TC_FR07_01,FR-07,-,Luồng chính (Main Flow),Hiển thị danh sách bài viết đầy đủ thông tin phân trang,CSDL có hơn 20 bài viết với nhiều trạng thái khác nhau.,1. Truy cập trang /pages/staff/posts.html.,"Mặc định trang 1, 10 bài/trang","Bảng hiển thị đầy đủ: ID, Ảnh thumbnail, Tiêu đề, Kênh đăng, Trạng thái, Ngày tạo, Tác giả và cột Hành động. Có phân trang rõ ràng.",High,PASS,Pagination & Table view
+TC_FR07_02,FR-07,-,Luồng thay thế (Alternative Flow),Lọc bài viết theo trạng thái (Status) kết hợp tìm kiếm từ khóa,Trang danh sách bài viết đang hiển thị.,"1. Chọn bộ lọc Trạng thái: 'Chờ duyệt (PENDING_REVIEW)'.
+2. Chọn Kênh: 'Facebook'.
+3. Nhập từ khóa 'Serum' vào ô tìm kiếm.","Status: PENDING_REVIEW, Platform: Facebook, Keyword: Serum","Bảng lọc tức thì (< 0.3s), chỉ hiển thị các bài viết thỏa mãn đồng thời 3 tiêu chí lọc.",Medium,PASS,Multi-filter search
+TC_FR07_03,FR-07,-,Luồng thay thế (Alternative Flow),Chuyển đổi giao diện hiển thị giữa Dạng bảng và Dạng lưới thẻ (Grid),Trang danh sách bài viết đang mở.,"1. Nhấn nút chuyển view sang 'Dạng lưới (Grid Card)'.
+2. Quan sát bố cục.
+3. Bấm lại nút 'Dạng bảng (Table)'.",Toggle View Mode,Giao diện chuyển đổi mượt mà không cần reload trang; dạng lưới hiển thị card trực quan kèm ảnh bìa nổi bật.,Low,PASS,UI UX view mode
+TC_FR07_04,FR-07,-,Luồng chính (Main Flow),Xem Modal chi tiết bài viết với đầy đủ thông tin và lịch sử,Danh sách bài viết đang hiển thị.,1. Click vào tiêu đề bài viết hoặc icon Mắt (Xem chi tiết).,Bài viết BL-0129,"Modal chi tiết hiển thị đầy đủ: Tiêu đề, Kênh xuất bản, Nội dung Caption, Hình ảnh đính kèm kích thước chuẩn và Lịch sử duyệt bài.",High,PASS,Post Detail Modal
+TC_FR08_01,FR-08,-,Luồng chính (Main Flow),Staff gửi bài viết đi phê duyệt (Submit for Approval) thành công,Bài viết nháp đã điền đủ thông tin hợp lệ.,"1. Tại trang tạo bài viết hoặc danh sách bài nháp, nhấn 'Gửi phê duyệt'.
+2. Xác nhận gửi.",Bài viết BL-0130 (DRAFT),Trạng thái bài viết chuyển sang PENDING_REVIEW; bài viết xuất hiện ngay trong Hàng đợi phê duyệt của Manager.,High,PASS,Submit approval
+TC_FR08_02,FR-08,-,Luồng thay thế (Alternative Flow),Kiểm tra khung xem trước Live Preview đa kênh thời gian thực,Form tạo bài viết đang mở.,"1. Nhập Caption có chứa hashtag #BlossomBeauty.
+2. Chuyển đổi qua lại giữa 3 tab xem trước: Facebook, Instagram, TikTok.
+3. Quan sát khung preview.",Hashtag: #BlossomBeauty #Skincare,"Khung preview cập nhật nội dung tức thì theo thời gian thực, hashtag được highlight màu xanh, hiển thị đúng mockup điện thoại của từng nền tảng.",Medium,PASS,Live mockup preview
+TC_FR08_03,FR-08,EX-08 / ERR-08,Luồng ngoại lệ (Exception Flow),Chặn gửi duyệt khi để trống tiêu đề hoặc chưa chọn nền tảng,Form tạo bài viết đang để trống ô tiêu đề.,1. Bấm nút 'Gửi phê duyệt'.,"Tiêu đề: rỗng, Kênh: chưa chọn","Hệ thống chặn submit, hiển thị thông báo lỗi màu đỏ [ERR-03]: 'Tiêu đề bài viết không được để trống' và 'Phải chọn ít nhất 1 nền tảng'.",High,PASS,Validation check
+TC_FR08_04,FR-08,BR-01,Quy tắc nghiệp vụ (Business Rule),Chỉ tác giả bài viết hoặc Quản lý mới có quyền gửi phê duyệt bài,Tài khoản Staff 2 đăng nhập.,"1. Staff 2 cố gắng gửi duyệt bài viết nháp của Staff 1 (qua API).
+2. Quan sát phản hồi.",Staff 2 gửi duyệt Post của Staff 1,Hệ thống từ chối quyền thực thi (HTTP 403 Forbidden): 'Bạn không có quyền gửi duyệt bài viết của người khác!'.,Medium,PASS,Phân quyền sở hữu bài viết
+TC_FR09_01,FR-09,BR-01,Luồng chính (Main Flow),Manager phê duyệt bài viết hợp lệ với giao dịch ACID,"Đăng nhập tài khoản Manager, có bài viết đang chờ duyệt.","1. Vào trang /pages/admin/approvals.html.
+2. Mở bài viết chờ duyệt.
+3. Bấm 'Phê duyệt' -> Xác nhận.",Bài viết BL-0129 (PENDING_REVIEW),"Trạng thái bài viết cập nhật thành APPROVED, tự động ghi nhận vào bảng approvals, nút 'Lên lịch ngay' khả dụng.",High,PASS,ACID Transaction
+TC_FR09_02,FR-09,-,Luồng thay thế (Alternative Flow),Phê duyệt hàng loạt nhiều bài viết cùng lúc (Batch Approval),Có 3 bài viết đang ở trạng thái PENDING_REVIEW.,"1. Tích chọn checkbox ở 3 bài viết.
+2. Nhấn nút 'Duyệt các bài đã chọn'.
+3. Xác nhận.",Danh sách 3 bài viết chờ duyệt,"Cả 3 bài viết đều chuyển sang trạng thái APPROVED, hệ thống ghi nhận 3 bản ghi audit log tương ứng.",Medium,PASS,Batch approval
+TC_FR09_03,FR-09,BR-01,Quy tắc nghiệp vụ (Business Rule),Chặn tài khoản Staff truy cập trang và API phê duyệt bài viết,Đăng nhập tài khoản Staff.,"1. Thử truy cập trực tiếp URL /pages/admin/approvals.html.
+2. Thử gọi API POST /api/approvals/approve.",Role: STAFF,Trang web tự động điều hướng về /pages/staff/posts.html kèm cảnh báo; API trả về mã lỗi HTTP 403 Forbidden.,High,PASS,RBAC Role Guard
+TC_FR09_04,FR-09,BR-07,Quy tắc nghiệp vụ (Business Rule),Ghi nhận Audit Trail đầy đủ sau khi bài viết được phê duyệt,Bài viết vừa được duyệt thành công.,1. Mở xem chi tiết bài viết -> Tab Lịch sử kiểm duyệt.,Bài viết vừa APPROVED,"Hiển thị dòng lịch sử: Thời gian duyệt chính xác, Người duyệt: 'Đoàn Thị Minh Anh (Manager)', Hành động: 'APPROVED', Ghi chú: 'Đã duyệt nội dung'.",High,PASS,Audit Trail logging
+TC_FR10_01,FR-10,BR-02,Luồng chính (Main Flow),Manager từ chối bài viết kèm lý do hợp lệ (> 10 ký tự),"Đăng nhập tài khoản Manager, có bài viết chờ duyệt.","1. Nhấn nút 'Từ chối' tại bài viết.
+2. Nhập lý do: 'Hình ảnh sản phẩm bị mờ, cần chụp lại rõ nét hơn'.
+3. Bấm 'Xác nhận từ chối'.","Lý do: 'Hình ảnh sản phẩm bị mờ, cần chụp lại rõ nét hơn'",Trạng thái bài chuyển sang REJECTED; lý do từ chối được lưu vào CSDL và hiển thị trong thông báo gửi về cho Staff.,High,PASS,Bắt buộc lý do BR-02
+TC_FR10_02,FR-10,-,Luồng thay thế (Alternative Flow),Manager yêu cầu chỉnh sửa (Changes Requested) kèm góp ý,Bài viết đang ở trạng thái PENDING_REVIEW.,"1. Chọn hành động 'Yêu cầu sửa đổi'.
+2. Nhập các điểm cần chỉnh sửa.
+3. Bấm gửi.",Góp ý: 'Cần bổ sung thêm thông tin chương trình khuyến mãi 20/11',Bài viết chuyển sang trạng thái CHANGES_REQUESTED; Staff nhận thông báo và có thể mở lại form để sửa.,Medium,PASS,Workflow Yêu cầu sửa
+TC_FR10_03,FR-10,EX-09 / ERR-09,Luồng ngoại lệ (Exception Flow),Chặn gửi từ chối khi để trống lý do hoặc nhập dưới 10 ký tự,Modal Từ chối bài viết đang mở.,"1. Để trống ô lý do từ chối (hoặc chỉ nhập 'ko dat').
+2. Bấm nút 'Xác nhận từ chối'.",Lý do: '' hoặc 'ko dat' (6 ký tự),"Hệ thống chặn submit, viền đỏ textarea và hiển thị cảnh báo [ERR-09] / BR-02: 'Lý do từ chối là bắt buộc và phải có ít nhất 10 ký tự!'.",High,PASS,Validation độ dài lý do
+TC_FR10_04,FR-10,BR-07,Quy tắc nghiệp vụ (Business Rule),Lưu vết lịch sử từ chối và lý do chi tiết vào bảng approvals,Bài viết đã bị từ chối duyệt.,1. Truy vấn bảng approvals hoặc xem modal chi tiết.,Post ID: 124,"Bản ghi lưu đúng: post_id, reviewer_id, action = 'REJECTED', reason = nội dung đã nhập, created_at = timestamp.",High,PASS,Audit Log toàn vẹn
+TC_FR11_01,FR-11,-,Luồng chính (Main Flow),Lên lịch xuất bản bài viết đã duyệt vào khung giờ hợp lệ,Bài viết đang ở trạng thái APPROVED.,"1. Vào trang Content Calendar.
+2. Chọn bài viết APPROVED để lên lịch.
+3. Chọn ngày 25/11/2026 lúc 09:00.
+4. Bấm 'Lưu lịch'.","Thời gian: 2026-11-25T09:00:00, Kênh: Facebook",Bài viết chuyển sang trạng thái SCHEDULED; thẻ sự kiện xuất hiện trên Calendar đúng ô ngày và giờ đã chọn.,High,PASS,Content Calendar
+TC_FR11_02,FR-11,-,Luồng thay thế (Alternative Flow),Kéo thả thẻ bài viết trên Calendar đổi giờ và chuyển chế độ Tháng/Tuần,Lịch biểu đang ở chế độ xem Tháng (Month View).,"1. Kéo thẻ bài viết từ ngày 25 sang ngày 26.
+2. Chuyển sang chế độ xem Tuần (Week View).
+3. Kéo đổi khung giờ từ 09:00 sang 15:00.",Kéo thả sự kiện trực quan,"Hệ thống tự động cập nhật thời gian mới trong CSDL, hiển thị Toast thông báo cập nhật lịch đăng thành công.",Medium,PASS,Kéo thả trực quan Drag & Drop
+TC_FR11_03,FR-11,EX-02 / ERR-02,Luồng ngoại lệ (Exception Flow),Chặn đặt lịch xuất bản trong quá khứ,Modal lên lịch đăng bài đang mở.,"1. Chọn thời gian xuất bản là ngày hôm qua (hoặc 1 giờ trước).
+2. Bấm 'Lưu lịch'.",Thời gian: 2020-01-01T08:00:00,"Hệ thống chặn lưu, hiển thị thông báo lỗi màu đỏ [ERR-02]: 'Không được chọn thời gian trong quá khứ!'.",High,PASS,Chặn lịch quá khứ ERR-02
+TC_FR11_04,FR-11,BR-10 / EX-03,Quy tắc nghiệp vụ (Business Rule),Phát hiện cảnh báo xung đột lịch đăng < 30 phút trên cùng một kênh,Đã có 1 bài Facebook lên lịch lúc 14:00.,"1. Đặt lịch cho bài viết thứ 2 cũng trên kênh Facebook lúc 14:15.
+2. Quan sát phản hồi trên giao diện Calendar.",Bài 1: FB 14:00; Bài 2: FB 14:15 (khoảng cách 15 phút),"Hệ thống phát hiện khoảng cách < 30 phút, hiển thị banner đỏ [ERR-03], gắn nhãn ⚠️ < 30p trên cả 2 thẻ bài và cung cấp nút 'Tự động dời sang 14:30'.",High,PASS,Xung đột lịch đăng BR-10
+TC_FR12_01,FR-12,-,Luồng chính (Main Flow),Hiển thị Icon Chuông thông báo kèm badge chấm đỏ khi có tin mới,Có thông báo mới được tạo (bài viết được duyệt hoặc nhắc giờ đăng).,"1. Đăng nhập vào hệ thống.
+2. Quan sát góc phải thanh Topbar Header.",Có 3 thông báo mới chưa đọc,Icon Chuông hiển thị badge màu đỏ (#notifDot) kèm con số '3' thể hiện số lượng thông báo chưa đọc.,High,PASS,Topbar Notification Bell
+TC_FR12_02,FR-12,-,Luồng thay thế (Alternative Flow),Mở Dropdown Flyout xem nhanh danh sách thông báo phân loại,Có danh sách thông báo tồn tại.,"1. Click chuột vào Icon Chuông trên Topbar.
+2. Xem các mục thông báo trong flyout.
+3. Click 'Xem tất cả thông báo'.",Click Bell Icon,"Flyout mở mượt mà hiển thị 5 thông báo gần nhất, phân loại icon rõ ràng (Duyệt, Từ chối, Nhắc lịch); bấm xem tất cả chuyển sang /pages/staff/notifications.html.",Medium,PASS,Flyout Dropdown
+TC_FR12_03,FR-12,BR-09,Quy tắc nghiệp vụ (Business Rule),Đánh dấu thông báo đã đọc (is_read = True) và ẩn badge đỏ,Đang hiển thị badge thông báo đỏ.,"1. Mở danh sách thông báo.
+2. Nhấn nút 'Đánh dấu tất cả đã đọc'.
+3. Quan sát icon Chuông.",Action: Mark All Read,Toàn bộ thông báo chuyển trạng thái is_read = True; badge chấm đỏ trên icon Chuông tự động ẩn đi.,High,PASS,Cập nhật is_read BR-09
+TC_FR12_04,FR-12,-,Luồng chính (Main Flow),Tác vụ tiện ích từ Modal Chi tiết: 'Sao chép Caption' & 'Tải Media',Modal chi tiết bài viết đang mở từ thông báo nhắc lịch.,"1. Nhấn nút 'Sao chép Caption'.
+2. Dán thử vào ứng dụng khác.
+3. Nhấn nút 'Tải xuống Media'.",Caption dài 300 ký tự kèm 2 file ảnh,Caption được copy chuẩn xác vào Clipboard (hiển thị Toast thông báo); Trình duyệt tự động tải toàn bộ file ảnh đính kèm về máy an toàn.,High,PASS,Copy Caption & Download Media
+TC_FR13_01,FR-13,BR-06,Luồng chính (Main Flow),Nhân viên xác nhận đã đăng bài thủ công kèm URL bài viết thực tế,Bài viết đang ở trạng thái SCHEDULED hoặc APPROVED.,"1. Nhân viên mở modal 'Xác nhận đã đăng'.
+2. Dán đường link bài viết thực tế trên Facebook.
+3. Bấm 'Xác nhận'.",URL: https://www.facebook.com/blossombeautystore/posts/1029384756,"Hệ thống xác thực tên miền hợp lệ, chuyển trạng thái bài viết sang PUBLISHED, lưu published_url và published_at vào CSDL.",High,PASS,Chuyển trạng thái PUBLISHED
+TC_FR13_02,FR-13,EX-10 / ERR-10,Luồng ngoại lệ (Exception Flow),Chặn xác nhận đăng khi URL sai tên miền hoặc không đúng định dạng,Modal xác nhận đăng bài đang mở cho kênh TikTok.,"1. Nhập đường link không phải của TikTok (vd nhập youtube.com hoặc text bừa).
+2. Bấm 'Xác nhận'.",URL sai: https://youtube.com/watch?v=123,"Hệ thống chặn submit, hiển thị thông báo lỗi [ERR-10]: 'Đường dẫn bài viết phải thuộc tên miền chính thức của nền tảng đã chọn (tiktok.com)'.",High,PASS,Kiểm tra tên miền nền tảng BR-06
+TC_FR13_03,FR-13,BR-06,Quy tắc nghiệp vụ (Business Rule),Khóa chỉnh sửa nội dung ngay sau khi bài viết được xác nhận Published,Bài viết vừa được xác nhận PUBLISHED thành công.,1. Thử bấm nút chỉnh sửa hoặc gọi API PUT /api/posts/{id}.,Post ID vừa Published,"Hệ thống chặn thao tác chỉnh sửa, bảo toàn dữ liệu bài viết để chuẩn bị cho việc thu thập chỉ số phân tích.",Medium,PASS,Bảo vệ bài Published
+TC_FR14_01,FR-14,BR-08,Luồng chính (Main Flow),"Nhập thủ công chỉ số đo lường (Reach, Views, Likes, Shares) cho bài",Bài viết đang ở trạng thái PUBLISHED.,"1. Vào trang chi tiết bài viết -> Tab Chỉ số đo lường.
+2. Nhập Reach: 15400, Views: 8200, Likes: 1250, Comments: 89, Shares: 45.
+3. Bấm 'Lưu chỉ số'.",Chỉ số số nguyên dương hợp lệ,"Dữ liệu được lưu thành công vào bảng post_statistics, hệ thống tự động tính toán tỷ lệ tương tác (Engagement Rate).",High,PASS,Nhập liệu thống kê
+TC_FR14_02,FR-14,-,Luồng thay thế (Alternative Flow),Tự động đồng bộ số liệu qua API Meta Graph / TikTok Open API,Bài viết đã liên kết mã bài đăng trên mạng xã hội và có Token hợp lệ.,"1. Nhấn nút 'Đồng bộ từ mạng xã hội'.
+2. Hệ thống gọi API Graph nền tảng lấy insights mới nhất.",OAuth Token còn hạn,"Chỉ số Reach, Likes, Comments tự động cập nhật về hệ thống theo thời gian thực mà không cần nhập tay.",Medium,PASS,Auto-sync API insights
+TC_FR14_03,FR-14,EX-04 / ERR-04,Luồng ngoại lệ (Exception Flow),Bắt lỗi Token OAuth hết hạn khi cố gắng đồng bộ số liệu tự động,Token kết nối Facebook Page hoặc TikTok đã hết hạn.,1. Bấm nút 'Đồng bộ từ mạng xã hội'.,Token OAuth hết hạn,"Hệ thống bắt mã lỗi chuẩn [ERR-04], hiển thị thông báo: 'Phiên kết nối mạng xã hội đã hết hạn. Vui lòng kết nối lại tài khoản!'. Ghi nhận log an toàn.",High,PASS,Xử lý token hết hạn ERR-04
+TC_FR14_04,FR-14,BR-08,Quy tắc nghiệp vụ (Business Rule),Chặn cập nhật chỉ số đo lường cho bài viết chưa Published,Bài viết đang ở trạng thái DRAFT hoặc PENDING_REVIEW.,"1. Thử gửi request POST /api/analytics/statistics cho bài viết DRAFT.
+2. Quan sát phản hồi.",Post status: DRAFT,Hệ thống chặn cập nhật (HTTP 400 Bad Request): 'Chỉ có thể ghi nhận chỉ số thống kê đối với bài viết đã xuất bản (PUBLISHED)!' theo quy tắc BR-08.,High,PASS,Quy tắc trạng thái thống kê BR-08
+TC_FR15_01,FR-15,-,Luồng chính (Main Flow),Hiển thị Dashboard Thống kê 4 KPI tổng quan và biểu đồ 12 tháng,"Đăng nhập tài khoản Quản lý, hệ thống đã có dữ liệu bài đăng.",1. Vào menu 'Báo cáo & Thống kê' (/pages/admin/analytics.html).,Dữ liệu tháng hiện tại,"Hiển thị đầy đủ 4 thẻ KPI (Tổng bài, Tổng tương tác, Reach, Tỷ lệ tương tác); Biểu đồ tương tác 12 tháng; Biểu đồ Donut tỷ lệ kênh; Bảng Top bài viết xuất sắc nhất.",High,PASS,Analytics Dashboard UI
+TC_FR15_02,FR-15,-,Luồng thay thế (Alternative Flow),Lọc báo cáo phân tích theo khoảng thời gian và kênh mạng xã hội,Trang Dashboard đang hiển thị.,"1. Chọn khoảng thời gian: 'Quý 4/2026'.
+2. Chọn kênh: 'TikTok'.
+3. Quan sát biểu đồ.","Time: Q4/2026, Platform: TikTok",Toàn bộ KPI và biểu đồ cập nhật dữ liệu lọc tương ứng trong thời gian phản hồi dưới 1 giây.,Medium,PASS,Lọc thời gian và kênh
+TC_FR15_03,FR-15,NFR-01,Luồng thay thế (Alternative Flow),Xuất báo cáo số liệu phân tích định dạng Excel / CSV / PDF dưới 5 giây,Trang Báo cáo đang hiển thị dữ liệu.,1. Nhấn nút 'Xuất báo cáo' -> Chọn định dạng Excel (.xlsx).,Export Format: Excel,File báo cáo được tạo và tải về máy tính hoàn tất trong thời gian < 2 giây (đáp ứng xuất sắc chỉ tiêu phi chức năng NFR-01: kết xuất dưới 5s).,High,PASS,Chỉ tiêu NFR-01 Export < 5s
+TC_FR15_04,FR-15,EX-08 / ERR-01,Luồng ngoại lệ (Exception Flow),Hiển thị màn hình Empty State khi lọc khoảng thời gian chưa có dữ liệu,Chọn khoảng thời gian không có bất kỳ bài viết nào được đăng.,"1. Chọn khoảng ngày: 01/01/2020 đến 31/01/2020.
+2. Quan sát giao diện.",Kỳ báo cáo không có dữ liệu,"Hệ thống không bị crash hoặc lỗi NaN, hiển thị màn hình Empty State chuẩn [ERR-01]: 'Chưa có dữ liệu thống kê trong khoảng thời gian đã chọn' kèm nút 'Khôi phục bộ lọc'.",Medium,PASS,Empty state UI handling
