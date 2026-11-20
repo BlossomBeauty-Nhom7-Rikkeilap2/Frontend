@@ -27,7 +27,7 @@ BR-02,Bắt buộc nhập lý do khi Từ chối bài viết,"Khi Quản lý t�
 BR-03,Giới hạn dung lượng và định dạng Media,"Hình ảnh tối đa 10MB (.jpg, .png, .webp); Video ngắn tối đa 50MB (.mp4, .mov).",FR-04,"TC_FR04_03, TC_FR04_04",PASS
 BR-04,Chuyển trạng thái khi sửa bài đã duyệt,Bài viết đã ở trạng thái Approved nếu bị chỉnh sửa nội dung phải tự động chuyển về Pending Review.,FR-05,TC_FR05_04,PASS
 BR-05,Bảo vệ bài viết đã xuất bản (Published),"Bài viết đã Published bị khóa hoàn toàn, không được phép chỉnh sửa nội dung hoặc xóa.","FR-05, FR-06","TC_FR05_03, TC_FR06_03",PASS
-BR-06,Xác thực URL bài viết thực tế,"Xác nhận đã đăng bài thủ công bắt buộc URL phải thuộc tên miền chính thức của Facebook, Instagram hoặc TikTok.",FR-13,"TC_FR13_01, TC_FR13_02, TC_FR13_03",PASS
+BR-06,Xác thực URL bài viết thực tế,"Xác nhận đã đăng bài thủ công bắt buộc URL phải thuộc tên miền chính thức của Facebook, Instagram hoặc Threads.",FR-13,"TC_FR13_01, TC_FR13_02, TC_FR13_03",PASS
 BR-07,Ghi nhận Audit Trail lịch sử kiểm duyệt,"Mọi thao tác phê duyệt, từ chối, yêu cầu chỉnh sửa đều phải ghi vết: người thực hiện, thời gian, lý do.","FR-09, FR-10","TC_FR09_04, TC_FR10_04",PASS
 BR-08,Ràng buộc cập nhật chỉ số thống kê,Chỉ các bài viết ở trạng thái Published mới được phép nhập hoặc đồng bộ chỉ số tương tác.,FR-14,"TC_FR14_01, TC_FR14_04",PASS
 BR-09,Đánh dấu trạng thái thông báo (is_read),Người dùng đọc thông báo hoặc nhấn 'Đánh dấu tất cả đã đọc' sẽ cập nhật is_read = True và tắt badge.,FR-12,TC_FR12_03,PASS
@@ -38,7 +38,7 @@ Mã Ngoại lệ (EX/ERR),Tên Ngoại lệ / Lỗi,Mô tả Hành vi Ngoại l�
 EX-01 / ERR-01,Khóa tài khoản do Brute-force,Đăng nhập sai mật khẩu quá 5 lần liên tiếp -> Khóa tài khoản tạm thời 15 phút.,FR-01,TC_FR01_03,PASS
 EX-02 / ERR-02,Đặt lịch trong quá khứ,Người dùng chọn thời gian xuất bản nhỏ hơn hoặc bằng thời điểm hiện tại -> Báo lỗi chặn lưu.,FR-11,TC_FR11_03,PASS
 EX-03 / ERR-03,Xung đột lịch đăng < 30 phút,Phát hiện 2 sự kiện cùng kênh cách nhau < 30 phút -> Hiển thị banner đỏ ERR-03 và nút giãn cách.,FR-11,TC_FR11_04,PASS
-EX-04 / ERR-04,Hết hạn Token OAuth mạng xã hội,Token Facebook/TikTok hết hạn khi đồng bộ số liệu -> Bắt lỗi ERR-04 và thông báo kết nối lại.,FR-14,TC_FR14_03,PASS
+EX-04 / ERR-04,Hết hạn Token OAuth mạng xã hội,Token Facebook/Threads hết hạn khi đồng bộ số liệu -> Bắt lỗi ERR-04 và thông báo kết nối lại.,FR-14,TC_FR14_03,PASS
 EX-05 / ERR-05,Vượt giới hạn kích thước Media,Tải lên tệp ảnh > 10MB hoặc video > 50MB -> Hệ thống từ chối nạp file và báo lỗi ERR-05.,FR-04,TC_FR04_03,PASS
 EX-06 / ERR-06,Vi phạm trạng thái vòng đời bài viết,"Thao tác sửa/xóa bài viết vi phạm máy trạng thái (sửa bài Published, xóa bài Pending) -> Báo lỗi.","FR-05, FR-06","TC_FR05_03, TC_FR06_03",PASS
 EX-07 / ERR-07,Hết hạn phiên làm việc (Session Expired),JWT Token hết hạn sau 60 phút hoặc Cookie bị xóa -> Chặn truy cập và redirect về Login.,FR-02,TC_FR02_03,PASS

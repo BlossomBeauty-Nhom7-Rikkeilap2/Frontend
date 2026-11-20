@@ -56,7 +56,7 @@ Bộ kiểm thử được thiết kế theo chuẩn kiểm thử phần mềm q
 | **BR-03** | Giới hạn dung lượng và định dạng Media | Hình ảnh tối đa 10MB (.jpg, .png, .webp); Video ngắn tối đa 50MB (.mp4, .mov). Chặn hoàn toàn các file thực thi (.exe, .zip). | FR-04 | `TC_FR04_03`, `TC_FR04_04` | **PASS** |
 | **BR-04** | Tự động chuyển trạng thái khi sửa bài đã duyệt | Bài viết đã ở trạng thái `APPROVED` nếu bị chỉnh sửa nội dung phải tự động chuyển về `PENDING_REVIEW` để Quản lý duyệt lại. | FR-05 | `TC_FR05_04` | **PASS** |
 | **BR-05** | Bảo vệ bài viết đã xuất bản (Published) | Bài viết đã ở trạng thái `PUBLISHED` bị khóa hoàn toàn, không được phép chỉnh sửa nội dung hoặc xóa khỏi hệ thống. | FR-05, FR-06 | `TC_FR05_03`, `TC_FR06_03` | **PASS** |
-| **BR-06** | Xác thực URL bài viết thực tế | Xác nhận đã đăng bài thủ công bắt buộc đường link phải thuộc tên miền chính thức của mạng xã hội đã chọn (`facebook.com`, `instagram.com`, `tiktok.com`). | FR-13 | `TC_FR13_01`, `TC_FR13_02`, `TC_FR13_03` | **PASS** |
+| **BR-06** | Xác thực URL bài viết thực tế | Xác nhận đã đăng bài thủ công bắt buộc đường link phải thuộc tên miền chính thức của mạng xã hội đã chọn (`facebook.com`, `instagram.com`, `threads.net`). | FR-13 | `TC_FR13_01`, `TC_FR13_02`, `TC_FR13_03` | **PASS** |
 | **BR-07** | Ghi nhận Audit Trail lịch sử kiểm duyệt | Mọi thao tác phê duyệt, từ chối, yêu cầu sửa đổi đều phải ghi vết vào CSDL: `reviewer_id`, `created_at`, `action`, `reason`. | FR-09, FR-10 | `TC_FR09_04`, `TC_FR10_04` | **PASS** |
 | **BR-08** | Ràng buộc cập nhật chỉ số thống kê | Chỉ các bài viết ở trạng thái `PUBLISHED` mới được phép ghi nhận hoặc đồng bộ chỉ số đo lường (Reach, Views, Likes, Shares). | FR-14 | `TC_FR14_01`, `TC_FR14_04` | **PASS** |
 | **BR-09** | Đánh dấu trạng thái thông báo (`is_read`) | Người dùng đọc thông báo hoặc nhấn "Đánh dấu tất cả đã đọc" sẽ cập nhật trường `is_read = True` và ẩn badge chấm đỏ trên icon Chuông. | FR-12 | `TC_FR12_03` | **PASS** |
@@ -71,7 +71,7 @@ Bộ kiểm thử được thiết kế theo chuẩn kiểm thử phần mềm q
 | **EX-01 / ERR-01** | Khóa tài khoản do Brute-force | Nhập sai mật khẩu liên tiếp quá 5 lần | Tạm khóa tài khoản trong 15 phút, chặn đăng nhập và trả về mã lỗi `[ERR-01]`. | `TC_FR01_03` |
 | **EX-02 / ERR-02** | Đặt lịch trong quá khứ | Chọn thời gian xuất bản nhỏ hơn hoặc bằng thời điểm hiện tại | Chặn lưu lịch, hiển thị banner đỏ `[ERR-02] Không được chọn thời gian trong quá khứ!`. | `TC_FR11_03` |
 | **EX-03 / ERR-03** | Xung đột lịch đăng < 30 phút | Hai bài viết cùng kênh đăng cách nhau < 30 phút | Báo lỗi `[ERR-03]`, gắn nhãn ⚠️ < 30p trên thẻ lịch và cung cấp nút giãn cách tự động. | `TC_FR11_04` |
-| **EX-04 / ERR-04** | Token OAuth hết hạn | Token kết nối API Facebook/TikTok hết hạn khi đồng bộ | Bắt mã lỗi `[ERR-04]`, ghi log an toàn và gửi thông báo yêu cầu người dùng kết nối lại. | `TC_FR14_03` |
+| **EX-04 / ERR-04** | Token OAuth hết hạn | Token kết nối API Facebook/Threads hết hạn khi đồng bộ | Bắt mã lỗi `[ERR-04]`, ghi log an toàn và gửi thông báo yêu cầu người dùng kết nối lại. | `TC_FR14_03` |
 | **EX-05 / ERR-05** | Vượt giới hạn kích thước Media | Tải lên file ảnh > 10MB hoặc video > 50MB | Chặn tải lên, hiển thị thông báo `[ERR-05] Kích thước tệp vượt quá giới hạn cho phép`. | `TC_FR04_03` |
 | **EX-06 / ERR-06** | Vi phạm trạng thái vòng đời bài viết | Thử xóa bài Pending/Published hoặc sửa bài Published | Chặn thao tác, trả về mã lỗi HTTP 400 và thông báo vi phạm máy trạng thái bài viết. | `TC_FR05_03`, `TC_FR06_03` |
 | **EX-07 / ERR-07** | Hết hạn phiên làm việc (Session) | Token JWT hết hạn (> 60 phút) hoặc Cookie bị xóa | Trả về 401 Unauthorized, hiển thị Toast cảnh báo và tự động chuyển hướng về trang Login. | `TC_FR02_03` |
@@ -125,7 +125,7 @@ Bộ kiểm thử được thiết kế theo chuẩn kiểm thử phần mềm q
 
 ### FR-08: Gửi phê duyệt & Live Preview đa kênh (Submission & Preview)
 * **TC_FR08_01 [Main Flow]:** Staff bấm "Gửi phê duyệt" cho bài viết nháp hợp lệ. Trạng thái chuyển sang `PENDING_REVIEW`, xuất hiện ngay trong Hàng đợi của Manager. *(Priority: High, Status: PASS)*
-* **TC_FR08_02 [Alt Flow]:** Kiểm tra khung xem trước Live Preview thời gian thực: chuyển đổi qua lại 3 tab Facebook, Instagram, TikTok render đúng mockup điện thoại. *(Priority: Medium, Status: PASS)*
+* **TC_FR08_02 [Alt Flow]:** Kiểm tra khung xem trước Live Preview thời gian thực: chuyển đổi qua lại 3 tab Facebook, Instagram, Threads render đúng mockup điện thoại. *(Priority: Medium, Status: PASS)*
 * **TC_FR08_03 [Exception Flow - EX-08]:** Chặn gửi duyệt khi để trống tiêu đề hoặc chưa chọn nền tảng. Hệ thống chặn submit và hiển thị lỗi `[ERR-03]`. *(Priority: High, Status: PASS)*
 * **TC_FR08_04 [Business Rule - BR-01]:** Chỉ tác giả bài viết hoặc Quản lý mới có quyền gửi phê duyệt bài. Staff khác cố tình can thiệp bị chặn HTTP 403 Forbidden. *(Priority: Medium, Status: PASS)*
 
@@ -155,18 +155,18 @@ Bộ kiểm thử được thiết kế theo chuẩn kiểm thử phần mềm q
 
 ### FR-13: Theo dõi tiến độ & Xác nhận đã đăng bài thủ công (Tracking Progress)
 * **TC_FR13_01 [Main Flow]:** Nhân viên xác nhận đã đăng bài thủ công kèm URL bài viết thực tế trên Facebook. Bài viết chuyển trạng thái sang `PUBLISHED`. *(Priority: High, Status: PASS)*
-* **TC_FR13_02 [Exception Flow - EX-10]:** Chặn xác nhận đăng khi URL sai tên miền mạng xã hội đích (vd chọn TikTok nhưng nhập link youtube). Báo lỗi `[ERR-10]` theo `BR-06`. *(Priority: High, Status: PASS)*
+* **TC_FR13_02 [Exception Flow - EX-10]:** Chặn xác nhận đăng khi URL sai tên miền mạng xã hội đích (vd chọn Threads nhưng nhập link youtube). Báo lỗi `[ERR-10]` theo `BR-06`. *(Priority: High, Status: PASS)*
 * **TC_FR13_03 [Business Rule - BR-06]:** Khóa chỉnh sửa nội dung ngay sau khi bài viết được xác nhận `PUBLISHED` để bảo toàn dữ liệu thu thập phân tích. *(Priority: Medium, Status: PASS)*
 
 ### FR-14: Cập nhật & Tự động đồng bộ số liệu bài đăng (Post Statistics)
 * **TC_FR14_01 [Main Flow]:** Nhập thủ công chỉ số đo lường (Reach, Views, Likes, Shares) cho bài viết đã `PUBLISHED`. Dữ liệu lưu thành công vào bảng `post_statistics`. *(Priority: High, Status: PASS)*
-* **TC_FR14_02 [Alt Flow]:** Tự động đồng bộ số liệu qua API Meta Graph / TikTok Open API v2 nạp chỉ số thực tế từ mạng xã hội. *(Priority: Medium, Status: PASS)*
+* **TC_FR14_02 [Alt Flow]:** Tự động đồng bộ số liệu qua API Meta Graph / Threads API nạp chỉ số thực tế từ mạng xã hội. *(Priority: Medium, Status: PASS)*
 * **TC_FR14_03 [Exception Flow - EX-04]:** Bắt lỗi Token OAuth hết hạn khi cố gắng đồng bộ số liệu. Bắt mã lỗi chuẩn `[ERR-04]` và thông báo yêu cầu kết nối lại tài khoản. *(Priority: High, Status: PASS)*
 * **TC_FR14_04 [Business Rule - BR-08]:** Chặn cập nhật chỉ số đo lường cho bài viết chưa `PUBLISHED` (DRAFT hoặc PENDING). Báo lỗi nghiệp vụ theo quy tắc `BR-08`. *(Priority: High, Status: PASS)*
 
 ### FR-15: Dashboard Phân tích đa kênh & Xuất báo cáo (Analytics & Export)
 * **TC_FR15_01 [Main Flow]:** Hiển thị Dashboard Thống kê 4 KPI tổng quan, biểu đồ tương tác 12 tháng, Donut chart phân bổ kênh và bảng Top bài viết xuất sắc nhất. *(Priority: High, Status: PASS)*
-* **TC_FR15_02 [Alt Flow]:** Lọc báo cáo phân tích theo khoảng thời gian tùy chọn (Quý 4/2026) và kênh mạng xã hội (TikTok). Biểu đồ cập nhật mượt mà < 1s. *(Priority: Medium, Status: PASS)*
+* **TC_FR15_02 [Alt Flow]:** Lọc báo cáo phân tích theo khoảng thời gian tùy chọn (Quý 4/2026) và kênh mạng xã hội (Threads). Biểu đồ cập nhật mượt mà < 1s. *(Priority: Medium, Status: PASS)*
 * **TC_FR15_03 [Alt Flow - NFR-01]:** Xuất báo cáo số liệu phân tích định dạng Excel / CSV / PDF hoàn tất và tải về máy trong thời gian < 2 giây (đáp ứng tiêu chí NFR-01: kết xuất dưới 5 giây). *(Priority: High, Status: PASS)*
 * **TC_FR15_04 [Exception Flow - EX-08]:** Hiển thị màn hình Empty State chuẩn `[ERR-01]` khi lọc khoảng thời gian chưa có dữ liệu bài đăng, kèm nút khôi phục bộ lọc. *(Priority: Medium, Status: PASS)*
 
