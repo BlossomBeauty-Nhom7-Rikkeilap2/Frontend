@@ -575,3 +575,66 @@
         grid-template-columns: 1fr 1fr;
     }
 }
+
+/* ---------- T06A671: RESPONSIVE TABLET & MOBILE (<= 850px / <= 600px) ---------- */
+@media (max-width: 850px) {
+    .fr07-context {
+        font-size: 16px;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .fr07-title {
+        font-size: 28px;
+    }
+    .fr07-panel {
+        padding: 16px;
+    }
+    .fr07-table-head {
+        display: none;
+    }
+    .fr07-post-row {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 16px;
+        border: 1px solid var(--pink-line, #f4dce4);
+        border-radius: 12px;
+        margin-bottom: 10px;
+    }
+    .fr07-row-actions {
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 600px) {
+    .fr07-metrics {
+        grid-template-columns: 1fr;
+    }
+    .fr07-filters {
+        grid-template-columns: 1fr;
+    }
+    .fr07-tabs {
+        gap: 16px;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .fr07-btn-primary {
+        width: 100%;
+    }
+    .fr07-pagination {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+    .fr06-dialog {
+        padding: 20px;
+    }
+    .fr06-actions {
+        flex-direction: column-reverse;
+        width: 100%;
+    }
+    .fr06-btn-cancel,
+    .fr06-btn-delete {
+        width: 100%;
+        justify-content: center;
+    }
+}
