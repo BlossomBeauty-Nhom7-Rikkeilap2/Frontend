@@ -47,7 +47,7 @@
         if (location.pathname.indexOf("/pages/") !== -1 && location.pathname.indexOf("/pages/auth/") === -1) {
             const inStaff = location.pathname.indexOf("/pages/staff/") !== -1;
             const fallbackUser = inStaff
-                ? { username: "datnp", email: "datnp@blossom.vn", role: "STAFF", fullName: "Nguyễn Phát Đạt", position: "BA / UI-UX" }
+                ? { username: "thuyduong", email: "thuyduong@blossom.vn", role: "STAFF", fullName: "Phạm Thùy Dương", position: "Marketing Staff" }
                 : { username: "admin", email: "admin@blossom.vn", role: "MANAGER", fullName: "Doãn Thị Minh Anh", position: "Marketing Manager" };
             try {
                 localStorage.setItem(USER_KEY, JSON.stringify(fallbackUser));

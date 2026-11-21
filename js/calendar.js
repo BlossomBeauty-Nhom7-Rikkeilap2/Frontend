@@ -22,7 +22,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "SCHEDULED", // Đã lên lịch / Đã đăng (#ebf6ef)
-            author: "Nguyễn Hà Linh"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 102,
@@ -32,7 +32,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "PENDING",   // Chờ duyệt (#fff2e4)
-            author: "Trần Ngọc Mai"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 103,
@@ -42,7 +42,7 @@
             time: "10:00",
             platform: "FB & IG",
             status: "EDITING",   // Đang chỉnh sửa (#f3edf8)
-            author: "Lê Thu Hương"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 104,
@@ -52,7 +52,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "SCHEDULED",
-            author: "Nguyễn Hà Linh"
+            author: "Phạm Thùy Dương"
         },
         {
             id: 105,
@@ -62,7 +62,7 @@
             time: "19:00",
             platform: "FB & IG",
             status: "SCHEDULED",
-            author: "Trần Ngọc Mai"
+            author: "Phạm Thùy Dương"
         },
         {
             id: 106,
@@ -72,7 +72,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "SCHEDULED",
-            author: "Lê Thu Hương"
+            author: "Trần Ngọc Mai"
         },
         {
             id: 107,
@@ -82,7 +82,7 @@
             time: "09:00",
             platform: "FB & IG",
             status: "SCHEDULED",
-            author: "Nguyễn Hà Linh"
+            author: "Trần Ngọc Mai"
         },
         {
             id: 108,
@@ -92,7 +92,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "PENDING",
-            author: "Trần Ngọc Mai"
+            author: "Phạm Thùy Dương"
         },
         {
             id: 109,
@@ -102,7 +102,7 @@
             time: "19:00",
             platform: "FB & IG",
             status: "SCHEDULED",
-            author: "Lê Thu Hương"
+            author: "Nhân viên Marketing"
         },
         {
             id: 110,
@@ -112,7 +112,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "SCHEDULED",
-            author: "Nguyễn Hà Linh"
+            author: "Nhân viên Marketing"
         },
         {
             id: 111,
@@ -204,6 +204,18 @@
         } catch (_) {}
         if (!state.events || !state.events.length) {
             state.events = JSON.parse(JSON.stringify(INITIAL_EVENTS));
+        } else {
+            // Đảm bảo có sự kiện mẫu của cả Minh Anh và Thùy Dương trong bộ nhớ
+            const hasThuyDuong = state.events.some(function (e) { return (e.author || "").includes("Thùy Dương"); });
+            if (!hasThuyDuong) {
+                INITIAL_EVENTS.filter(function (e) { return (e.author || "").includes("Thùy Dương"); })
+                              .forEach(function (e) { state.events.push(JSON.parse(JSON.stringify(e))); });
+            }
+            const hasMinhAnh = state.events.some(function (e) { return (e.author || "").includes("Minh Anh"); });
+            if (!hasMinhAnh) {
+                INITIAL_EVENTS.filter(function (e) { return (e.author || "").includes("Minh Anh"); })
+                              .forEach(function (e) { state.events.unshift(JSON.parse(JSON.stringify(e))); });
+            }
         }
 
         // Đồng bộ các bài viết mới tạo từ FR-04/05/06/07 (blossom_posts_fr06_07_v1) lên Lịch đăng bài
@@ -699,13 +711,36 @@
         }
     }
 
+    function isMyPost(ev, u) {
+        if (!ev || !ev.author) return false;
+        if (!u) return false;
+        const myFull = (u.fullName || u.name || "").toLowerCase().trim();
+        const myShort = (window.Auth && typeof window.Auth.shortName === "function" ? window.Auth.shortName(u) : "").toLowerCase().trim();
+        const myUser = (u.username || "").toLowerCase().trim();
+        const author = ev.author.toLowerCase().trim();
+
+        if (myFull && (author === myFull || author.includes(myFull) || myFull.includes(author))) return true;
+        if (myShort && (author === myShort || author.includes(myShort) || myShort.includes(author))) return true;
+        if (myUser && (author === myUser || author.includes(myUser))) return true;
+
+        return false;
+    }
+
     function render() {
         const board = document.getElementById("calendarBoard");
         const periodLabel = document.getElementById("calendarPeriodLabel");
         const totalSummary = document.getElementById("calendarTotalSummary");
         if (!board) return;
 
+        const isStaffPage = location.pathname.indexOf("/pages/staff/") !== -1;
+        const currentUser = (window.Auth && typeof window.Auth.getUser === "function") ? window.Auth.getUser() : null;
+        const isStaff = isStaffPage || (currentUser && currentUser.role === "STAFF");
+
         const filteredEvents = state.events.filter(function (ev) {
+            // YÊU CẦU CỦA LEADER: "acc của ai chỉ xem được lịch của người đó, không dc xem lịch của người khác, chỉ admin mới xem dc lịch của tất cả"
+            if (isStaff && !isMyPost(ev, currentUser)) {
+                return false;
+            }
             return matchesChannelFilter(ev, state.channelFilter);
         });
 

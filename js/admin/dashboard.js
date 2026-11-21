@@ -73,12 +73,13 @@
             title: "Chọn serum phù hợp với làn da của bạn",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Nguyễn Hà Linh",
+            author: "Phạm Thùy Dương",
             status: "DRAFT",
             planned_date: "2026-11-07",
             planned_label: "07/11/2026",
             updated_label: "04/11/2026",
             caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png",
             deleted_at: null
         },
         {
@@ -87,12 +88,13 @@
             title: "Chống nắng mỗi ngày, nâng niu làn da",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Phạm Khánh Linh",
+            author: "Phạm Thùy Dương",
             status: "SCHEDULED",
             planned_date: "2026-11-08",
             planned_label: "08/11/2026",
             updated_label: "06/11/2026",
             caption: "Kem chống nắng thuần chay mỏng nhẹ, không để lại vệt trắng.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         },
         {
@@ -129,12 +131,13 @@
             title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
             platforms: ["Instagram"],
             platform_label: "Instagram",
-            author: "Lê Thu Hương",
+            author: "Nhân viên Marketing",
             status: "APPROVED",
             planned_date: "2026-11-12",
             planned_label: "12/11/2026",
             updated_label: "10/11/2026",
             caption: "Làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png",
             deleted_at: null
         },
         {
@@ -143,12 +146,13 @@
             title: "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ",
             platforms: ["Facebook"],
             platform_label: "Facebook",
-            author: "Phạm Khánh Linh",
+            author: "Nhân viên Marketing",
             status: "PUBLISHED",
             planned_date: "2026-11-01",
             planned_label: "01/11/2026",
             updated_label: "01/11/2026",
             caption: "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         }
     ];
@@ -404,17 +408,26 @@
     // ==============================
     // OPEN DETAIL MODAL / EDIT
     // ==============================
-    function handlePostClick(postId) {
+    function handlePostClick(postOrId) {
+        let postObj = null;
+        if (typeof postOrId === "object" && postOrId !== null) {
+            postObj = postOrId;
+        } else {
+            const pid = String(postOrId);
+            postObj = allPosts.find(function (p) {
+                return String(p.post_id) === pid || p.code === pid;
+            });
+        }
         if (window.PostDetailModal && typeof window.PostDetailModal.open === "function") {
-            window.PostDetailModal.open(postId);
+            window.PostDetailModal.open(postObj || postOrId);
             return;
         }
         if (typeof window.openPostDetailModal === "function") {
-            window.openPostDetailModal(postId);
+            window.openPostDetailModal(postObj || postOrId);
             return;
         }
         // Fallback: điều hướng xem chi tiết tại posts.html
-        location.href = "posts.html?view=" + encodeURIComponent(postId);
+        location.href = "posts.html?view=" + encodeURIComponent(postObj ? postObj.post_id : postOrId);
     }
 
     // ==============================
@@ -463,11 +476,27 @@
             boardEl.addEventListener("click", function (e) {
                 const card = e.target.closest(".post[data-post-id]");
                 if (card) {
-                    handlePostClick(Number(card.dataset.postId));
+                    const pid = card.dataset.postId;
+                    const found = allPosts.find(function (p) {
+                        return String(p.post_id) === String(pid) || p.code === String(pid);
+                    });
+                    handlePostClick(found || Number(pid));
                 }
             });
             boardEl.addEventListener("keydown", function (e) {
                 if (e.key === "Enter" || e.key === " ") {
+                    const card = e.target.closest(".post[data-post-id]");
+                    if (card) {
+                        e.preventDefault();
+                        const pid = card.dataset.postId;
+                        const found = allPosts.find(function (p) {
+                            return String(p.post_id) === String(pid) || p.code === String(pid);
+                        });
+                        handlePostClick(found || Number(pid));
+                    }
+                }
+            });
+        }
                     const card = e.target.closest(".post[data-post-id]");
                     if (card) {
                         e.preventDefault();

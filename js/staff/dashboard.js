@@ -73,12 +73,13 @@
             title: "Chọn serum phù hợp với làn da của bạn",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Nguyễn Hà Linh",
+            author: "Phạm Thùy Dương",
             status: "DRAFT",
             planned_date: "2026-11-07",
             planned_label: "07/11/2026",
             updated_label: "04/11/2026",
             caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png",
             deleted_at: null
         },
         {
@@ -87,12 +88,13 @@
             title: "Chống nắng mỗi ngày, nâng niu làn da",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Phạm Khánh Linh",
+            author: "Phạm Thùy Dương",
             status: "SCHEDULED",
             planned_date: "2026-11-08",
             planned_label: "08/11/2026",
             updated_label: "06/11/2026",
             caption: "Kem chống nắng thuần chay mỏng nhẹ, không để lại vệt trắng.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         },
         {
@@ -129,12 +131,13 @@
             title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
             platforms: ["Instagram"],
             platform_label: "Instagram",
-            author: "Lê Thu Hương",
+            author: "Nhân viên Marketing",
             status: "APPROVED",
             planned_date: "2026-11-12",
             planned_label: "12/11/2026",
             updated_label: "10/11/2026",
             caption: "Làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png",
             deleted_at: null
         },
         {
@@ -143,12 +146,13 @@
             title: "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ",
             platforms: ["Facebook"],
             platform_label: "Facebook",
-            author: "Phạm Khánh Linh",
+            author: "Nhân viên Marketing",
             status: "PUBLISHED",
             planned_date: "2026-11-01",
             planned_label: "01/11/2026",
             updated_label: "01/11/2026",
             caption: "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         }
     ];
@@ -174,10 +178,8 @@
 
         if (myName && (author === myName || author.includes(myName) || myName.includes(author))) return true;
         if (myShort && (author === myShort || author.includes(myShort) || myShort.includes(author))) return true;
-        if (myUser && author === myUser) return true;
+        if (myUser && (author === myUser || author.includes(myUser))) return true;
 
-        // Minh Anh hoặc Nguyễn Phát Đạt demo
-        if (author.includes("minh anh") || author.includes("phát đạt")) return true;
         return false;
     }
 
@@ -200,12 +202,8 @@
         const all = loadAllPosts();
         const active = all.filter(function (p) { return !p.deleted_at; });
 
-        // Lọc bài viết của riêng nhân viên này
+        // Lọc bài viết của riêng nhân viên này (tuyệt đối không hiển thị bài của nhân viên khác)
         let myPosts = active.filter(function (p) { return isMyPost(p, user); });
-        if (!myPosts.length) {
-            // Nếu tài khoản mới chưa có bài, hiển thị các bài mẫu để giao diện hoàn chỉnh
-            myPosts = active.slice(0, 4);
-        }
 
         const countStatus = function (st) {
             return myPosts.filter(function (p) { return mapStatus(p.status) === st; }).length;

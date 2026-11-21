@@ -21,12 +21,13 @@
             title: "5 bước dưỡng da cho buổi sáng rạng rỡ",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Nguyễn Hà Linh",
+            author: "Doãn Thị Minh Anh",
             status: "PUBLISHED",
             planned_date: "2026-11-04",
             planned_label: "04/11/2026",
             updated_label: "04/11/2026",
             caption: "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng Blossom.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         },
         {
@@ -35,12 +36,13 @@
             title: "Bí quyết chăm da mùa hanh khô",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Trần Ngọc Mai",
+            author: "Doãn Thị Minh Anh",
             status: "PENDING_APPROVAL",
             planned_date: "2026-11-05",
             planned_label: "05/11/2026",
             updated_label: "05/11/2026",
             caption: "Cấp ẩm chuyên sâu bảo vệ hàng rào tự nhiên của làn da trong tiết trời thu đông.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png",
             deleted_at: null
         },
         {
@@ -49,12 +51,13 @@
             title: "Một chút yêu thương cho làn da",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Lê Thu Hương",
+            author: "Doãn Thị Minh Anh",
             status: "REVISION_REQUESTED",
             planned_date: "2026-11-06",
             planned_label: "06/11/2026",
             updated_label: "06/11/2026",
             caption: "Dành 10 phút mỗi tối để thư giãn và phục hồi làn da với mặt nạ hoa hồng.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         },
         {
@@ -63,12 +66,13 @@
             title: "Chọn serum phù hợp với làn da của bạn",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Nguyễn Hà Linh",
+            author: "Phạm Thùy Dương",
             status: "DRAFT",
             planned_date: "2026-11-07",
             planned_label: "07/11/2026",
             updated_label: "04/11/2026",
             caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png",
             deleted_at: null
         },
         {
@@ -77,12 +81,13 @@
             title: "Chống nắng mỗi ngày, nâng niu làn da",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Phạm Khánh Linh",
+            author: "Phạm Thùy Dương",
             status: "SCHEDULED",
             planned_date: "2026-11-08",
             planned_label: "08/11/2026",
             updated_label: "06/11/2026",
             caption: "Kem chống nắng thuần chay mỏng nhẹ, không để lại vệt trắng.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         },
         {
@@ -119,12 +124,13 @@
             title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
             platforms: ["Instagram"],
             platform_label: "Instagram",
-            author: "Lê Thu Hương",
+            author: "Nhân viên Marketing",
             status: "APPROVED",
             planned_date: "2026-11-12",
             planned_label: "12/11/2026",
             updated_label: "10/11/2026",
             caption: "Làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png",
             deleted_at: null
         },
         {
@@ -133,12 +139,13 @@
             title: "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ",
             platforms: ["Facebook"],
             platform_label: "Facebook",
-            author: "Phạm Khánh Linh",
+            author: "Nhân viên Marketing",
             status: "PUBLISHED",
             planned_date: "2026-11-01",
             planned_label: "01/11/2026",
             updated_label: "01/11/2026",
             caption: "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         }
     ];
@@ -707,6 +714,9 @@
                     list[idx].planned_label = plannedLabel;
                     list[idx].updated_label = todayLabel;
                     list[idx].caption = payload.caption;
+                    if (currentMedia && (currentMedia.url || currentMedia.serverUrl)) {
+                        list[idx].mediaUrl = currentMedia.url || currentMedia.serverUrl;
+                    }
                 } else {
                     list.unshift({
                         post_id: currentPostId,
@@ -720,6 +730,7 @@
                         planned_label: plannedLabel,
                         updated_label: todayLabel,
                         caption: payload.caption,
+                        mediaUrl: currentMedia ? (currentMedia.url || currentMedia.serverUrl) : null,
                         deleted_at: null
                     });
                 }
@@ -739,10 +750,12 @@
                     planned_label: plannedLabel,
                     updated_label: todayLabel,
                     caption: payload.caption,
+                    mediaUrl: currentMedia ? (currentMedia.url || currentMedia.serverUrl) : null,
                     deleted_at: null
                 });
             }
             localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(list));
+            window.dispatchEvent(new Event("blossom_posts_updated"));
         } catch (e) {
             /* ignore */
         }

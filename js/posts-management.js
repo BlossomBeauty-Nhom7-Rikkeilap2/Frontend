@@ -86,12 +86,13 @@
             title: "Chọn serum phù hợp với làn da của bạn",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Nguyễn Hà Linh",
+            author: "Phạm Thùy Dương",
             status: "DRAFT",
             planned_date: "2026-11-07",
             planned_label: "07/11/2026",
             updated_label: "04/11/2026",
             caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png",
             deleted_at: null
         },
         {
@@ -100,12 +101,13 @@
             title: "Chống nắng mỗi ngày, nâng niu làn da",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Phạm Khánh Linh",
+            author: "Phạm Thùy Dương",
             status: "SCHEDULED",
             planned_date: "2026-11-08",
             planned_label: "08/11/2026",
             updated_label: "06/11/2026",
             caption: "Kem chống nắng thuần chay mỏng nhẹ, không để lại vệt trắng.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         },
         {
@@ -142,12 +144,13 @@
             title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
             platforms: ["Instagram"],
             platform_label: "Instagram",
-            author: "Lê Thu Hương",
+            author: "Nhân viên Marketing",
             status: "APPROVED",
             planned_date: "2026-11-12",
             planned_label: "12/11/2026",
             updated_label: "10/11/2026",
             caption: "Làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png",
             deleted_at: null
         },
         {
@@ -156,12 +159,13 @@
             title: "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ",
             platforms: ["Facebook"],
             platform_label: "Facebook",
-            author: "Phạm Khánh Linh",
+            author: "Nhân viên Marketing",
             status: "PUBLISHED",
             planned_date: "2026-11-01",
             planned_label: "01/11/2026",
             updated_label: "01/11/2026",
             caption: "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11.",
+            mediaUrl: "../../assets/poster.png",
             deleted_at: null
         }
     ];
@@ -178,17 +182,16 @@
 
     function isMyPost(p, u) {
         if (!p || !p.author) return false;
-        if (!u) return true;
-        const myFull = (u.fullName || "").toLowerCase().trim();
+        if (!u) return false;
+        const myFull = (u.fullName || u.name || "").toLowerCase().trim();
         const myShort = (window.Auth && typeof window.Auth.shortName === "function" ? window.Auth.shortName(u) : "").toLowerCase().trim();
         const myUser = (u.username || "").toLowerCase().trim();
         const author = p.author.toLowerCase().trim();
 
         if (myFull && (author === myFull || author.includes(myFull) || myFull.includes(author))) return true;
         if (myShort && (author === myShort || author.includes(myShort) || myShort.includes(author))) return true;
-        if (myUser && author === myUser) return true;
+        if (myUser && (author === myUser || author.includes(myUser))) return true;
 
-        if (author.includes("minh anh") || author.includes("phát đạt")) return true;
         return false;
     }
 
@@ -196,7 +199,13 @@
         try {
             const raw = JSON.parse(localStorage.getItem(POST_LIST_KEY));
             if (Array.isArray(raw) && raw.length) {
-                // Đảm bảo có ít nhất các bài mẫu của Doãn Thị Minh Anh để Staff trải nghiệm hoàn hảo
+                // Đảm bảo có bài mẫu cho cả Minh Anh và Thùy Dương trong dữ liệu lưu trữ
+                const hasThuyDuong = raw.some(function (p) { return (p.author || "").includes("Thùy Dương"); });
+                if (!hasThuyDuong) {
+                    INITIAL_POSTS.filter(function (p) { return (p.author || "").includes("Thùy Dương"); })
+                                 .forEach(function (p) { raw.push(p); });
+                    localStorage.setItem(POST_LIST_KEY, JSON.stringify(raw));
+                }
                 const hasMinhAnh = raw.some(function (p) { return (p.author || "").includes("Minh Anh"); });
                 if (!hasMinhAnh) {
                     INITIAL_POSTS.filter(function (p) { return (p.author || "").includes("Minh Anh"); })
@@ -221,10 +230,16 @@
         const keyword = (document.getElementById("postSearchInput").value || "").trim().toLowerCase();
         const platformVal = document.getElementById("filterPlatformSelect").value;
         const statusVal = document.getElementById("filterStatusSelect").value;
-        const authorVal = document.getElementById("filterAuthorSelect").value;
+        const authorEl = document.getElementById("filterAuthorSelect");
+        const authorVal = authorEl ? authorEl.value : "ALL";
         const dateVal = document.getElementById("filterDateInput").value;
 
         return posts.filter(function (p) {
+            // QUY TẮC CỐT LÕI: Ở trang Staff, nhân viên TUYỆT ĐỐI chỉ xem bài viết của chính mình!
+            if (isStaffPage && !isMyPost(p, currentUser)) {
+                return false;
+            }
+
             // 1. Lọc theo Tab (Xóa mềm hoặc bài viết cá nhân / toàn công ty)
             if (activeTab === "DELETED") {
                 if (!p.deleted_at) return false;

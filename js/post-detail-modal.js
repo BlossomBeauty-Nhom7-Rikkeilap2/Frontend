@@ -7,7 +7,131 @@
 (function (global) {
     "use strict";
 
+    const MASTER_FALLBACK_POSTS = [
+        {
+            post_id: 129,
+            code: "BL-0129",
+            title: "Kem dưỡng trắng da Blossom",
+            platforms: ["Instagram"],
+            platform_label: "Instagram",
+            author: "Doãn Thị Minh Anh",
+            status: "PENDING_APPROVAL",
+            planned_label: "05/11/2026 08:00",
+            caption: "Kem dưỡng trắng da Blossom chứa chiết xuất hoa anh đào giúp nâng tông nhẹ nhàng và cấp ẩm sâu. Thành phần thuần chay lành tính cho mọi loại da.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png"
+        },
+        {
+            post_id: 128,
+            code: "BL-0128",
+            title: "5 bước dưỡng da cho buổi sáng rạng rỡ",
+            platforms: ["Facebook", "Instagram"],
+            platform_label: "Facebook & Instagram",
+            author: "Doãn Thị Minh Anh",
+            status: "PUBLISHED",
+            planned_label: "04/11/2026 09:00",
+            caption: "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng các sản phẩm thiên nhiên thuần khiết từ Blossom Beauty Store.",
+            mediaUrl: "../../assets/poster.png"
+        },
+        {
+            post_id: 127,
+            code: "BL-0127",
+            title: "Bí quyết chăm da mùa hanh khô",
+            platforms: ["Facebook", "Instagram"],
+            platform_label: "Facebook & Instagram",
+            author: "Doãn Thị Minh Anh",
+            status: "DRAFT",
+            planned_label: "07/11/2026 14:00",
+            caption: "Cấp ẩm chuyên sâu bảo vệ hàng rào tự nhiên của làn da trong tiết trời thu đông hanh hao.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png"
+        },
+        {
+            post_id: 126,
+            code: "BL-0126",
+            title: "Một chút yêu thương cho làn da",
+            platforms: ["Facebook", "Instagram"],
+            platform_label: "Facebook & Instagram",
+            author: "Doãn Thị Minh Anh",
+            status: "REVISION_REQUESTED",
+            planned_label: "06/11/2026 10:00",
+            caption: "Dành 10 phút mỗi tối để thư giãn và phục hồi làn da với mặt nạ hoa hồng thiên nhiên Blossom.",
+            mediaUrl: "../../assets/poster.png"
+        },
+        {
+            post_id: 125,
+            code: "BL-0125",
+            title: "Chọn serum phù hợp với làn da của bạn",
+            platforms: ["Facebook", "Instagram"],
+            platform_label: "Facebook & Instagram",
+            author: "Phạm Thùy Dương",
+            status: "DRAFT",
+            planned_label: "07/11/2026 09:00",
+            caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C để tìm ra serum chân ái cho làn da.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png"
+        },
+        {
+            post_id: 124,
+            code: "BL-0124",
+            title: "Chống nắng mỗi ngày, nâng niu làn da",
+            platforms: ["Facebook", "Instagram"],
+            platform_label: "Facebook & Instagram",
+            author: "Phạm Thùy Dương",
+            status: "SCHEDULED",
+            planned_label: "08/11/2026 08:00",
+            caption: "Kem chống nắng thuần chay mỏng nhẹ, bảo vệ quang phổ rộng SPF 50+ PA++++ không để lại vệt trắng.",
+            mediaUrl: "../../assets/poster.png"
+        },
+        {
+            post_id: 123,
+            code: "BL-0123",
+            title: "Routine tối giản cho ngày bận rộn",
+            platforms: ["Facebook", "Instagram", "Threads"],
+            platform_label: "Facebook & Instagram",
+            author: "Trần Ngọc Mai",
+            status: "REJECTED",
+            planned_label: "03/11/2026 19:00",
+            caption: "3 bước dưỡng da gọn nhẹ, tiết kiệm thời gian nhưng vẫn đủ ẩm cho cô nàng công sở bận rộn.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png"
+        },
+        {
+            post_id: 122,
+            code: "BL-0122",
+            title: "Review Son Dưỡng Thuần Chay Hương Đào Blossom",
+            platforms: ["Threads"],
+            platform_label: "Threads",
+            author: "Trần Ngọc Mai",
+            status: "DRAFT",
+            planned_label: "10/11/2026 10:00",
+            caption: "Video ngắn unbox và swatch bảng màu son dưỡng thuần chay hương đào ngọt ngào mùa lễ hội.",
+            mediaUrl: "../../assets/poster.png"
+        },
+        {
+            post_id: 121,
+            code: "BL-0121",
+            title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
+            platforms: ["Instagram"],
+            platform_label: "Instagram",
+            author: "Nhân viên Marketing",
+            status: "APPROVED",
+            planned_label: "12/11/2026 08:30",
+            caption: "Phương pháp làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng, đánh bay bã nhờn sâu trong lỗ chân lông.",
+            mediaUrl: "../../assets/figma/skincare-editorial.png"
+        },
+        {
+            post_id: 120,
+            code: "BL-0120",
+            title: "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ",
+            platforms: ["Facebook"],
+            platform_label: "Facebook",
+            author: "Nhân viên Marketing",
+            status: "PUBLISHED",
+            planned_label: "01/11/2026 09:00",
+            caption: "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11 tại hệ thống Blossom Beauty Store.",
+            mediaUrl: "../../assets/poster.png"
+        }
+    ];
+
     function getSharedPost(postId) {
+        if (!postId) return null;
         try {
             const list = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
             const found = list.find(function (p) {
@@ -17,6 +141,13 @@
             });
             if (found) return found;
         } catch (e) {}
+
+        const masterFound = MASTER_FALLBACK_POSTS.find(function (p) {
+            return Number(p.post_id) === Number(postId) ||
+                   String(p.post_id) === String(postId) ||
+                   p.code === String(postId);
+        });
+        if (masterFound) return masterFound;
 
         // Fallback từ calendar events
         try {
@@ -33,54 +164,23 @@
                     platform_label: ev.platform || "Facebook & Instagram",
                     author: ev.author || "Doãn Thị Minh Anh",
                     status: ev.status === "SCHEDULED" ? "SCHEDULED" : (ev.status === "PENDING" ? "PENDING_APPROVAL" : "DRAFT"),
-                    planned_label: ev.date + " " + ev.time,
+                    planned_label: ev.date + " " + (ev.time || "09:00"),
                     caption: "Routine chăm sóc da toàn diện cùng các tinh chất dưỡng ẩm từ thiên nhiên của Blossom Beauty.",
                     mediaUrl: "../../assets/figma/skincare-editorial.png"
                 };
             }
         } catch (e) {}
 
-        if (Number(postId) === 129 || String(postId).includes("129")) {
-            return {
-                post_id: 129,
-                code: "BL-0129",
-                title: "Kem dưỡng trắng da Blossom",
-                platforms: ["Instagram"],
-                platform_label: "Instagram",
-                author: "Doãn Thị Minh Anh",
-                status: "PENDING_APPROVAL",
-                planned_label: "05/11/2026 08:00",
-                caption: "Kem dưỡng trắng da Blossom chứa chiết xuất hoa anh đào giúp nâng tông nhẹ nhàng và cấp ẩm sâu. Thành phần thuần chay lành tính cho mọi loại da.",
-                mediaUrl: "../../assets/figma/skincare-editorial.png"
-            };
-        }
-
-        if (Number(postId) === 127 || String(postId).includes("127")) {
-            return {
-                post_id: 127,
-                code: "BL-0127",
-                title: "Bí quyết chăm da mùa hanh khô",
-                platforms: ["Facebook", "Instagram"],
-                platform_label: "Facebook & Instagram",
-                author: "Trần Ngọc Mai",
-                status: "PENDING_APPROVAL",
-                planned_label: "05/11/2026 08:00",
-                caption: "Cấp ẩm chuyên sâu bảo vệ hàng rào tự nhiên của làn da trong tiết trời thu đông.",
-                mediaUrl: "../../assets/figma/skincare-editorial.png"
-            };
-        }
-
-        // Default mock
         return {
             post_id: postId,
             code: "BL-0" + postId,
-            title: "Bộ sưu tập chăm sóc da thu đông Blossom",
-            platforms: ["Facebook", "Instagram"],
+            title: "Bài viết #" + postId,
+            platforms: ["Facebook & Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
+            author: "Thành viên Blossom",
             status: "PENDING_APPROVAL",
-            planned_label: "20/11/2026 14:00",
-            caption: "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng các sản phẩm thiên nhiên thuần khiết từ Blossom Beauty Store. #BlossomBeauty #SkincareRoutine #NaturalGlow",
+            planned_label: "15/11/2026 09:00",
+            caption: "Nội dung bài viết mới thêm trên hệ thống quản lý nội dung Blossom Beauty Store.",
             mediaUrl: "../../assets/figma/skincare-editorial.png"
         };
     }
@@ -160,10 +260,15 @@
             });
     }
 
-    function openPostDetailModal(postId) {
-        const post = getSharedPost(postId);
+    function openPostDetailModal(postOrId) {
+        let post = null;
+        if (postOrId && typeof postOrId === "object") {
+            post = postOrId;
+        } else {
+            post = getSharedPost(postOrId);
+        }
         if (!post) {
-            UI.toast("error", "Lỗi", "Không tìm thấy dữ liệu bài viết ID #" + postId);
+            UI.toast("error", "Lỗi", "Không tìm thấy dữ liệu bài viết ID #" + postOrId);
             return;
         }
 
