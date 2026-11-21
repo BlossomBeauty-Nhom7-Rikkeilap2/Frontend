@@ -118,9 +118,9 @@
 }
 
 .fr11-period-label {
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 24px;
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 20px;
     line-height: 1.35;
     color: var(--text-strong, #24122e);
     min-width: 170px;
