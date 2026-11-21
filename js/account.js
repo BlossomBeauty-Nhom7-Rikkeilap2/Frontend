@@ -46,7 +46,7 @@
         timezone: "Asia/Ho_Chi_Minh",
         requireApproval: true,
         defaultTime: "09:00",
-        platforms: ["Facebook", "Instagram", "TikTok"],
+        platforms: ["Facebook", "Instagram", "Threads"],
         notifyPending: true,
         notifyRevision: true,
         notifyPublished: true,
