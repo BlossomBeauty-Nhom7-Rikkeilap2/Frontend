@@ -2,10 +2,10 @@
    ACCOUNT STORE – Kho dữ liệu tài khoản (demo, lưu localStorage)
    Dùng chung cho:
      - pages/admin/accounts.html  (quản lý tài khoản)
-     - pages/auth/login.html      (chặn tài khoản đã khóa đăng nhập)
+     - pages/auth/login.html      (chặn tài khoản đã khóa đăng nhập & xác thực tài khoản)
 
-   Khi nối backend: thay load()/save() bằng lời gọi API.
-   Lưu ý: KHÔNG lưu mật khẩu ở phía trình duyệt – mật khẩu do server băm và kiểm tra.
+   Lưu trữ mật khẩu mã hóa demo trong localStorage để hỗ trợ đăng nhập
+   cho toàn bộ 8 tài khoản hệ thống và bất kỳ tài khoản mới nào được tạo.
    ========================================================= */
 (function (global) {
     "use strict";
@@ -14,14 +14,14 @@
 
     // role: "MANAGER" | "STAFF"      status: "active" | "locked"
     const SEED = [
-        { id: "acc-001", fullName: "Doãn Thị Minh Anh", email: "admin@blossom.vn",    role: "MANAGER", status: "active", createdAt: "2026-01-05" },
-        { id: "acc-002", fullName: "Trần Quốc Mạnh",    email: "manh@blossom.vn",     role: "STAFF",   status: "active", createdAt: "2026-02-12" },
-        { id: "acc-003", fullName: "Nguyễn Thu Hà",     email: "thuha@blossom.vn",    role: "STAFF",   status: "active", createdAt: "2026-02-20" },
-        { id: "acc-004", fullName: "Lê Hoàng Long",     email: "hoanglong@blossom.vn", role: "STAFF",  status: "locked", createdAt: "2026-03-08" },
-        { id: "acc-005", fullName: "Phạm Ngọc Diệp",    email: "ngocdiep@blossom.vn", role: "MANAGER", status: "active", createdAt: "2026-04-02" },
-        { id: "acc-006", fullName: "Võ Khánh Linh",     email: "khanhlinh@blossom.vn", role: "STAFF",  status: "active", createdAt: "2026-05-17" },
-        { id: "acc-007", fullName: "Đặng Bảo Châu",     email: "baochau@blossom.vn",  role: "STAFF",   status: "active", createdAt: "2026-07-01" },
-        { id: "acc-008", fullName: "Bùi Gia Hân",       email: "giahan@blossom.vn",   role: "STAFF",   status: "locked", createdAt: "2026-09-22" }
+        { id: "acc-001", fullName: "Doãn Thị Minh Anh", email: "admin@blossom.vn",    role: "MANAGER", status: "active", createdAt: "2026-01-05", password: "Blossom@123", position: "Marketing Manager" },
+        { id: "acc-002", fullName: "Trần Quốc Mạnh",    email: "manh@blossom.vn",     role: "STAFF",   status: "active", createdAt: "2026-02-12", password: "Manh@2026",   position: "Marketing Staff" },
+        { id: "acc-003", fullName: "Nguyễn Thu Hà",     email: "thuha@blossom.vn",    role: "STAFF",   status: "active", createdAt: "2026-02-20", password: "Blossom@123", position: "Content Creator" },
+        { id: "acc-004", fullName: "Lê Hoàng Long",     email: "hoanglong@blossom.vn", role: "STAFF",  status: "locked", createdAt: "2026-03-08", password: "Blossom@123", position: "Copywriter" },
+        { id: "acc-005", fullName: "Phạm Ngọc Diệp",    email: "ngocdiep@blossom.vn", role: "MANAGER", status: "active", createdAt: "2026-04-02", password: "Blossom@123", position: "Brand Manager" },
+        { id: "acc-006", fullName: "Võ Khánh Linh",     email: "khanhlinh@blossom.vn", role: "STAFF",  status: "active", createdAt: "2026-05-17", password: "Blossom@123", position: "Social Media Executive" },
+        { id: "acc-007", fullName: "Đặng Bảo Châu",     email: "baochau@blossom.vn",  role: "STAFF",   status: "active", createdAt: "2026-07-01", password: "Blossom@123", position: "Designer" },
+        { id: "acc-008", fullName: "Bùi Gia Hân",       email: "giahan@blossom.vn",   role: "STAFF",   status: "locked", createdAt: "2026-09-22", password: "Blossom@123", position: "Marketing Intern" }
     ];
 
     function normEmail(email) {
@@ -35,7 +35,13 @@
     function load() {
         try {
             const raw = JSON.parse(localStorage.getItem(KEY));
-            if (Array.isArray(raw)) return raw;
+            if (Array.isArray(raw) && raw.length > 0) {
+                // Đảm bảo mọi tài khoản đều có mật khẩu
+                return raw.map(function (a) {
+                    if (!a.password) a.password = "Blossom@123";
+                    return a;
+                });
+            }
         } catch (e) { /* dữ liệu hỏng -> dùng dữ liệu mẫu */ }
         const seed = SEED.map(function (a) { return Object.assign({}, a); });
         save(seed);
@@ -48,5 +54,5 @@
         return load().some(function (a) { return normEmail(a.email) === key && a.status === "locked"; });
     }
 
-    global.AccountStore = { KEY, load, save, isLocked, normEmail };
+    global.AccountStore = { KEY, SEED, load, save, isLocked, normEmail };
 })(window);

@@ -84,8 +84,10 @@
             if (emailTaken(list, data.email)) throw fail("Email này đã được sử dụng.", "email");
             const rec = {
                 id: nextId(list), fullName: data.fullName, email: data.email,
-                role: data.role, status: "active", createdAt: today()
-            };                                                      // KHÔNG lưu mật khẩu ở trình duyệt
+                role: data.role, status: "active", createdAt: today(),
+                password: data.password || "Blossom@123"
+            };
+            if (data.avatar) rec.avatar = data.avatar;
             list.push(rec);
             AccountStore.save(list);
             return rec;
@@ -105,7 +107,9 @@
             rec.fullName = data.fullName;
             rec.email = data.email;
             rec.role = data.role;
-            AccountStore.save(list);                                // data.password (nếu có) chỉ gửi lên server
+            if (data.password) rec.password = data.password;
+            if (data.avatar !== undefined) rec.avatar = data.avatar;
+            AccountStore.save(list);
             return rec;
         });
     }
@@ -224,8 +228,11 @@
         } else {
             listEl.innerHTML = view.map(function (a) {
                 const cls = (a.id === state.selectedId ? "is-selected " : "") + (a.status === "locked" ? "is-locked" : "");
+                const avatarContent = a.avatar
+                    ? '<img src="' + esc(a.avatar) + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">'
+                    : esc(initials(a.fullName));
                 return '<tr data-id="' + esc(a.id) + '" class="' + cls.trim() + '" tabindex="0">' +
-                    '<td><div class="acc-user"><span class="avatar avatar--sm">' + esc(initials(a.fullName)) + "</span>" +
+                    '<td><div class="acc-user"><span class="avatar avatar--sm">' + avatarContent + "</span>" +
                         "<div><b>" + esc(a.fullName) + "</b><small>" + esc(a.email) + "</small></div></div></td>" +
                     "<td>" + roleBadge(a.role) + "</td>" +
                     "<td>" + statusBadge(a.status) + "</td>" +
@@ -268,12 +275,23 @@
         }
         const self = isSelf(a);
         const locking = a.status === "active";
+        const avatarContent = a.avatar
+            ? '<img src="' + esc(a.avatar) + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">'
+            : esc(initials(a.fullName));
+
         detailEl.hidden = false;
         layoutEl.classList.add("has-detail");
         detailEl.innerHTML =
             '<div class="card__head"><h3 class="card__title">Chi tiết tài khoản</h3>' +
                 '<button type="button" class="icon-btn" data-act="close-detail" aria-label="Đóng chi tiết">' + UI.icon("close") + "</button></div>" +
-            '<div class="acc-detail__who"><span class="avatar avatar--lg">' + esc(initials(a.fullName)) + "</span>" +
+            '<div class="acc-detail__who">' +
+                '<div style="position:relative;display:inline-block;flex-shrink:0;">' +
+                    '<span class="avatar avatar--lg">' + avatarContent + '</span>' +
+                    '<label class="acc-avatar-edit" style="position:absolute;bottom:0;right:0;width:28px;height:28px;background:#d9467a;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.2);" title="Tải ảnh đại diện">' +
+                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>' +
+                        '<input type="file" id="detailAvatarFile" accept="image/png,image/jpeg,image/webp" style="display:none;">' +
+                    '</label>' +
+                '</div>' +
                 "<div><b>" + esc(a.fullName) + "</b><small>" + esc(a.email) + "</small></div></div>" +
             '<dl class="kv">' +
                 "<dt>Vai trò</dt><dd>" + roleBadge(a.role) + "</dd>" +
@@ -500,20 +518,49 @@
     /* ---------- 5a. THÊM TÀI KHOẢN ---------- */
     function openAddModal() {
         if (!canManage()) return;
+        let chosenAvatar = "";
         openFormModal({
             title: "Thêm tài khoản",
             submitLabel: "Thêm tài khoản",
             busyText: "Đang thêm...",
             errorTitle: "Không thể thêm tài khoản",
             body:
+                fieldHtml("avatar", "Ảnh đại diện (tùy chọn)", '<div style="display:flex;align-items:center;gap:12px;"><div id="af-avatar-prev" style="width:48px;height:48px;border-radius:50%;background:#fbe4ec;display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:600;color:#d9467a;flex-shrink:0;">?</div><div><label class="btn btn--secondary btn--sm" style="cursor:pointer;margin:0 0 4px 0;display:inline-flex;align-items:center;"><span>Tải ảnh lên</span><input type="file" id="af-avatar-inp" accept="image/png,image/jpeg,image/webp" style="display:none;"></label><div class="field__hint" style="font-size:12px;color:var(--muted);">JPG, PNG hoặc WebP, tối đa 5 MB</div></div></div>') +
                 fieldHtml("fullName", "Họ tên", '<input class="input" id="af-fullName" type="text" autocomplete="off" maxlength="80" placeholder="Nguyễn Văn A">', { required: true }) +
                 fieldHtml("email", "Email", '<input class="input" id="af-email" type="email" autocomplete="off" maxlength="120" placeholder="ten@blossom.vn">', { required: true }) +
                 fieldHtml("role", "Vai trò", roleSelect("STAFF", false), { required: true, hint: "Staff: tạo & chỉnh sửa bài viết. Manager: toàn quyền quản trị." }) +
                 passwordBlock("Mật khẩu"),
+            init: function (root) {
+                const inp = root.querySelector("#af-avatar-inp");
+                const prev = root.querySelector("#af-avatar-prev");
+                if (inp && prev) {
+                    inp.addEventListener("change", function () {
+                        const file = inp.files && inp.files[0];
+                        if (!file) return;
+                        if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) {
+                            UI.toast("error", "Định dạng không hợp lệ", "Chỉ chấp nhận ảnh PNG, JPG hoặc WebP.");
+                            inp.value = "";
+                            return;
+                        }
+                        if (file.size > 5 * 1024 * 1024) {
+                            UI.toast("error", "Ảnh quá lớn", "Dung lượng ảnh tối đa là 5 MB.");
+                            inp.value = "";
+                            return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            chosenAvatar = e.target.result;
+                            prev.innerHTML = '<img src="' + esc(chosenAvatar) + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            },
             read: function (root) {
                 const v = readCommon(root);
                 v.password = val(root, "password");
                 v.confirm = val(root, "confirm");
+                v.avatar = chosenAvatar;
                 return v;
             },
             validate: function (v) {
@@ -541,6 +588,7 @@
         if (!acc) { UI.toast("error", "Không tìm thấy tài khoản", "Tài khoản có thể đã bị xóa."); reload(); renderAll(); return; }
         const self = isSelf(acc);
         const oldEmailKey = AccountStore.normEmail(acc.email);
+        let chosenAvatar = acc.avatar || "";
 
         openFormModal({
             title: "Sửa tài khoản",
@@ -548,6 +596,7 @@
             busyText: "Đang lưu...",
             errorTitle: "Không thể lưu thay đổi",
             body:
+                fieldHtml("avatar", "Ảnh đại diện", '<div style="display:flex;align-items:center;gap:12px;"><div id="af-avatar-prev" style="width:48px;height:48px;border-radius:50%;background:#fbe4ec;display:flex;align-items:center;justify-content:center;overflow:hidden;font-weight:600;color:#d9467a;flex-shrink:0;">' + (chosenAvatar ? '<img src="' + esc(chosenAvatar) + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">' : esc(initials(acc.fullName))) + '</div><div><label class="btn btn--secondary btn--sm" style="cursor:pointer;margin:0 0 4px 0;display:inline-flex;align-items:center;"><span>Đổi ảnh đại diện</span><input type="file" id="af-avatar-inp" accept="image/png,image/jpeg,image/webp" style="display:none;"></label><div class="field__hint" style="font-size:12px;color:var(--muted);">JPG, PNG hoặc WebP, tối đa 5 MB</div></div></div>') +
                 fieldHtml("fullName", "Họ tên", '<input class="input" id="af-fullName" type="text" autocomplete="off" maxlength="80" value="' + esc(acc.fullName) + '">', { required: true }) +
                 fieldHtml("email", "Email", '<input class="input" id="af-email" type="email" autocomplete="off" maxlength="120" value="' + esc(acc.email) + '">', { required: true }) +
                 fieldHtml("role", "Vai trò", roleSelect(acc.role, self), {
@@ -557,6 +606,30 @@
                 '<label class="af-check"><input type="checkbox" id="af-changePwd"><span>Đặt lại mật khẩu cho tài khoản này</span></label>' +
                 '<div class="af-pwd-box" id="af-pwdBox" hidden>' + passwordBlock("Mật khẩu mới") + "</div>",
             init: function (root) {
+                const inp = root.querySelector("#af-avatar-inp");
+                const prev = root.querySelector("#af-avatar-prev");
+                if (inp && prev) {
+                    inp.addEventListener("change", function () {
+                        const file = inp.files && inp.files[0];
+                        if (!file) return;
+                        if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) {
+                            UI.toast("error", "Định dạng không hợp lệ", "Chỉ chấp nhận ảnh PNG, JPG hoặc WebP.");
+                            inp.value = "";
+                            return;
+                        }
+                        if (file.size > 5 * 1024 * 1024) {
+                            UI.toast("error", "Ảnh quá lớn", "Dung lượng ảnh tối đa là 5 MB.");
+                            inp.value = "";
+                            return;
+                        }
+                        const reader = new FileReader();
+                        reader.onload = function (e) {
+                            chosenAvatar = e.target.result;
+                            prev.innerHTML = '<img src="' + esc(chosenAvatar) + '" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
                 const chk = root.querySelector("#af-changePwd");
                 const box = root.querySelector("#af-pwdBox");
                 chk.addEventListener("change", function () {
@@ -572,6 +645,7 @@
             read: function (root) {
                 const v = readCommon(root);
                 if (self) v.role = acc.role;                        // select bị vô hiệu hóa -> giữ nguyên
+                v.avatar = chosenAvatar;
                 v.changePwd = root.querySelector("#af-changePwd").checked;
                 if (v.changePwd) { v.password = val(root, "password"); v.confirm = val(root, "confirm"); }
                 return v;
@@ -588,6 +662,16 @@
             submit: function (v) { return updateAccountRemote(acc.id, v); },
             done: function (rec, v) {
                 if (self) syncSession(rec, oldEmailKey);
+                if (self && v.avatar) {
+                    const me = currentUser();
+                    me.avatar = v.avatar;
+                    try { localStorage.setItem(Auth.USER_KEY, JSON.stringify(me)); } catch (_) {}
+                    try { localStorage.setItem("blossom_avatar_" + (me.username || me.email || "user"), v.avatar); } catch (_) {}
+                    const topAvatar = document.querySelector("#topbar .avatar");
+                    if (topAvatar) {
+                        topAvatar.innerHTML = '<img src="' + esc(v.avatar) + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
+                    }
+                }
                 reload();
                 state.selectedId = rec.id;
                 renderAll();
@@ -687,6 +771,59 @@
     });
 
     detailEl.addEventListener("click", onActionClick);
+
+    detailEl.addEventListener("change", function (e) {
+        if (e.target && e.target.id === "detailAvatarFile") {
+            const input = e.target;
+            const file = input.files && input.files[0];
+            if (!file) return;
+
+            if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) {
+                UI.toast("error", "Định dạng không hợp lệ", "Vui lòng chọn ảnh JPG, PNG hoặc WebP.");
+                input.value = "";
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                UI.toast("error", "Ảnh quá lớn", "Dung lượng ảnh tối đa là 5 MB.");
+                input.value = "";
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (evt) {
+                const dataUrl = evt.target.result;
+                const a = findById(state.selectedId);
+                if (a) {
+                    const list = AccountStore.load();
+                    const rec = list.find(function (x) { return x.id === a.id; });
+                    if (rec) {
+                        rec.avatar = dataUrl;
+                        AccountStore.save(list);
+                    }
+                    a.avatar = dataUrl;
+
+                    // Nếu đổi ảnh cho chính mình thì cập nhật luôn phiên hiện tại
+                    if (isSelf(a)) {
+                        const me = currentUser();
+                        me.avatar = dataUrl;
+                        try { localStorage.setItem(Auth.USER_KEY, JSON.stringify(me)); } catch (_) {}
+                        try { localStorage.setItem("blossom_avatar_" + (me.username || me.email || "user"), dataUrl); } catch (_) {}
+                        const topAvatar = document.querySelector("#topbar .avatar");
+                        if (topAvatar) {
+                            topAvatar.innerHTML = '<img src="' + esc(dataUrl) + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
+                        }
+                    }
+
+                    reload();
+                    renderTable();
+                    renderDetail();
+                    UI.toast("success", "Đã cập nhật ảnh đại diện", "Ảnh đại diện của " + a.fullName + " đã được lưu.");
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 
     $("pager").addEventListener("click", function (e) {
         const b = e.target.closest("button[data-page]");
