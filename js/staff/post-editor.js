@@ -1,6 +1,6 @@
 /* =========================================================
    FR-04 & FR-05 · TẠO & CHỈNH SỬA BÀI VIẾT (Task T06A660)
-   - Form nhiều nền tảng (Facebook, Instagram, TikTok)
+   - Form nhiều nền tảng (Facebook, Instagram, Threads)
    - Upload & kiểm tra định dạng/dung lượng: JPG/PNG/WEBP (≤ 10MB), MP4/MOV (≤ 50MB)
    - Auto-save tự động mỗi 30 giây + lưu tạm LocalStorage
    - Live Preview đa nền tảng
@@ -10,7 +10,7 @@
 (function () {
     "use strict";
 
-    const POSTS_STORAGE_KEY = "blossom_posts_fr06_07_v1";
+    const POSTS_STORAGE_KEY = "blossom_posts_v3";
     const AUTOSAVE_DRAFT_KEY = "blossom_autosave_draft_v1";
     const AUTOSAVE_INTERVAL_SEC = 30;
 
@@ -35,7 +35,7 @@
             title: "Bí quyết chăm da mùa hanh khô",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Trần Ngọc Mai",
+            author: "Doãn Thị Minh Anh",
             status: "PENDING_APPROVAL",
             planned_date: "2026-11-05",
             planned_label: "05/11/2026",
@@ -63,7 +63,7 @@
             title: "Chọn serum phù hợp với làn da của bạn",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Nguyễn Hà Linh",
+            author: "Doãn Thị Minh Anh",
             status: "DRAFT",
             planned_date: "2026-11-07",
             planned_label: "07/11/2026",
@@ -89,9 +89,9 @@
             post_id: 123,
             code: "BL-0123",
             title: "Routine tối giản cho ngày bận rộn",
-            platforms: ["Facebook", "Instagram", "TikTok"],
+            platforms: ["Facebook", "Instagram", "Threads"],
             platform_label: "Facebook & Instagram",
-            author: "Trần Ngọc Mai",
+            author: "Doãn Thị Minh Anh",
             status: "REJECTED",
             planned_date: "2026-11-03",
             planned_label: "03/11/2026",
@@ -103,8 +103,8 @@
             post_id: 122,
             code: "BL-0122",
             title: "Review Son Dưỡng Thuần Chay Hương Đào Blossom",
-            platforms: ["TikTok"],
-            platform_label: "TikTok",
+            platforms: ["Threads"],
+            platform_label: "Threads",
             author: "Trần Ngọc Mai",
             status: "DRAFT",
             planned_date: "2026-11-10",
@@ -196,7 +196,7 @@
             headline: "Đôi môi mềm mượt suốt 24 giờ.",
             caption: "Khám phá dòng son dưỡng thuần chay chiết xuất từ hoa quả tươi hữu cơ, cấp ẩm sâu 24h và mang lại sắc hồng tự nhiên.",
             hashtags: "#SonDuong #BlossomBeauty #VeganCosmetics #LipCare",
-            platforms: ["Facebook", "Instagram", "TikTok"],
+            platforms: ["Facebook", "Instagram", "Threads"],
             planned_time: "20/11/2026         09:30",
             approver: "Nguyễn Minh Anh",
             status: "APPROVED",
@@ -245,7 +245,7 @@
             headline: "Đánh thức vẻ rạng rỡ tự nhiên mỗi sáng.",
             caption: "Công thức 15% Vitamin C tinh khiết kết hợp chiết xuất hoa anh đào giúp làm mờ thâm sạm chỉ sau 14 ngày sử dụng đều đặn.",
             hashtags: "#VitaminC #SerumBlossom #SkincareRoutine",
-            platforms: ["Instagram", "TikTok"],
+            platforms: ["Instagram", "Threads"],
             planned_time: "22/11/2026         19:00",
             approver: "Nguyễn Minh Anh",
             status: "REVISION_REQUESTED",
@@ -299,7 +299,7 @@
         const plats = getSelectedPlatforms();
         const select = document.getElementById("platformSelect");
         if (plats.length === 3) {
-            select.value = "Facebook, Instagram & TikTok";
+            select.value = "Facebook, Instagram & Threads";
         } else if (plats.indexOf("Facebook") !== -1 && plats.indexOf("Instagram") !== -1 && plats.length === 2) {
             select.value = "Facebook & Instagram";
         } else if (plats.length === 1) {
@@ -801,7 +801,7 @@
         document.getElementById("platformSelect").addEventListener("change", function (e) {
             const val = e.target.value;
             if (val === "Facebook & Instagram") setSelectedPlatforms(["Facebook", "Instagram"]);
-            else if (val === "Facebook, Instagram & TikTok") setSelectedPlatforms(["Facebook", "Instagram", "TikTok"]);
+            else if (val === "Facebook, Instagram & Threads") setSelectedPlatforms(["Facebook", "Instagram", "Threads"]);
             else setSelectedPlatforms([val]);
             updateChecklist();
             updateLivePreview();
@@ -897,6 +897,18 @@
             backLink.href = getPostListHref();
         }
 
+        const loggedUser = (window.Auth && typeof window.Auth.getUser === "function") ? window.Auth.getUser() : null;
+        const authorInput = document.getElementById("postAuthor");
+        if (authorInput && loggedUser && loggedUser.fullName) {
+            authorInput.value = loggedUser.fullName;
+        }
+        const isStaffUser = loggedUser && loggedUser.role === "STAFF";
+        const demoBarSel = document.getElementById("demoPostStateSelect");
+        if (isStaffUser && demoBarSel) {
+            demoBarSel.hidden = true;
+            if (demoBarSel.previousElementSibling) demoBarSel.previousElementSibling.hidden = true;
+        }
+
         const stateSelect = document.getElementById("demoPostStateSelect");
         if (stateSelect) {
             // Hỗ trợ truyền ?id=...&state=... từ trang Danh sách bài viết (FR-07)
@@ -913,6 +925,11 @@
                 const sharedList = getSharedPostList();
                 const found = sharedList.find(function (p) { return Number(p.post_id) === urlId; });
                 if (found) {
+                    if (isStaffUser && loggedUser && found.author && found.author.trim().toLowerCase() !== loggedUser.fullName.trim().toLowerCase()) {
+                        UI.toast("error", "Không có quyền chỉnh sửa", "Bạn chỉ được chỉnh sửa bài viết của chính mình.");
+                        setTimeout(function () { location.replace("posts.html"); }, 900);
+                        return;
+                    }
                     currentPostId = found.post_id;
                     currentPostStatus = found.status;
                     document.getElementById("editorCrumb").textContent = "Blossom / Bài viết / " + found.code + " / Chỉnh sửa";

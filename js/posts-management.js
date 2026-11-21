@@ -9,7 +9,7 @@
 (function () {
     "use strict";
 
-    const POST_LIST_KEY = "blossom_posts_fr06_07_v1";
+    const POST_LIST_KEY = "blossom_posts_v3";
     const PAGE_SIZE = 6;
 
     const STATUS_MAP = {
@@ -43,7 +43,7 @@
             title: "Bí quyết chăm da mùa hanh khô",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Trần Ngọc Mai",
+            author: "Doãn Thị Minh Anh",
             status: "PENDING_APPROVAL",
             planned_date: "2026-11-05",
             planned_label: "05/11/2026",
@@ -71,7 +71,7 @@
             title: "Chọn serum phù hợp với làn da của bạn",
             platforms: ["Facebook", "Instagram"],
             platform_label: "Facebook & Instagram",
-            author: "Nguyễn Hà Linh",
+            author: "Doãn Thị Minh Anh",
             status: "DRAFT",
             planned_date: "2026-11-07",
             planned_label: "07/11/2026",
@@ -97,9 +97,9 @@
             post_id: 123,
             code: "BL-0123",
             title: "Routine tối giản cho ngày bận rộn",
-            platforms: ["Facebook", "Instagram", "TikTok"],
+            platforms: ["Facebook", "Instagram", "Threads"],
             platform_label: "Facebook & Instagram",
-            author: "Trần Ngọc Mai",
+            author: "Doãn Thị Minh Anh",
             status: "REJECTED",
             planned_date: "2026-11-03",
             planned_label: "03/11/2026",
@@ -111,8 +111,8 @@
             post_id: 122,
             code: "BL-0122",
             title: "Review Son Dưỡng Thuần Chay Hương Đào Blossom",
-            platforms: ["TikTok"],
-            platform_label: "TikTok",
+            platforms: ["Threads"],
+            platform_label: "Threads",
             author: "Trần Ngọc Mai",
             status: "DRAFT",
             planned_date: "2026-11-10",
@@ -151,8 +151,19 @@
         }
     ];
 
+    const currentUser = (window.Auth && typeof window.Auth.getUser === "function") ? window.Auth.getUser() : null;
+    const isStaffScope = (currentUser && currentUser.role === "STAFF") || document.body.dataset.scope === "staff";
+    const currentAuthorName = (currentUser && currentUser.fullName) ? currentUser.fullName.trim() : "Doãn Thị Minh Anh";
+
+    function isMyPost(p) {
+        if (!p) return false;
+        const a = String(p.author || "").trim().toLowerCase();
+        const me = currentAuthorName.toLowerCase();
+        return a === me || (currentUser && currentUser.username && a === currentUser.username.toLowerCase());
+    }
+
     let posts = loadPosts();
-    let activeTab = "ALL"; // ALL | MINE | DELETED
+    let activeTab = isStaffScope ? "MINE" : "ALL"; // ALL | MINE | DELETED
     let currentPage = 1;
     let pendingDeletePost = null;
 
@@ -175,16 +186,21 @@
         const keyword = (document.getElementById("postSearchInput").value || "").trim().toLowerCase();
         const platformVal = document.getElementById("filterPlatformSelect").value;
         const statusVal = document.getElementById("filterStatusSelect").value;
-        const authorVal = document.getElementById("filterAuthorSelect").value;
+        const authorEl = document.getElementById("filterAuthorSelect");
+        const authorVal = authorEl ? authorEl.value : "ALL";
         const dateVal = document.getElementById("filterDateInput").value;
 
         return posts.filter(function (p) {
-            // 1. Tab filter (Soft delete visibility)
+            // 1. Phân quyền nghiêm ngặt: Nhân viên (STAFF) CHỈ được xem bài viết của chính mình
+            if (isStaffScope && !isMyPost(p)) {
+                return false;
+            }
+
             if (activeTab === "DELETED") {
                 if (!p.deleted_at) return false;
             } else {
                 if (p.deleted_at) return false;
-                if (activeTab === "MINE" && p.author !== "Trần Ngọc Mai" && p.author !== "Nguyễn Hà Linh") {
+                if (activeTab === "MINE" && !isMyPost(p)) {
                     return false;
                 }
             }
@@ -220,21 +236,22 @@
     }
 
     function renderMetrics() {
-        const activeList = posts.filter(function (p) { return !p.deleted_at; });
-        const draftCount = activeList.filter(function (p) { return p.status === "DRAFT"; }).length;
-        const pendingCount = activeList.filter(function (p) { return p.status === "PENDING_APPROVAL"; }).length;
-        const pubCount = activeList.filter(function (p) { return p.status === "PUBLISHED"; }).length;
+        const scopedList = posts.filter(function (p) {
+            return !p.deleted_at && (!isStaffScope || isMyPost(p));
+        });
+        const draftCount = scopedList.filter(function (p) { return p.status === "DRAFT"; }).length;
+        const pendingCount = scopedList.filter(function (p) { return p.status === "PENDING_APPROVAL"; }).length;
+        const pubCount = scopedList.filter(function (p) { return p.status === "PUBLISHED"; }).length;
 
         const mTotal = document.getElementById("metricPostTotal");
         const mDraft = document.getElementById("metricPostDraft");
         const mPending = document.getElementById("metricPostPending");
         const mPub = document.getElementById("metricPostPublished");
 
-        // Giữ con số trực quan theo Figma hoặc cập nhật động khi xóa/lọc
-        if (mTotal) mTotal.textContent = String(119 + activeList.length);
-        if (mDraft) mDraft.textContent = String(12 + draftCount);
-        if (mPending) mPending.textContent = String(17 + pendingCount);
-        if (mPub) mPub.textContent = String(94 + pubCount);
+        if (mTotal) mTotal.textContent = String(scopedList.length);
+        if (mDraft) mDraft.textContent = String(draftCount);
+        if (mPending) mPending.textContent = String(pendingCount);
+        if (mPub) mPub.textContent = String(pubCount);
     }
 
     function renderTable() {

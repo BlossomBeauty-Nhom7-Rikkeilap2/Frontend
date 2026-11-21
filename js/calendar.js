@@ -1,7 +1,7 @@
 /* ==========================================================
    FR-11 · CONTENT CALENDAR CONTROLLER (T06A667)
    - 3 chế độ xem: Tháng (Month) / Tuần (Week) / Ngày (Day)
-   - Nhãn màu theo nền tảng (Facebook, Instagram, TikTok, FB & IG)
+   - Nhãn màu theo nền tảng (Facebook, Instagram, Threads, FB & IG)
    - Kéo-thả (Drag & Drop) mượt trên cả 3 chế độ để đổi ngày/giờ
    - Phát hiện & cảnh báo xung đột < 30 phút cùng nền tảng (ERR-03)
    - Chặn đặt lịch trong quá khứ (ERR-02)
@@ -9,7 +9,7 @@
 (function (global) {
     "use strict";
 
-    const STORAGE_KEY = "blossom_fr11_calendar_events_v1";
+    const STORAGE_KEY = "blossom_fr11_calendar_events_v3";
     const TODAY_STR = "2026-11-04";
 
     // 11 bài viết chuẩn theo Figma Node 3:45302 (Tháng 11, 2026)
@@ -32,7 +32,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "PENDING",   // Chờ duyệt (#fff2e4)
-            author: "Trần Ngọc Mai"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 103,
@@ -62,7 +62,7 @@
             time: "19:00",
             platform: "FB & IG",
             status: "SCHEDULED",
-            author: "Trần Ngọc Mai"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 106,
@@ -92,7 +92,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "PENDING",
-            author: "Trần Ngọc Mai"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 109,
@@ -122,7 +122,7 @@
             time: "10:00",
             platform: "FB & IG",
             status: "PENDING",
-            author: "Trần Ngọc Mai"
+            author: "Doãn Thị Minh Anh"
         }
     ];
 
@@ -186,7 +186,7 @@
 
     let state = {
         mode: "MONTH",         // MONTH | WEEK | DAY
-        channelFilter: "ALL",  // ALL | Facebook | Instagram | TikTok
+        channelFilter: "ALL",  // ALL | Facebook | Instagram | Threads
         activeDay: TODAY_STR,
         draggedEventId: null,
         events: []
@@ -208,7 +208,7 @@
 
         // Đồng bộ các bài viết mới tạo từ FR-04/05/06/07 (blossom_posts_fr06_07_v1) lên Lịch đăng bài
         try {
-            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
+            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_v3") || "[]");
             if (Array.isArray(sharedPosts)) {
                 sharedPosts.forEach(function (p) {
                     if (p.deleted_at || !p.planned_date) return;
@@ -236,7 +236,7 @@
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state.events));
             // Đồng bộ ngược ngày đăng sang danh sách bài viết FR-07 nếu trùng mã bài viết
-            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
+            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_v3") || "[]");
             if (Array.isArray(sharedPosts) && sharedPosts.length) {
                 let changed = false;
                 state.events.forEach(function (ev) {
@@ -250,7 +250,7 @@
                     }
                 });
                 if (changed) {
-                    localStorage.setItem("blossom_posts_fr06_07_v1", JSON.stringify(sharedPosts));
+                    localStorage.setItem("blossom_posts_v3", JSON.stringify(sharedPosts));
                 }
             }
         } catch (_) {}
@@ -314,14 +314,14 @@
     function platformClass(platform) {
         if (platform === "Facebook") return "platform-fb";
         if (platform === "Instagram") return "platform-ig";
-        if (platform === "TikTok") return "platform-tiktok";
+        if (platform === "Threads") return "platform-threads";
         return "platform-fbig";
     }
 
     function platformDotColor(platform) {
         if (platform === "Facebook") return "#1877F2";
         if (platform === "Instagram") return "#E1306C";
-        if (platform === "TikTok") return "#111111";
+        if (platform === "Threads") return "#111111";
         return "#cc618a";
     }
 
@@ -703,7 +703,14 @@
         const totalSummary = document.getElementById("calendarTotalSummary");
         if (!board) return;
 
+        const calUser = (global.Auth && typeof global.Auth.getUser === "function") ? global.Auth.getUser() : null;
+        const isStaffCal = (calUser && calUser.role === "STAFF") || location.pathname.indexOf("/pages/staff/") !== -1;
+        const myCalName = (calUser && calUser.fullName) ? calUser.fullName.trim().toLowerCase() : "";
+
         const filteredEvents = state.events.filter(function (ev) {
+            if (isStaffCal && myCalName && String(ev.author || "").trim().toLowerCase() !== myCalName) {
+                return false;
+            }
             return matchesChannelFilter(ev, state.channelFilter);
         });
 

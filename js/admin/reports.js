@@ -65,7 +65,7 @@
             reach: 7920,
             engagement: 895,
             rate: 11.30,
-            channel: "TikTok"
+            channel: "Threads"
         },
         {
             id: 115,
@@ -101,19 +101,19 @@
             reach: 8400,
             engagement: 860,
             rate: 10.24,
-            channel: "TikTok"
+            channel: "Threads"
         }
     ];
 
     const CHANNEL_META = [
         { name: "Facebook",  color: "#cc618a" },
         { name: "Instagram", color: "#f4b8ce" },
-        { name: "TikTok",    color: "#9a83b2" }
+        { name: "Threads",    color: "#9a83b2" }
     ];
 
     let state = {
         period: "2026-11",   // 2026-11 | 2026-10 | 2026-Q4 | EMPTY
-        platform: "ALL",     // ALL | Facebook | Instagram | TikTok
+        platform: "ALL",     // ALL | Facebook | Instagram | Threads
         staff: "ALL"         // ALL | Nguyễn Hà Linh | Trần Ngọc Mai | Lê Thu Hương
     };
 
@@ -124,7 +124,7 @@
     function getAllRankingPosts() {
         const list = TOP_POSTS_DATA.slice();
         try {
-            const shared = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
+            const shared = JSON.parse(localStorage.getItem("blossom_posts_v3") || "[]");
             if (Array.isArray(shared)) {
                 shared.forEach(function (p) {
                     if (p.deleted_at) return;
@@ -253,14 +253,14 @@
         const totalEl = document.getElementById("donutTotalText");
         const listEl = document.getElementById("fr15ChannelList");
 
-        const totalsByChannel = { Facebook: 0, Instagram: 0, TikTok: 0 };
+        const totalsByChannel = { Facebook: 0, Instagram: 0, Threads: 0 };
         filtered.forEach(function (item) {
             if (totalsByChannel[item.channel] !== undefined) {
                 totalsByChannel[item.channel] += item.engagement;
             }
         });
 
-        const grandTotal = totalsByChannel.Facebook + totalsByChannel.Instagram + totalsByChannel.TikTok;
+        const grandTotal = totalsByChannel.Facebook + totalsByChannel.Instagram + totalsByChannel.Threads;
         if (totalEl) totalEl.textContent = formatNumber(grandTotal);
 
         let accPct = 0;

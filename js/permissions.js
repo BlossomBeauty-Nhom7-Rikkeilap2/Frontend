@@ -9,7 +9,11 @@
     const M = Auth.ROLES.MANAGER;
     const S = Auth.ROLES.STAFF;
 
-    /* ---------- 1. Quy tắc theo thư mục ---------- */
+    /* ---------- 1. Quy tắc theo thư mục ----------
+       pages/admin/* -> CHỈ MANAGER (Admin)
+       pages/staff/* -> CHỈ STAFF (Nhân viên)
+       pages/auth/*  -> Công khai
+    */
     const AREA_ACCESS = {
         auth: "public",
         admin: [M],
@@ -17,23 +21,19 @@
     };
 
     /* ---------- 2. Ngoại lệ theo từng trang ----------
-       Cho phép cả Manager và Staff truy cập luồng Bài viết (FR-04/05/06/07)
-       và Lịch đăng bài (FR-11) để liên kết xuyên suốt giữa các màn hình.
+       Chỉ chia sẻ trang Tạo/Chỉnh sửa bài viết cho cả Manager và Staff.
+       Nhân viên (STAFF) tuyệt đối không được vào bất kỳ trang /pages/admin/* nào.
     */
     const PAGE_ACCESS = {
         "staff/create-post.html": [M, S],
-        "staff/edit-post.html":   [M, S],
-        "staff/posts.html":       [M, S],
-        "admin/posts.html":       [M, S],
-        "staff/calendar.html":    [M, S],
-        "admin/calendar.html":    [M, S]
+        "staff/edit-post.html":   [M, S]
     };
 
     /* ---------- 3. Quyền theo chức năng ---------- */
     const FEATURES = {
         "post:create":     [S, M],
         "post:edit":       [S, M],
-        "post:delete":     [S, M],
+        "post:delete":     [M],
         "post:approve":    [M],
         "report:view":     [M],
         "account:manage":  [M],
@@ -85,7 +85,7 @@
             Auth.setFlash({
                 type: "error",
                 title: "Không có quyền truy cập",
-                message: "Tài khoản " + Auth.ROLE_LABEL[user.role] + " không được phép vào trang này."
+                message: "Tài khoản nhân viên không được phép truy cập trang quản trị."
             });
             hidePage();
             location.replace(Auth.homeUrl(user.role));

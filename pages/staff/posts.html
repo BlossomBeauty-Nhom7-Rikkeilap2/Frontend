@@ -7,7 +7,6 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CSS dùng chung + CSS riêng FR-06/07 -->
     <link rel="stylesheet" href="../../css/common.css">
     <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/components.css">
@@ -17,141 +16,129 @@
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
 </head>
-<body data-search="Tìm kiếm bài viết..." data-active="posts.html">
+<body data-search="Tìm kiếm bài viết..." data-active="posts.html" data-scope="staff">
 
     <aside class="sidebar" id="sidebar"></aside>
 
     <div class="main">
         <header class="topbar" id="topbar"></header>
 
-        <main class="content fr07-workspace" data-node-id="3:44649">
+        <main class="content fr07-workspace">
             <!-- 1. PAGE HEADING -->
-            <section class="fr07-heading" data-node-id="3:44650">
-                <div class="fr07-context" data-node-id="3:44651">
-                    <span data-node-id="3:44652">Blossom / Bài viết</span>
+            <section class="fr07-heading">
+                <div class="fr07-context">
+                    <span>Blossom / Bài viết của tôi</span>
                     <button type="button" class="btn btn--secondary btn--sm" onclick="history.length > 1 ? history.back() : (location.href='dashboard.html')">← Quay lại</button>
                 </div>
 
-                <div class="fr07-title-row" data-node-id="3:44653">
-                    <div class="fr07-title-block" data-node-id="3:44654">
-                        <h2 class="fr07-title" data-node-id="3:44655">Quản lý bài viết</h2>
-                        <p class="fr07-subtitle" data-node-id="3:44656">Nơi mọi ý tưởng được nuôi dưỡng và tỏa sáng.</p>
+                <div class="fr07-title-row">
+                    <div class="fr07-title-block">
+                        <h2 class="fr07-title">Bài viết của tôi</h2>
+                        <p class="fr07-subtitle">Quản lý và theo dõi các bài viết do bạn tạo.</p>
                     </div>
 
-                    <a href="create-post.html" class="fr07-btn-primary" id="btnCreatePost" data-node-id="3:44657">
+                    <a href="create-post.html" class="fr07-btn-primary" id="btnCreatePost">
                         <img src="../../assets/figma/plus.svg" alt="" width="16" height="16">
                         <span>Tạo bài viết</span>
                     </a>
                 </div>
             </section>
 
-            <!-- 2. POST METRICS (4 CARDS) -->
-            <section class="fr07-metrics" data-node-id="3:44660">
-                <div class="fr07-metric-card" data-node-id="3:44661">
-                    <div class="fr07-metric-symbol" data-node-id="3:44662">
+            <!-- 2. MY POST METRICS (4 CARDS) -->
+            <section class="fr07-metrics">
+                <div class="fr07-metric-card">
+                    <div class="fr07-metric-symbol">
                         <img src="../../assets/figma/file-text.svg" alt="" width="18" height="18">
                     </div>
-                    <div class="fr07-metric-info" data-node-id="3:44664">
-                        <span class="fr07-metric-label" data-node-id="3:44665">Tổng bài viết</span>
-                        <span class="fr07-metric-value" id="metricPostTotal" data-node-id="3:44666">128</span>
-                        <span class="fr07-metric-note" data-node-id="3:44667">Toàn bộ nội dung</span>
+                    <div class="fr07-metric-info">
+                        <span class="fr07-metric-label">Bài viết của tôi</span>
+                        <span class="fr07-metric-value" id="metricPostTotal">0</span>
+                        <span class="fr07-metric-note">Tất cả bài bạn đã tạo</span>
                     </div>
                 </div>
 
-                <div class="fr07-metric-card" data-node-id="3:44668">
-                    <div class="fr07-metric-symbol" data-node-id="3:44669">
+                <div class="fr07-metric-card">
+                    <div class="fr07-metric-symbol">
                         <img src="../../assets/figma/file-text.svg" alt="" width="18" height="18">
                     </div>
-                    <div class="fr07-metric-info" data-node-id="3:44671">
-                        <span class="fr07-metric-label" data-node-id="3:44672">Bản nháp</span>
-                        <span class="fr07-metric-value" id="metricPostDraft" data-node-id="3:44673">14</span>
-                        <span class="fr07-metric-note" data-node-id="3:44674">Đang được hoàn thiện</span>
+                    <div class="fr07-metric-info">
+                        <span class="fr07-metric-label">Bản nháp</span>
+                        <span class="fr07-metric-value" id="metricPostDraft">0</span>
+                        <span class="fr07-metric-note">Đang được hoàn thiện</span>
                     </div>
                 </div>
 
-                <div class="fr07-metric-card" data-node-id="3:44675">
-                    <div class="fr07-metric-symbol" data-node-id="3:44676">
+                <div class="fr07-metric-card">
+                    <div class="fr07-metric-symbol">
                         <img src="../../assets/figma/file-text.svg" alt="" width="18" height="18">
                     </div>
-                    <div class="fr07-metric-info" data-node-id="3:44678">
-                        <span class="fr07-metric-label" data-node-id="3:44679">Chờ duyệt</span>
-                        <span class="fr07-metric-value" id="metricPostPending" data-node-id="3:44680">18</span>
-                        <span class="fr07-metric-note" data-node-id="3:44681">Cần quản lý phê duyệt</span>
+                    <div class="fr07-metric-info">
+                        <span class="fr07-metric-label">Chờ duyệt</span>
+                        <span class="fr07-metric-value" id="metricPostPending">0</span>
+                        <span class="fr07-metric-note">Đang chờ quản lý duyệt</span>
                     </div>
                 </div>
 
-                <div class="fr07-metric-card" data-node-id="3:44682">
-                    <div class="fr07-metric-symbol" data-node-id="3:44683">
+                <div class="fr07-metric-card">
+                    <div class="fr07-metric-symbol">
                         <img src="../../assets/figma/file-text.svg" alt="" width="18" height="18">
                     </div>
-                    <div class="fr07-metric-info" data-node-id="3:44685">
-                        <span class="fr07-metric-label" data-node-id="3:44686">Đã xuất bản</span>
-                        <span class="fr07-metric-value" id="metricPostPublished" data-node-id="3:44687">96</span>
-                        <span class="fr07-metric-note" data-node-id="3:44688">Đã chia sẻ đến khách hàng</span>
+                    <div class="fr07-metric-info">
+                        <span class="fr07-metric-label">Đã xuất bản</span>
+                        <span class="fr07-metric-value" id="metricPostPublished">0</span>
+                        <span class="fr07-metric-note">Đã chia sẻ lên kênh</span>
                     </div>
                 </div>
             </section>
 
-            <!-- 3. POST LIST PANEL -->
-            <section class="fr07-panel" data-node-id="3:44689">
-                <div class="fr07-tabs" data-node-id="3:44690">
-                    <button type="button" class="fr07-tab-btn is-active" data-post-tab="ALL" data-node-id="3:44691">Tất cả bài viết</button>
-                    <button type="button" class="fr07-tab-btn" data-post-tab="MINE" data-node-id="3:44692">Bài viết của tôi</button>
-                    <button type="button" class="fr07-tab-btn" data-post-tab="DELETED" data-node-id="3:44693">Đã lưu trữ</button>
+            <!-- 3. MY POST LIST PANEL (CHỈ HIỆN BÀI CỦA NHÂN VIÊN ĐANG ĐĂNG NHẬP) -->
+            <section class="fr07-panel">
+                <div class="fr07-tabs">
+                    <button type="button" class="fr07-tab-btn is-active" data-post-tab="MINE">Bài viết của tôi</button>
+                    <button type="button" class="fr07-tab-btn" data-post-tab="DELETED">Đã lưu trữ</button>
                 </div>
 
-                <div class="fr07-filters" data-node-id="3:44694">
-                    <div class="fr07-filter-field" data-node-id="3:44695">
-                        <label class="fr07-filter-label" for="postSearchInput" data-node-id="3:44696">Tìm kiếm</label>
-                        <div class="fr07-search-wrap" data-node-id="3:44697">
+                <div class="fr07-filters" style="grid-template-columns: minmax(240px, 2fr) repeat(3, minmax(150px, 1fr));">
+                    <div class="fr07-filter-field">
+                        <label class="fr07-filter-label" for="postSearchInput">Tìm kiếm</label>
+                        <div class="fr07-search-wrap">
                             <img src="../../assets/figma/search.svg" alt="" width="14" height="14">
                             <input type="text" id="postSearchInput" placeholder="Tìm theo tiêu đề, mã bài viết..." autocomplete="off">
                         </div>
                     </div>
 
                     <div class="fr07-filter-field">
-                        <label class="fr07-filter-label" for="filterPlatformSelect">Nền tảng</label>
+                        <label class="fr07-filter-label" for="filterPlatformSelect">Kênh đăng</label>
                         <select class="fr07-select" id="filterPlatformSelect">
-                            <option value="ALL">Tất cả nền tảng</option>
+                            <option value="ALL">Tất cả kênh</option>
                             <option value="Facebook">Facebook</option>
                             <option value="Instagram">Instagram</option>
-                            <option value="TikTok">TikTok</option>
+                            <option value="Threads">Threads</option>
                         </select>
                     </div>
 
-                    <div class="fr07-filter-field" data-node-id="3:44700">
-                        <label class="fr07-filter-label" for="filterStatusSelect" data-node-id="3:44701">Trạng thái</label>
-                        <select class="fr07-select" id="filterStatusSelect" data-node-id="3:44702">
+                    <div class="fr07-filter-field">
+                        <label class="fr07-filter-label" for="filterStatusSelect">Trạng thái</label>
+                        <select class="fr07-select" id="filterStatusSelect">
                             <option value="ALL">Tất cả trạng thái</option>
                             <option value="DRAFT">Bản nháp</option>
                             <option value="PENDING_APPROVAL">Chờ duyệt</option>
                             <option value="REVISION_REQUESTED">Đang chỉnh sửa</option>
                             <option value="REJECTED">Bị từ chối</option>
-                            <option value="APPROVED">Đã phê duyệt</option>
+                            <option value="APPROVED">Đã duyệt</option>
                             <option value="SCHEDULED">Đã lên lịch</option>
                             <option value="PUBLISHED">Đã xuất bản</option>
                         </select>
                     </div>
 
-                    <div class="fr07-filter-field" data-node-id="3:44704">
-                        <label class="fr07-filter-label" for="filterAuthorSelect" data-node-id="3:44705">Tác giả</label>
-                        <select class="fr07-select" id="filterAuthorSelect" data-node-id="3:44706">
-                            <option value="ALL">Tất cả tác giả</option>
-                            <option value="Nguyễn Hà Linh">Nguyễn Hà Linh</option>
-                            <option value="Trần Ngọc Mai">Trần Ngọc Mai</option>
-                            <option value="Lê Thu Hương">Lê Thu Hương</option>
-                            <option value="Phạm Khánh Linh">Phạm Khánh Linh</option>
-                        </select>
-                    </div>
-
-                    <div class="fr07-filter-field" data-node-id="3:44708">
-                        <label class="fr07-filter-label" for="filterDateInput" data-node-id="3:44709">Thời gian</label>
-                        <input type="date" class="fr07-date-input" id="filterDateInput" aria-label="Lọc theo ngày dự kiến đăng">
+                    <div class="fr07-filter-field">
+                        <label class="fr07-filter-label" for="filterDateInput">Thời gian</label>
+                        <input type="date" class="fr07-date-input" id="filterDateInput" aria-label="Lọc theo ngày đăng">
                     </div>
                 </div>
 
-                <div class="fr07-post-list" data-node-id="3:44712">
-                    <div class="fr07-table-head" data-node-id="3:44713">
+                <div class="fr07-post-list">
+                    <div class="fr07-table-head">
                         <span>BÀI VIẾT</span>
                         <span>TÁC GIẢ</span>
                         <span>TRẠNG THÁI</span>
@@ -162,9 +149,9 @@
                     <div id="postTableBody"></div>
                 </div>
 
-                <div class="fr07-pagination" data-node-id="3:44803">
-                    <span id="postPaginationSummary" data-node-id="3:44804">Hiển thị 1–6 trên 128 bài viết</span>
-                    <div class="fr07-page-btns" id="postPaginationBtns" data-node-id="3:44805"></div>
+                <div class="fr07-pagination">
+                    <span id="postPaginationSummary">Hiển thị 0 bài viết</span>
+                    <div class="fr07-page-btns" id="postPaginationBtns"></div>
                 </div>
             </section>
         </main>
@@ -172,41 +159,39 @@
         <footer class="footer" id="footer"></footer>
     </div>
 
-    <!-- FR-06: DELETE POST CONFIRMATION MODAL -->
-    <div class="fr06-backdrop" id="fr06DeleteModal" data-node-id="3:44571" hidden>
-        <div class="fr06-dialog" role="dialog" aria-modal="true" aria-labelledby="fr06ModalTitle" data-node-id="3:44572">
-            <div class="fr06-dialog-header" data-node-id="3:44573">
-                <div class="fr06-dialog-symbol" data-node-id="3:44574">
+    <!-- HỘP THOẠI XÁC NHẬN XÓA BÀI VIẾT -->
+    <div class="fr06-backdrop" id="fr06DeleteModal" hidden>
+        <div class="fr06-dialog" role="dialog" aria-modal="true" aria-labelledby="fr06ModalTitle">
+            <div class="fr06-dialog-header">
+                <div class="fr06-dialog-symbol">
                     <img src="../../assets/figma/trash-2-24.svg" alt="" width="24" height="24">
                 </div>
-                <button type="button" class="fr06-close-btn" id="btnCloseDeleteModal" aria-label="Đóng" data-node-id="3:46816">
+                <button type="button" class="fr06-close-btn" id="btnCloseDeleteModal" aria-label="Đóng">
                     <img src="../../assets/figma/x-18.svg" alt="Đóng" width="18" height="18">
                 </button>
             </div>
 
-            <div class="fr06-dialog-intro" data-node-id="3:44577">
-                <h3 class="fr06-dialog-title" id="fr06ModalTitle" data-node-id="3:44578">Xóa bài viết này?</h3>
-                <p class="fr06-dialog-desc" data-node-id="3:44579">
-                    Bài viết sẽ được chuyển vào mục Đã lưu trữ.
-                </p>
+            <div class="fr06-dialog-intro">
+                <h3 class="fr06-dialog-title" id="fr06ModalTitle">Xóa bài viết này?</h3>
+                <p class="fr06-dialog-desc">Bài viết sẽ được chuyển vào mục Đã lưu trữ.</p>
             </div>
 
-            <div class="fr06-target-box" data-node-id="3:44580">
-                <span class="fr06-target-code" id="delTargetCode" data-node-id="3:44581">BL-0125 · BẢN NHÁP</span>
-                <p class="fr06-target-title" id="delTargetTitle" data-node-id="3:44582">Chọn serum phù hợp với làn da của bạn</p>
-                <span class="fr06-target-meta" id="delTargetMeta" data-node-id="3:44583">Nguyễn Hà Linh · Cập nhật 04/11/2026</span>
+            <div class="fr06-target-box">
+                <span class="fr06-target-code" id="delTargetCode">BL-0125 · BẢN NHÁP</span>
+                <p class="fr06-target-title" id="delTargetTitle">Chọn serum phù hợp với làn da của bạn</p>
+                <span class="fr06-target-meta" id="delTargetMeta">Cập nhật 04/11/2026</span>
             </div>
 
-            <div class="fr06-warning-row" data-node-id="3:44584">
+            <div class="fr06-warning-row">
                 <img src="../../assets/figma/info-16.svg" alt="" width="16" height="16">
-                <span data-node-id="3:44586">Bạn vẫn có thể xem lại bài viết trong mục Đã lưu trữ.</span>
+                <span>Bạn vẫn có thể xem lại bài viết trong mục Đã lưu trữ.</span>
             </div>
 
-            <div class="fr06-divider" data-node-id="3:44587"></div>
+            <div class="fr06-divider"></div>
 
-            <div class="fr06-actions" data-node-id="3:44588">
-                <button type="button" class="fr06-btn-cancel" id="btnCancelDeleteModal" data-node-id="3:44589">Hủy bỏ</button>
-                <button type="button" class="fr06-btn-delete" id="btnConfirmDeleteModal" data-node-id="3:44591">
+            <div class="fr06-actions">
+                <button type="button" class="fr06-btn-cancel" id="btnCancelDeleteModal">Hủy bỏ</button>
+                <button type="button" class="fr06-btn-delete" id="btnConfirmDeleteModal">
                     <img src="../../assets/figma/trash-2-16.svg" alt="" width="16" height="16">
                     <span>Xóa bài viết</span>
                 </button>
