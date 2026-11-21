@@ -3,68 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" href="../../assets/logo.png">
-    <title>Blossom – Tiến độ bài viết</title>
+    <title>Blossom – Theo dõi tiến độ nhân viên</title>
 
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- CSS dùng chung -->
     <link rel="stylesheet" href="../../css/common.css">
     <link rel="stylesheet" href="../../css/layout.css">
     <link rel="stylesheet" href="../../css/components.css">
-    <!-- CSS riêng của trang -->
     <link rel="stylesheet" href="../../css/admin/dashboard.css">
-    <link rel="stylesheet" href="../../css/notifications.css">
 
-    <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
 </head>
 
 <body data-search="Tìm kiếm bài viết..." data-active="dashboard.html">
 
-    <!-- Sidebar + Header + Footer do js/layout.js render -->
     <aside class="sidebar" id="sidebar"></aside>
 
     <div class="main">
-
         <header class="topbar" id="topbar"></header>
 
         <main class="content">
+            <div class="crumb">Blossom / Tổng quan / Theo dõi tiến độ nhân viên</div>
 
-            <div class="crumb">Blossom / Tổng quan / Tiến độ bài viết</div>
-
-            <h2 class="page-title">Tiến độ bài viết</h2>
-
-            <p class="page-sub">
-                Từng bước hoàn thiện nội dung, cùng đội ngũ giữ nhịp sáng tạo.
-            </p>
+            <div class="dash-head-row">
+                <div>
+                    <h2 class="page-title">Theo dõi tiến độ nhân viên</h2>
+                    <p class="page-sub">
+                        Thống kê bài đăng được giao, hạn hoàn thành nội dung và tỷ lệ hoàn thành của từng thành viên.
+                    </p>
+                </div>
+                <a href="calendar.html" class="btn btn--secondary">Xem lịch đăng bài →</a>
+            </div>
 
             <section class="stats" id="stats"></section>
 
             <div class="bar">
-
-                <div class="tabs">
-                    <button type="button" class="tab active" id="tabProgress">Bảng tiến độ</button>
-                    <button type="button" class="tab" id="tabMembers">Theo thành viên</button>
+                <div class="tabs" role="tablist">
+                    <button type="button" class="tab active" data-dash-tab="members">Theo thành viên</button>
+                    <button type="button" class="tab" data-dash-tab="board">Bảng tiến độ</button>
                 </div>
 
                 <div class="filters">
-                    <select class="select" id="filterAuthor" aria-label="Lọc theo tác giả">
-                        <option value="ALL">Tất cả tác giả</option>
+                    <select class="select" id="dashAuthorFilter" aria-label="Lọc theo nhân viên">
+                        <option value="ALL">Tất cả nhân viên</option>
+                        <option value="Doãn Thị Minh Anh">Doãn Thị Minh Anh</option>
+                        <option value="Nguyễn Hà Linh">Nguyễn Hà Linh</option>
+                        <option value="Trần Ngọc Mai">Trần Ngọc Mai</option>
+                        <option value="Lê Thu Hương">Lê Thu Hương</option>
+                        <option value="Phạm Khánh Linh">Phạm Khánh Linh</option>
                     </select>
 
-                    <select class="select" id="filterCampaign" aria-label="Lọc theo chiến dịch">
+                    <select class="select" id="dashCampaignFilter" aria-label="Lọc theo chiến dịch">
                         <option value="ALL">Tất cả chiến dịch</option>
-                        <option value="Chăm sóc da thu đông">Chăm sóc da thu đông</option>
-                        <option value="Tuần lễ hoa anh đào">Tuần lễ hoa anh đào</option>
-                        <option value="Bộ sưu tập son thuần chay">Bộ sưu tập son thuần chay</option>
+                        <option value="Nâng niu làn da · Tháng 11">Nâng niu làn da · Tháng 11</option>
+                        <option value="Rạng rỡ mùa lễ hội · Tháng 12">Rạng rỡ mùa lễ hội · Tháng 12</option>
+                        <option value="Chăm da dịu nhẹ mỗi ngày">Chăm da dịu nhẹ mỗi ngày</option>
+                    </select>
+
+                    <select class="select" id="dashPeriodFilter" aria-label="Lọc theo khoảng thời gian">
+                        <option value="ALL">Tất cả thời gian</option>
+                        <option value="2026-11">Tháng 11/2026</option>
+                        <option value="2026-10">Tháng 10/2026</option>
                     </select>
                 </div>
             </div>
 
-            <section class="board" id="board"></section>
+            <!-- TAB 1: THEO THÀNH VIÊN -->
+            <section class="member-grid" id="memberProgressGrid"></section>
+
+            <!-- TAB 2: BẢNG TIẾN ĐỘ (KANBAN) -->
+            <section class="board" id="board" hidden></section>
 
             <div class="priority" id="priorityBox">
                 <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
@@ -72,24 +81,19 @@
                 </svg>
 
                 <div>
-                    <b id="priorityTitle">Ưu tiên hôm nay</b>
-                    <p id="priorityDesc">Đang tải dữ liệu tiến độ công việc...</p>
+                    <b>Ưu tiên hôm nay</b>
+                    <p id="priorityText">Đang tổng hợp tiến độ các bài viết cần xử lý...</p>
                 </div>
 
-                <a href="approvals.html" class="link" id="priorityLink">Xem công việc</a>
+                <a href="posts.html" class="link">Xem danh sách bài viết</a>
             </div>
-
         </main>
 
         <footer class="footer" id="footer"></footer>
     </div>
 
-    <!-- JavaScript: component → layout → logic của trang -->
     <script src="../../js/components.js"></script>
     <script src="../../js/layout.js"></script>
-    <script src="../../js/notifications-store.js"></script>
-    <script src="../../js/post-detail-modal.js"></script>
     <script src="../../js/admin/dashboard.js"></script>
-
 </body>
 </html>

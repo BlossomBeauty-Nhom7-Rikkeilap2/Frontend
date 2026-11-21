@@ -1,7 +1,7 @@
 /* ==========================================================
    FR-11 · CONTENT CALENDAR CONTROLLER (T06A667)
    - 3 chế độ xem: Tháng (Month) / Tuần (Week) / Ngày (Day)
-   - Nhãn màu theo nền tảng (Facebook, Instagram, TikTok, FB & IG)
+   - Nhãn màu theo nền tảng (Facebook, Instagram, Threads, FB & IG)
    - Kéo-thả (Drag & Drop) mượt trên cả 3 chế độ để đổi ngày/giờ
    - Phát hiện & cảnh báo xung đột < 30 phút cùng nền tảng (ERR-03)
    - Chặn đặt lịch trong quá khứ (ERR-02)
@@ -9,7 +9,7 @@
 (function (global) {
     "use strict";
 
-    const STORAGE_KEY = "blossom_fr11_calendar_events_v1";
+    const STORAGE_KEY = "blossom_fr11_calendar_events_v3";
     const TODAY_STR = "2026-11-04";
 
     // 11 bài viết chuẩn theo Figma Node 3:45302 (Tháng 11, 2026)
@@ -32,7 +32,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "PENDING",   // Chờ duyệt (#fff2e4)
-            author: "Trần Ngọc Mai"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 103,
@@ -62,7 +62,7 @@
             time: "19:00",
             platform: "FB & IG",
             status: "SCHEDULED",
-            author: "Trần Ngọc Mai"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 106,
@@ -92,7 +92,7 @@
             time: "08:00",
             platform: "FB & IG",
             status: "PENDING",
-            author: "Trần Ngọc Mai"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 109,
@@ -122,7 +122,7 @@
             time: "10:00",
             platform: "FB & IG",
             status: "PENDING",
-            author: "Trần Ngọc Mai"
+            author: "Doãn Thị Minh Anh"
         }
     ];
 
@@ -186,7 +186,9 @@
 
     let state = {
         mode: "MONTH",         // MONTH | WEEK | DAY
-        channelFilter: "ALL",  // ALL | Facebook | Instagram | TikTok
+        channelFilter: "ALL",  // ALL | Facebook | Instagram | Threads
+        staffFilter: "ALL",    // ALL | tên nhân viên (Manager)
+        statusFilter: "ALL",   // ALL | PENDING | SCHEDULED | EDITING (Manager)
         activeDay: TODAY_STR,
         draggedEventId: null,
         events: []
@@ -208,7 +210,7 @@
 
         // Đồng bộ các bài viết mới tạo từ FR-04/05/06/07 (blossom_posts_fr06_07_v1) lên Lịch đăng bài
         try {
-            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
+            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_v3") || "[]");
             if (Array.isArray(sharedPosts)) {
                 sharedPosts.forEach(function (p) {
                     if (p.deleted_at || !p.planned_date) return;
@@ -236,7 +238,7 @@
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state.events));
             // Đồng bộ ngược ngày đăng sang danh sách bài viết FR-07 nếu trùng mã bài viết
-            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
+            const sharedPosts = JSON.parse(localStorage.getItem("blossom_posts_v3") || "[]");
             if (Array.isArray(sharedPosts) && sharedPosts.length) {
                 let changed = false;
                 state.events.forEach(function (ev) {
@@ -250,7 +252,7 @@
                     }
                 });
                 if (changed) {
-                    localStorage.setItem("blossom_posts_fr06_07_v1", JSON.stringify(sharedPosts));
+                    localStorage.setItem("blossom_posts_v3", JSON.stringify(sharedPosts));
                 }
             }
         } catch (_) {}
@@ -314,14 +316,14 @@
     function platformClass(platform) {
         if (platform === "Facebook") return "platform-fb";
         if (platform === "Instagram") return "platform-ig";
-        if (platform === "TikTok") return "platform-tiktok";
+        if (platform === "Threads") return "platform-threads";
         return "platform-fbig";
     }
 
     function platformDotColor(platform) {
         if (platform === "Facebook") return "#1877F2";
         if (platform === "Instagram") return "#E1306C";
-        if (platform === "TikTok") return "#111111";
+        if (platform === "Threads") return "#111111";
         return "#cc618a";
     }
 
@@ -338,7 +340,7 @@
             '<div class="' + cls + '" draggable="true" data-event-id="' + ev.id + '" title="Kéo-thả để đổi lịch hoặc nhấn để chỉnh giờ (' + ev.code + ')">' +
                 '<div class="fr11-event-meta">' +
                     '<span><span class="fr11-platform-dot" style="background:' + platformDotColor(ev.platform) + '"></span> ' + ev.time + ' · ' + ev.platform + '</span>' +
-                    (isConflict ? '<span class="fr11-conflict-pill">⚠️ &lt;30p</span>' : '') +
+                    (isConflict ? '<span class="fr11-conflict-pill">Trùng giờ</span>' : '') +
                 '</div>' +
                 '<div class="fr11-event-title">' + ev.title + '</div>' +
             '</div>'
@@ -357,10 +359,8 @@
 
         const first = conflictData.pairs[0];
         detailEl.textContent =
-            'Phát hiện ' + conflictData.pairs.length + ' xung đột lịch đăng dưới 30 phút cùng nền tảng: "' +
-            first.a.title + '" (' + first.a.time + ') và "' + first.b.title + '" (' + first.b.time +
-            ') ngày ' + first.a.date.split("-").reverse().join("/") +
-            ' trên kênh ' + first.a.platform + ' (khoảng cách giữa 2 bài đăng dưới 30 phút).';
+            '"' + first.a.title + '" (' + first.a.time + ') và "' + first.b.title + '" (' + first.b.time +
+            ') cùng đăng trên ' + first.a.platform + ' cách nhau ' + first.diff + ' phút.';
         banner.hidden = false;
     }
 
@@ -445,7 +445,7 @@
 
         TIME_SLOTS.forEach(function (slotTime) {
             const slotEvents = dayEventsAll.filter(function (ev) { return ev.time === slotTime; });
-            const note = slotTime === "08:15" ? "Khung kiểm tra < 30p" : "GMT+7";
+            const note = "";
             html +=
                 '<div class="fr11-day-row">' +
                     '<div class="fr11-day-time">' +
@@ -524,7 +524,7 @@
         // Kiểm tra ERR-02: Không cho phép dời lịch về quá khứ (< 2026-11-04)
         if (targetDate < TODAY_STR) {
             if (global.Toast) {
-                Toast.error("Thời gian đăng bài phải lớn hơn thời điểm hiện tại!");
+                Toast.error("Vui lòng chọn thời gian đăng trong tương lai.");
             }
             return false;
         }
@@ -559,7 +559,7 @@
         const conflicts = detectConflicts(state.events);
         if (conflicts.conflictIds.has(ev.id)) {
             if (global.Toast) {
-                Toast.warn("Cảnh báo xung đột: Có bài viết cùng nền tảng cách nhau dưới 30 phút (" + ev.date.split("-").reverse().join("/") + " lúc " + ev.time + ")!");
+                Toast.warn("Khung giờ này bị trùng với một bài viết khác trên cùng kênh.");
             }
         } else if (global.Toast) {
             Toast.success('Đã dời lịch "' + ev.title + '" sang ' + ev.time + ' ngày ' + ev.date.split("-").reverse().join("/"));
@@ -588,7 +588,7 @@
         saveEvents();
         render();
         if (global.Toast && adjustedCount > 0) {
-            Toast.success("Đã tự động giãn cách lịch đăng +30 phút để xử lý xung đột!");
+            Toast.success("Đã tự động giãn cách khung giờ đăng.");
         }
     }
 
@@ -610,14 +610,21 @@
         const editLink = document.getElementById("btnOpenPostEditorFromCal");
         const baseEditPath = location.pathname.indexOf("/pages/admin/") !== -1 ? "../staff/edit-post.html" : "edit-post.html";
 
+        const authorInput = document.getElementById("fr11FormAuthor");
+        const reasonInput = document.getElementById("fr11FormReason");
+        const mgrActions = document.getElementById("managerReviewActions");
+
         if (ev) {
-            modalTitle.textContent = "Điều chỉnh lịch đăng bài (" + ev.code + ")";
+            modalTitle.textContent = "Chi tiết lịch đăng (" + ev.code + ")";
             idInput.value = String(ev.id);
             titleInput.value = ev.title;
             platformSelect.value = ev.platform;
             statusSelect.value = ev.status;
             dateInput.value = ev.date;
             timeInput.value = ev.time;
+            if (authorInput) authorInput.value = ev.author || "Doãn Thị Minh Anh";
+            if (reasonInput) reasonInput.value = ev.change_reason || "";
+            if (mgrActions) mgrActions.hidden = false;
             if (editLink) {
                 editLink.href = baseEditPath + "?id=" + encodeURIComponent(ev.id) + "&state=" + encodeURIComponent(ev.status === "PENDING" ? "PENDING_APPROVAL" : "DRAFT");
                 editLink.hidden = false;
@@ -630,6 +637,12 @@
             statusSelect.value = "SCHEDULED";
             dateInput.value = TODAY_STR;
             timeInput.value = "08:15";
+            if (authorInput) {
+                const u = (global.Auth && typeof global.Auth.getUser === "function") ? global.Auth.getUser() : null;
+                authorInput.value = (u && u.fullName) ? u.fullName : "Doãn Thị Minh Anh";
+            }
+            if (reasonInput) reasonInput.value = "";
+            if (mgrActions) mgrActions.hidden = true;
             if (editLink) editLink.hidden = true;
         }
 
@@ -659,7 +672,7 @@
 
         // Kiểm tra ERR-02: đặt lịch trong quá khứ
         if (date < TODAY_STR) {
-            errBox.textContent = "Thời gian đăng bài phải lớn hơn thời điểm hiện tại.";
+            errBox.textContent = "Vui lòng chọn thời gian đăng trong tương lai.";
             errBox.hidden = false;
             return;
         }
@@ -693,7 +706,7 @@
 
         const conflicts = detectConflicts(state.events);
         if (conflicts.pairs.length > 0 && global.Toast) {
-            Toast.warn("Cảnh báo xung đột lịch đăng dưới 30 phút trên cùng nền tảng!");
+            Toast.warn("Khung giờ này bị trùng với bài viết khác trên cùng kênh.");
         } else if (global.Toast) {
             Toast.success("Đã lưu lịch đăng bài thành công!");
         }
@@ -705,7 +718,22 @@
         const totalSummary = document.getElementById("calendarTotalSummary");
         if (!board) return;
 
+        const calUser = (global.Auth && typeof global.Auth.getUser === "function") ? global.Auth.getUser() : null;
+        const isStaffCal = (calUser && calUser.role === "STAFF") || location.pathname.indexOf("/pages/staff/") !== -1;
+        const myCalName = (calUser && calUser.fullName) ? calUser.fullName.trim().toLowerCase() : "";
+
         const filteredEvents = state.events.filter(function (ev) {
+            if (isStaffCal && myCalName && String(ev.author || "").trim().toLowerCase() !== myCalName) {
+                return false;
+            }
+            if (!isStaffCal) {
+                if (state.staffFilter !== "ALL" && String(ev.author || "").trim() !== state.staffFilter) {
+                    return false;
+                }
+                if (state.statusFilter !== "ALL" && ev.status !== state.statusFilter) {
+                    return false;
+                }
+            }
             return matchesChannelFilter(ev, state.channelFilter);
         });
 
@@ -723,7 +751,7 @@
         }
 
         if (totalSummary) {
-            totalSummary.textContent = filteredEvents.length + " bài viết trong tháng · Múi giờ GMT+7";
+            totalSummary.textContent = filteredEvents.length + " bài viết trong tháng";
         }
 
         document.querySelectorAll("[data-cal-mode]").forEach(function (btn) {
@@ -752,12 +780,79 @@
             });
         });
 
+        // Lọc theo nhân viên (Manager)
+        const staffSelect = document.getElementById("staffFilterSelect");
+        if (staffSelect) {
+            staffSelect.addEventListener("change", function () {
+                state.staffFilter = staffSelect.value;
+                render();
+            });
+        }
+
         // Lọc theo kênh
         const channelSelect = document.getElementById("channelFilterSelect");
         if (channelSelect) {
             channelSelect.addEventListener("change", function () {
                 state.channelFilter = channelSelect.value;
                 render();
+            });
+        }
+
+        // Lọc theo trạng thái xác nhận lịch (Manager)
+        const statusSelect = document.getElementById("statusFilterSelect");
+        if (statusSelect) {
+            statusSelect.addEventListener("change", function () {
+                state.statusFilter = statusSelect.value;
+                render();
+            });
+        }
+
+        // Nút Manager: Xác nhận lịch đăng
+        const btnConfirmSched = document.getElementById("btnConfirmSchedule");
+        if (btnConfirmSched) {
+            btnConfirmSched.addEventListener("click", function () {
+                const idVal = parseInt((document.getElementById("fr11FormId") || {}).value || "0", 10);
+                const ev = state.events.find(function (x) { return x.id === idVal; });
+                if (!ev) return;
+                ev.status = "SCHEDULED";
+                ev.change_reason = "";
+                ev.date = document.getElementById("fr11FormDate").value || ev.date;
+                ev.time = document.getElementById("fr11FormTime").value || ev.time;
+                saveEvents();
+                closeScheduleModal();
+                render();
+                if (global.UI && typeof global.UI.toast === "function") {
+                    UI.toast("success", "Đã xác nhận lịch đăng", 'Lịch đăng bài "' + ev.title + '" đã trở thành lịch chính thức.');
+                }
+            });
+        }
+
+        // Nút Manager: Yêu cầu nhân viên thay đổi lịch kèm lý do
+        const btnReqChange = document.getElementById("btnRequestChangeSchedule");
+        if (btnReqChange) {
+            btnReqChange.addEventListener("click", function () {
+                const idVal = parseInt((document.getElementById("fr11FormId") || {}).value || "0", 10);
+                const ev = state.events.find(function (x) { return x.id === idVal; });
+                const reasonEl = document.getElementById("fr11FormReason");
+                const errBox = document.getElementById("fr11ModalError");
+                const reason = reasonEl ? reasonEl.value.trim() : "";
+                if (!ev) return;
+                if (!reason) {
+                    if (errBox) {
+                        errBox.textContent = "Vui lòng nhập lý do yêu cầu thay đổi lịch.";
+                        errBox.hidden = false;
+                    }
+                    if (reasonEl) reasonEl.focus();
+                    return;
+                }
+                ev.status = "EDITING";
+                ev.change_reason = reason;
+                saveEvents();
+                closeScheduleModal();
+                render();
+                if (global.UI && typeof global.UI.toast === "function") {
+                    UI.toast("warning", "Đã yêu cầu thay đổi lịch", 'Đã gửi lý do cho nhân viên ' + (ev.author || "") + ".");
+                }
             });
         }
 

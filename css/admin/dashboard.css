@@ -183,3 +183,185 @@
         flex: 1;
     }
 }
+
+/* ---------- TÙY CHỈNH TIẾN ĐỘ THEO THÀNH VIÊN (DASHBOARD MANAGER) ---------- */
+.dash-head-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.member-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.member-card {
+    background: #ffffff;
+    border: 1px solid var(--pink-line);
+    border-radius: 16px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.member-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.member-identity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.member-avatar {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--pink-soft);
+    color: var(--pink);
+    font-size: 16px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.member-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-strong);
+}
+
+.member-role {
+    font-size: 13.5px;
+    color: var(--muted);
+}
+
+.member-pct-badge {
+    background: var(--pink-soft);
+    color: var(--pink);
+    font-size: 15px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 100px;
+    white-space: nowrap;
+}
+
+.member-pct-badge.is-good {
+    background: var(--green-bg);
+    color: var(--green);
+}
+
+.member-progress-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.member-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13.5px;
+    color: var(--muted);
+}
+
+.member-kpis {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+}
+
+.member-kpi-box {
+    background: var(--pink-bg);
+    border: 1px solid var(--pink-line);
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+}
+
+.member-kpi-box b {
+    display: block;
+    font-size: 18px;
+    color: var(--text-strong);
+}
+
+.member-kpi-box span {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.member-recent-title {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text-2);
+}
+
+.member-recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.member-recent-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid var(--pink-line);
+    border-radius: 10px;
+    background: #fffbfc;
+    transition: border-color 0.15s ease;
+}
+
+.member-recent-item:hover {
+    border-color: var(--pink);
+}
+
+.member-recent-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.member-recent-info a {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.member-recent-info a:hover {
+    color: var(--pink);
+    text-decoration: underline;
+}
+
+.member-recent-info small {
+    font-size: 12.5px;
+    color: var(--muted);
+}
+
+@media (max-width: 1050px) {
+    .member-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .member-kpis {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
