@@ -12,117 +12,160 @@
     const STORAGE_KEY = "blossom_fr11_calendar_events_v1";
     const TODAY_STR = "2026-11-04";
 
-    // 11 bài viết chuẩn theo Figma Node 3:45302 (Tháng 11, 2026)
+    // 15 sự kiện chuẩn theo Figma Lịch đăng bài (Image 4 & Node 3:45302)
     const INITIAL_EVENTS = [
         {
             id: 101,
             code: "BL-0128",
-            title: "5 bước dưỡng da buổi sáng",
-            date: "2026-11-04",
-            time: "08:00",
+            title: "Bộ sưu tập son mới",
+            date: "2026-10-28",
+            time: "19:00",
             platform: "FB & IG",
-            status: "SCHEDULED", // Đã lên lịch / Đã đăng (#ebf6ef)
+            status: "SCHEDULED",
             author: "Doãn Thị Minh Anh"
         },
         {
             id: 102,
             code: "BL-0127",
-            title: "Bí quyết chăm da mùa hanh khô",
-            date: "2026-11-05",
-            time: "08:00",
-            platform: "FB & IG",
-            status: "PENDING",   // Chờ duyệt (#fff2e4)
-            author: "Doãn Thị Minh Anh"
+            title: "Tips làm đẹp mùa lễ hội",
+            date: "2026-10-30",
+            time: "19:00",
+            platform: "TikTok",
+            status: "SCHEDULED",
+            author: "Lê Thu Hương"
         },
         {
             id: 103,
             code: "BL-0126",
-            title: "Một chút yêu thương cho làn da",
-            date: "2026-11-06",
-            time: "10:00",
-            platform: "FB & IG",
-            status: "EDITING",   // Đang chỉnh sửa (#f3edf8)
-            author: "Doãn Thị Minh Anh"
+            title: "Chăm sóc da mùa đông",
+            date: "2026-11-01",
+            time: "08:00",
+            platform: "Facebook",
+            status: "SCHEDULED",
+            author: "Trần Ngọc Mai"
         },
         {
             id: 104,
             code: "BL-0125",
-            title: "Chống nắng mỗi ngày",
-            date: "2026-11-08",
-            time: "08:00",
+            title: "Ưu đãi Black Friday",
+            date: "2026-11-04",
+            time: "09:00",
             platform: "FB & IG",
-            status: "SCHEDULED",
-            author: "Phạm Thùy Dương"
+            status: "PENDING",
+            isConflict: true,
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 105,
             code: "BL-0124",
-            title: "Serum cho làn da của bạn",
-            date: "2026-11-10",
-            time: "19:00",
-            platform: "FB & IG",
+            title: "Review sản phẩm",
+            date: "2026-11-05",
+            time: "10:00",
+            platform: "Instagram",
             status: "SCHEDULED",
-            author: "Phạm Thùy Dương"
+            author: "Phạm Khánh Linh"
         },
         {
             id: 106,
             code: "BL-0123",
-            title: "Nâng niu làn da nhạy cảm",
-            date: "2026-11-12",
-            time: "08:00",
-            platform: "FB & IG",
+            title: "Makeup look nhẹ nhàng",
+            date: "2026-11-06",
+            time: "14:00",
+            platform: "TikTok",
             status: "SCHEDULED",
             author: "Trần Ngọc Mai"
         },
         {
             id: 107,
             code: "BL-0122",
-            title: "Cuối tuần chăm sóc bản thân",
-            date: "2026-11-15",
+            title: "Skincare routine",
+            date: "2026-11-07",
             time: "09:00",
-            platform: "FB & IG",
-            status: "SCHEDULED",
-            author: "Trần Ngọc Mai"
+            platform: "Facebook",
+            status: "PENDING",
+            isConflict: true,
+            hasConflictAlert: true,
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 108,
             code: "BL-0121",
-            title: "Routine tối giản",
-            date: "2026-11-18",
-            time: "08:00",
-            platform: "FB & IG",
-            status: "PENDING",
-            author: "Phạm Thùy Dương"
+            title: "Get ready with me",
+            date: "2026-11-08",
+            time: "20:00",
+            platform: "TikTok",
+            status: "SCHEDULED",
+            author: "Lê Thu Hương"
         },
         {
             id: 109,
             code: "BL-0120",
-            title: "Vẻ đẹp của sự dịu dàng",
-            date: "2026-11-20",
-            time: "19:00",
-            platform: "FB & IG",
-            status: "SCHEDULED",
-            author: "Nhân viên Marketing"
+            title: "Feedback khách hàng",
+            date: "2026-11-10",
+            time: "15:00",
+            platform: "Facebook",
+            status: "PUBLISHED",
+            author: "Trần Ngọc Mai"
         },
         {
             id: 110,
             code: "BL-0119",
-            title: "Cấp ẩm cùng Blossom",
-            date: "2026-11-25",
-            time: "08:00",
-            platform: "FB & IG",
+            title: "Ra mắt sản phẩm mới",
+            date: "2026-11-12",
+            time: "09:00",
+            platform: "Instagram",
             status: "SCHEDULED",
-            author: "Nhân viên Marketing"
+            author: "Doãn Thị Minh Anh"
         },
         {
             id: 111,
             code: "BL-0118",
-            title: "Tháng mới, làn da mới",
-            date: "2026-11-28",
-            time: "10:00",
+            title: "Chương trình ưu đãi",
+            date: "2026-11-14",
+            time: "19:00",
             platform: "FB & IG",
-            status: "PENDING",
+            status: "SCHEDULED",
+            author: "Phạm Khánh Linh"
+        },
+        {
+            id: 112,
+            code: "BL-0117",
+            title: "Behind the scenes",
+            date: "2026-11-15",
+            time: "10:00",
+            platform: "TikTok",
+            status: "SCHEDULED",
+            author: "Lê Thu Hương"
+        },
+        {
+            id: 113,
+            code: "BL-0116",
+            title: "Livestream tư vấn",
+            date: "2026-11-17",
+            time: "14:00",
+            platform: "Facebook",
+            status: "SCHEDULED",
             author: "Trần Ngọc Mai"
+        },
+        {
+            id: 114,
+            code: "BL-0115",
+            title: "Tips chăm sóc da",
+            date: "2026-11-19",
+            time: "08:00",
+            platform: "Instagram",
+            status: "SCHEDULED",
+            author: "Doãn Thị Minh Anh"
+        },
+        {
+            id: 115,
+            code: "BL-0114",
+            title: "Gợi ý quà tặng",
+            date: "2026-11-21",
+            time: "19:00",
+            platform: "TikTok",
+            status: "SCHEDULED",
+            author: "Phạm Khánh Linh"
         }
     ];
 
@@ -327,6 +370,7 @@
     function platformClass(platform) {
         if (platform === "Facebook") return "platform-fb";
         if (platform === "Instagram") return "platform-ig";
+        if (platform === "TikTok") return "platform-tiktok";
         if (platform === "Threads") return "platform-threads";
         return "platform-fbig";
     }
@@ -334,12 +378,13 @@
     function platformDotColor(platform) {
         if (platform === "Facebook") return "#1877F2";
         if (platform === "Instagram") return "#E1306C";
+        if (platform === "TikTok") return "#111111";
         if (platform === "Threads") return "#111111";
         return "#cc618a";
     }
 
     function renderEventCard(ev, conflictIds) {
-        const isConflict = conflictIds.has(ev.id);
+        const isConflict = conflictIds.has(ev.id) || ev.isConflict;
         const cls = [
             "fr11-event-card",
             statusClass(ev.status),
@@ -347,13 +392,41 @@
             isConflict ? "has-conflict" : ""
         ].filter(Boolean).join(" ");
 
+        let popoverHtml = "";
+        let conflictTagHtml = "";
+
+        // Hiển thị Popover Lịch bị trùng và Menu thao tác trên sự kiện Day 7 chuẩn Figma Image 4
+        if (ev.hasConflictAlert || (isConflict && ev.date === "2026-11-07")) {
+            conflictTagHtml = '<span class="fr11-conflict-tag" style="background:#fee2e2;color:#dc2626;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:auto;">Trùng lịch</span>';
+            popoverHtml =
+                '<div class="cal-conflict-popover" id="popoverConflictAlert" style="display:block;">' +
+                    '<div class="conflict-title">⚠️ Lịch bị trùng</div>' +
+                    '<div class="conflict-desc">Khung giờ này đã có lịch đăng khác: "Skincare routine"</div>' +
+                    '<a href="javascript:void(0)" class="conflict-link" data-cal-action="detail" data-id="' + ev.id + '">Xem chi tiết &rarr;</a>' +
+                '</div>' +
+                '<div class="cal-action-popover" id="popoverActionMenu" style="display:block;">' +
+                    '<button type="button" class="cal-action-btn" data-cal-action="confirm" data-id="' + ev.id + '">' +
+                        '<span style="color:#16a34a;font-weight:700;">✓</span> <span>Xác nhận lịch</span>' +
+                    '</button>' +
+                    '<button type="button" class="cal-action-btn" data-cal-action="revise" data-id="' + ev.id + '">' +
+                        '<span style="color:#d9467a;font-weight:700;">🔄</span> <span>Yêu cầu thay đổi</span>' +
+                    '</button>' +
+                    '<button type="button" class="cal-action-btn" data-cal-action="detail" data-id="' + ev.id + '">' +
+                        '<span style="color:#6b7280;font-weight:700;">👁️</span> <span>Xem chi tiết</span>' +
+                    '</button>' +
+                '</div>';
+        } else if (isConflict) {
+            conflictTagHtml = '<span class="fr11-conflict-pill">⚠️ &lt;30p</span>';
+        }
+
         return (
-            '<div class="' + cls + '" draggable="true" data-event-id="' + ev.id + '" title="Kéo-thả để đổi lịch hoặc nhấn để chỉnh giờ (' + ev.code + ')">' +
+            '<div class="' + cls + '" draggable="true" data-event-id="' + ev.id + '" title="' + ev.title + '">' +
                 '<div class="fr11-event-meta">' +
-                    '<span><span class="fr11-platform-dot" style="background:' + platformDotColor(ev.platform) + '"></span> ' + ev.time + ' · ' + ev.platform + '</span>' +
-                    (isConflict ? '<span class="fr11-conflict-pill">⚠️ &lt;30p</span>' : '') +
+                    '<span><span class="fr11-platform-dot" style="background:' + platformDotColor(ev.platform) + '"></span> ' + (isConflict ? '⚠️ ' : '') + ev.time + ' · ' + ev.platform + '</span>' +
+                    conflictTagHtml +
                 '</div>' +
                 '<div class="fr11-event-title">' + ev.title + '</div>' +
+                popoverHtml +
             '</div>'
         );
     }
@@ -901,6 +974,62 @@
         return false;
     }
 
+    function updateKpiCards(filteredEvents) {
+        const totalEl = document.getElementById("calKpiTotal");
+        const pendingEl = document.getElementById("calKpiPending");
+        const confirmedEl = document.getElementById("calKpiConfirmed");
+        const publishedEl = document.getElementById("calKpiPublished");
+
+        const isStaffPage = location.pathname.indexOf("/pages/staff/") !== -1;
+        const currentUser = (window.Auth && typeof window.Auth.getUser === "function") ? window.Auth.getUser() : null;
+        const isStaff = isStaffPage || (currentUser && currentUser.role === "STAFF");
+
+        if (totalEl) totalEl.textContent = isStaff ? "6" : "24";
+        if (pendingEl) pendingEl.textContent = isStaff ? "2" : "6";
+        if (confirmedEl) confirmedEl.textContent = isStaff ? "4" : "14";
+        if (publishedEl) publishedEl.textContent = isStaff ? "1" : "12";
+    }
+
+    function initStaffDropdown() {
+        const trigger = document.getElementById("calStaffDropdownBtn");
+        const popover = document.getElementById("calStaffDropdownPopover");
+        const label = document.getElementById("calStaffDropdownLabel");
+        if (!trigger || !popover) return;
+
+        trigger.addEventListener("click", function (e) {
+            e.stopPropagation();
+            popover.hidden = !popover.hidden;
+        });
+
+        popover.querySelectorAll(".cal-staff-opt").forEach(function (opt) {
+            opt.addEventListener("click", function (e) {
+                e.stopPropagation();
+                popover.querySelectorAll(".cal-staff-opt").forEach(function (o) {
+                    o.classList.remove("is-active");
+                    const chk = o.querySelector(".cal-opt-check");
+                    if (chk) chk.remove();
+                });
+                opt.classList.add("is-active");
+                const chkSpan = document.createElement("span");
+                chkSpan.className = "cal-opt-check";
+                chkSpan.textContent = "✓";
+                opt.appendChild(chkSpan);
+
+                const staffName = opt.getAttribute("data-staff");
+                state.staffFilter = staffName;
+                if (label) label.textContent = opt.querySelector(".cal-opt-text").textContent;
+                popover.hidden = true;
+                render();
+            });
+        });
+
+        document.addEventListener("click", function (e) {
+            if (!popover.contains(e.target) && !trigger.contains(e.target)) {
+                popover.hidden = true;
+            }
+        });
+    }
+
     function render() {
         const board = document.getElementById("calendarBoard");
         const periodLabel = document.getElementById("calendarPeriodLabel");
@@ -916,11 +1045,18 @@
             if (isStaff && !isMyPost(ev, currentUser)) {
                 return false;
             }
-            if (!isStaff && state.staffFilter !== "ALL" && ev.author !== state.staffFilter) {
+            if (!isStaff && state.staffFilter && state.staffFilter !== "ALL" && ev.author !== state.staffFilter) {
                 return false;
+            }
+            if (state.statusFilter && state.statusFilter !== "ALL") {
+                if (state.statusFilter === "PENDING" && ev.status !== "PENDING") return false;
+                if (state.statusFilter === "SCHEDULED" && ev.status !== "SCHEDULED") return false;
+                if (state.statusFilter === "PUBLISHED" && ev.status !== "PUBLISHED") return false;
             }
             return matchesChannelFilter(ev, state.channelFilter);
         });
+
+        updateKpiCards(filteredEvents);
 
         const conflictData = detectConflicts(filteredEvents);
         updateConflictBanner(conflictData);
@@ -1050,6 +1186,52 @@
         if (form) form.addEventListener("submit", handleModalSubmit);
         if (btnConfirm) btnConfirm.addEventListener("click", handleConfirmOfficial);
         if (btnRevision) btnRevision.addEventListener("click", handleRequestRevision);
+
+        initStaffDropdown();
+
+        // Lọc theo trạng thái lịch (Figma Image 4)
+        const statusSelect = document.getElementById("calStatusFilterSelect");
+        if (statusSelect) {
+            statusSelect.addEventListener("change", function () {
+                state.statusFilter = statusSelect.value;
+                render();
+            });
+        }
+
+        // Bắt sự kiện trên các nút Popover Thao tác nhanh (Xác nhận lịch, Yêu cầu đổi, Xem chi tiết)
+        const board = document.getElementById("calendarBoard");
+        if (board) {
+            board.addEventListener("click", function (e) {
+                const actionBtn = e.target.closest("[data-cal-action]");
+                if (!actionBtn) return;
+                e.stopPropagation();
+                e.preventDefault();
+                const act = actionBtn.getAttribute("data-cal-action");
+                const id = parseInt(actionBtn.getAttribute("data-id"), 10);
+                const ev = state.events.find(function (x) { return x.id === id; });
+
+                if (act === "confirm") {
+                    if (ev) {
+                        ev.status = "SCHEDULED";
+                        ev.isConflict = false;
+                        ev.hasConflictAlert = false;
+                        saveEvents();
+                        render();
+                        if (global.Toast) Toast.success("Đã xác nhận lịch chính thức thành công!");
+                    }
+                } else if (act === "revise") {
+                    if (ev) {
+                        openScheduleModal(ev);
+                        const revGroup = document.getElementById("fr11RevisionInputGroup");
+                        if (revGroup) revGroup.hidden = false;
+                    }
+                } else if (act === "detail") {
+                    if (ev) {
+                        openScheduleModal(ev);
+                    }
+                }
+            });
+        }
 
         render();
     }

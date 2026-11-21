@@ -328,7 +328,8 @@
                     email: user.email,
                     role: user.role,
                     fullName: user.fullName,
-                    position: user.position
+                    position: user.position,
+                    avatar: user.avatar || ""
                 })
             );
 

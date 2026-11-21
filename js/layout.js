@@ -71,10 +71,15 @@
             '<button type="button" class="help" id="helpBtn">' + icon("help") + "Bạn cần hỗ trợ?</button></div>";
     }
 
-    // Ảnh đại diện (đặt ở Hồ sơ cá nhân) nếu có, không thì chữ cái viết tắt
+    // Ảnh đại diện (đặt ở Hồ sơ cá nhân hoặc Quản lý tài khoản) nếu có, không thì chữ cái viết tắt
     function avatarHTML(user) {
-        let src = "";
-        try { src = localStorage.getItem("blossom_avatar_" + (user.username || "")) || ""; } catch (e) { /* bỏ qua */ }
+        let src = (user && user.avatar) || "";
+        if (!src && user && user.username) {
+            try { src = localStorage.getItem("blossom_avatar_" + user.username) || ""; } catch (e) {}
+        }
+        if (!src && user && user.email) {
+            try { src = localStorage.getItem("blossom_avatar_" + user.email) || ""; } catch (e) {}
+        }
         return src
             ? '<img src="' + esc(src) + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">'
             : esc(Auth.initials(user));

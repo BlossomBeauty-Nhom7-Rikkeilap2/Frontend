@@ -82,12 +82,19 @@
         return delay(500).then(function () {
             const list = AccountStore.load();                       // đọc lại để chặn trùng khi mở nhiều tab
             if (emailTaken(list, data.email)) throw fail("Email này đã được sử dụng.", "email");
+            const uname = (data.email ? data.email.split("@")[0] : "").toLowerCase();
             const rec = {
                 id: nextId(list), fullName: data.fullName, email: data.email,
+                username: uname,
                 role: data.role, status: "active", createdAt: today(),
-                password: data.password || "Blossom@123"
+                password: data.password || "Blossom@123",
+                position: data.role === "MANAGER" ? "Marketing Manager" : "Marketing Staff"
             };
-            if (data.avatar) rec.avatar = data.avatar;
+            if (data.avatar) {
+                rec.avatar = data.avatar;
+                try { localStorage.setItem("blossom_avatar_" + uname, data.avatar); } catch (_) {}
+                try { localStorage.setItem("blossom_avatar_" + data.email.toLowerCase(), data.avatar); } catch (_) {}
+            }
             list.push(rec);
             AccountStore.save(list);
             return rec;
@@ -107,8 +114,15 @@
             rec.fullName = data.fullName;
             rec.email = data.email;
             rec.role = data.role;
+            if (!rec.username) rec.username = (data.email ? data.email.split("@")[0] : "").toLowerCase();
             if (data.password) rec.password = data.password;
-            if (data.avatar !== undefined) rec.avatar = data.avatar;
+            if (data.avatar !== undefined) {
+                rec.avatar = data.avatar;
+                if (data.avatar) {
+                    try { localStorage.setItem("blossom_avatar_" + rec.username, data.avatar); } catch (_) {}
+                    try { localStorage.setItem("blossom_avatar_" + data.email.toLowerCase(), data.avatar); } catch (_) {}
+                }
+            }
             AccountStore.save(list);
             return rec;
         });

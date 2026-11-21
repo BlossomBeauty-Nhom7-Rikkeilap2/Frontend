@@ -34,8 +34,11 @@
 
                 <div class="fr11-title-row" data-node-id="3:45307">
                     <div class="fr11-title-block" data-node-id="3:45308">
-                        <h2 class="fr11-title" data-node-id="3:45309">Lịch đăng bài</h2>
-                        <p class="fr11-subtitle" data-node-id="3:45310">Sắp xếp từng khoảnh khắc, để nội dung tỏa sáng đúng lúc.</p>
+                        <h2 class="fr11-title" data-node-id="3:45309">
+                            <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#d9467a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px;margin-right:6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            Lịch đăng bài
+                        </h2>
+                        <p class="fr11-subtitle" data-node-id="3:45310">Theo dõi và quản lý lịch đăng bài của toàn đội. 🌸</p>
                     </div>
 
                     <div class="fr11-heading-actions">
@@ -47,40 +50,138 @@
                 </div>
             </section>
 
-            <!-- 2. CALENDAR TOOLBAR (Figma 3:45312) -->
-            <section class="fr11-toolbar" data-node-id="3:45312">
-                <div class="fr11-month-nav" data-node-id="3:45313">
-                    <button type="button" class="fr11-nav-arrow" id="btnCalendarPrev" title="Kỳ trước" data-node-id="3:45314">
-                        <img src="../../assets/figma/chevron-left.svg" alt="Trước" width="18" height="18">
-                    </button>
-                    <h3 class="fr11-period-label" id="calendarPeriodLabel" data-node-id="3:45316">Tháng 11, 2026</h3>
-                    <button type="button" class="fr11-nav-arrow" id="btnCalendarNext" title="Kỳ sau" data-node-id="3:45317">
-                        <img src="../../assets/figma/chevron-right.svg" alt="Sau" width="18" height="18">
-                    </button>
-                    <button type="button" class="fr11-btn-outline" id="btnCalendarToday" data-node-id="3:45319">Hôm nay</button>
-                </div>
+            <!-- 2. TOP 4 KPI CARDS (Figma FR-11) -->
+            <section class="cal-kpi-grid">
+                <article class="cal-kpi-card" data-kpi="total">
+                    <div class="cal-kpi-icon is-pink">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                    </div>
+                    <div class="cal-kpi-info">
+                        <span class="cal-kpi-label">Tổng lịch đăng</span>
+                        <strong class="cal-kpi-value" id="calKpiTotal">24</strong>
+                        <span class="cal-kpi-delta is-up">↑ +2 so với tháng trước</span>
+                    </div>
+                </article>
 
-                <div class="fr11-view-controls" data-node-id="3:45321">
-                    <select class="fr11-channel-select" id="channelFilterSelect" aria-label="Lọc theo kênh" data-node-id="3:45322">
-                        <option value="ALL">Tất cả kênh ⌄</option>
+                <article class="cal-kpi-card" data-kpi="pending">
+                    <div class="cal-kpi-icon is-orange">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                    </div>
+                    <div class="cal-kpi-info">
+                        <span class="cal-kpi-label">Chờ xác nhận</span>
+                        <strong class="cal-kpi-value" id="calKpiPending">6</strong>
+                        <span class="cal-kpi-delta is-dot">● Cần xem xét</span>
+                    </div>
+                </article>
+
+                <article class="cal-kpi-card" data-kpi="confirmed">
+                    <div class="cal-kpi-icon is-green">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <div class="cal-kpi-info">
+                        <span class="cal-kpi-label">Đã xác nhận</span>
+                        <strong class="cal-kpi-value" id="calKpiConfirmed">14</strong>
+                        <span class="cal-kpi-delta is-up">↑ 2</span>
+                    </div>
+                </article>
+
+                <article class="cal-kpi-card" data-kpi="published">
+                    <div class="cal-kpi-icon is-purple">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </div>
+                    <div class="cal-kpi-info">
+                        <span class="cal-kpi-label">Đã đăng</span>
+                        <strong class="cal-kpi-value" id="calKpiPublished">12</strong>
+                        <span class="cal-kpi-delta is-up">↑ 1</span>
+                    </div>
+                </article>
+            </section>
+
+            <!-- 3. CALENDAR TOOLBAR (Figma 3:45312) -->
+            <section class="fr11-toolbar" data-node-id="3:45312">
+                <div class="fr11-left-filters">
+                    <!-- Dropdown Nhân viên với avatar -->
+                    <div class="cal-staff-dropdown" id="calStaffDropdown">
+                        <button type="button" class="cal-dropdown-trigger" id="calStaffDropdownBtn">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span id="calStaffDropdownLabel">Tất cả nhân viên</span>
+                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="cal-dropdown-popover" id="calStaffDropdownPopover" hidden>
+                            <div class="cal-staff-opt is-active" data-staff="ALL">
+                                <span class="cal-opt-text">Tất cả nhân viên</span>
+                                <span class="cal-opt-check">✓</span>
+                            </div>
+                            <div class="cal-staff-opt" data-staff="Trần Ngọc Mai">
+                                <img class="cal-opt-avatar" src="../../assets/avatars/mai.png" alt="">
+                                <span class="cal-opt-text">Trần Ngọc Mai</span>
+                            </div>
+                            <div class="cal-staff-opt" data-staff="Doãn Thị Minh Anh">
+                                <img class="cal-opt-avatar" src="../../assets/avatars/minhanh.png" alt="">
+                                <span class="cal-opt-text">Doãn Thị Minh Anh</span>
+                            </div>
+                            <div class="cal-staff-opt" data-staff="Lê Thu Hương">
+                                <img class="cal-opt-avatar" src="../../assets/avatars/huong.png" alt="">
+                                <span class="cal-opt-text">Lê Thu Hương</span>
+                            </div>
+                            <div class="cal-staff-opt" data-staff="Phạm Khánh Linh">
+                                <img class="cal-opt-avatar" src="../../assets/avatars/linh.png" alt="">
+                                <span class="cal-opt-text">Phạm Khánh Linh</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dropdown Nền tảng -->
+                    <select class="fr11-filter-select" id="channelFilterSelect" aria-label="Lọc theo nền tảng">
+                        <option value="ALL">Tất cả nền tảng ⌄</option>
                         <option value="Facebook">Facebook</option>
                         <option value="Instagram">Instagram</option>
+                        <option value="TikTok">TikTok</option>
+                        <option value="FB & IG">FB &amp; IG</option>
                         <option value="Threads">Threads</option>
                     </select>
 
-                    <select class="fr11-channel-select" id="staffFilterSelect" aria-label="Lọc theo nhân viên">
-                        <option value="ALL">Tất cả nhân sự ⌄</option>
-                        <option value="Doãn Thị Minh Anh">Doãn Thị Minh Anh</option>
-                        <option value="Phạm Thùy Dương">Phạm Thùy Dương</option>
-                        <option value="Trần Ngọc Mai">Trần Ngọc Mai</option>
-                        <option value="Nhân viên Marketing">Nhân viên Marketing</option>
+                    <!-- Dropdown Trạng thái -->
+                    <select class="fr11-filter-select" id="calStatusFilterSelect" aria-label="Lọc theo trạng thái">
+                        <option value="ALL">Trạng thái ⌄</option>
+                        <option value="PENDING">Chờ xác nhận</option>
+                        <option value="SCHEDULED">Đã xác nhận</option>
+                        <option value="PUBLISHED">Đã đăng</option>
                     </select>
+                </div>
+
+                <div class="fr11-right-controls">
+                    <div class="fr11-month-nav" data-node-id="3:45313">
+                        <button type="button" class="fr11-nav-arrow" id="btnCalendarPrev" title="Kỳ trước" data-node-id="3:45314">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                        </button>
+                        <div class="fr11-period-box">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            <span class="fr11-period-label" id="calendarPeriodLabel" data-node-id="3:45316">Tháng 11, 2026</span>
+                        </div>
+                        <button type="button" class="fr11-nav-arrow" id="btnCalendarNext" title="Kỳ sau" data-node-id="3:45317">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                    </div>
 
                     <div class="fr11-mode-group" role="tablist" aria-label="Chế độ xem lịch">
                         <button type="button" class="fr11-mode-btn is-active" data-cal-mode="MONTH" data-node-id="3:45324">Tháng</button>
                         <button type="button" class="fr11-mode-btn" data-cal-mode="WEEK" data-node-id="3:45326">Tuần</button>
                         <button type="button" class="fr11-mode-btn" data-cal-mode="DAY">Ngày</button>
-                        <button type="button" class="fr11-mode-btn" data-cal-mode="LIST">Danh sách</button>
                     </div>
                 </div>
             </section>
