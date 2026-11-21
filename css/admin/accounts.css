@@ -516,3 +516,137 @@
         overflow-x: auto;
     }
 }
+
+/* ---------- Form Thêm / Sửa tài khoản: mật khẩu, độ mạnh, checkbox ---------- */
+.modal--form {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(100vh - 32px);
+}
+
+.modal--form .modal__body {
+    overflow-y: auto;
+}
+
+.modal--form .req {
+    color: var(--red);
+}
+
+.af-pass {
+    position: relative;
+}
+
+.af-pass .input {
+    padding-right: 46px;
+}
+
+.af-eye {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 44px;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 0 8px 8px 0;
+    background: none;
+    color: var(--muted);
+}
+
+.af-eye:hover {
+    color: var(--pink);
+}
+
+.af-eye svg {
+    width: 18px;
+    height: 18px;
+}
+
+.af-meter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 2px;
+}
+
+.af-meter__bars {
+    flex: 1;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+}
+
+.af-meter__bars i {
+    height: 6px;
+    border-radius: 20px;
+    background: var(--pink-soft);
+    transition: background .2s;
+}
+
+.af-meter[data-level="1"] i:nth-child(-n+1) { background: var(--red); }
+.af-meter[data-level="2"] i:nth-child(-n+2) { background: var(--orange); }
+.af-meter[data-level="3"] i:nth-child(-n+3) { background: #8bbf5a; }
+.af-meter[data-level="4"] i:nth-child(-n+4) { background: var(--green); }
+
+.af-meter__text {
+    min-width: 84px;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.af-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-2);
+    cursor: pointer;
+}
+
+.af-check input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--pink);
+}
+
+.af-pwd-box {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.af-pwd-box[hidden] {
+    display: none;
+}
+
+/* Khi panel chi tiết đang mở: thu gọn bảng để không bị cuộn ngang / cắt cột Ngày tạo */
+@media (min-width: 1101px) {
+    .has-detail .acc-table {
+        min-width: 0;
+    }
+
+    .has-detail .acc-table th,
+    .has-detail .acc-table td {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .has-detail .acc-user {
+        gap: 10px;
+    }
+}
+
+@media (min-width: 1101px) and (max-width: 1400px) {
+    .acc-layout.has-detail {
+        grid-template-columns: minmax(0, 1fr) 280px;
+    }
+
+    .has-detail .acc-table th,
+    .has-detail .acc-table td {
+        padding-left: 6px;
+        padding-right: 6px;
+    }
+}
