@@ -185,8 +185,9 @@
     const TIME_SLOTS = ["08:00", "08:15", "09:00", "10:00", "14:00", "19:00", "20:00"];
 
     let state = {
-        mode: "MONTH",         // MONTH | WEEK | DAY
+        mode: "MONTH",         // MONTH | WEEK | DAY | LIST
         channelFilter: "ALL",  // ALL | Facebook | Instagram | Threads
+        staffFilter: "ALL",    // ALL | Tên nhân viên
         activeDay: TODAY_STR,
         draggedEventId: null,
         events: []
@@ -479,6 +480,66 @@
         container.innerHTML = html;
     }
 
+    // ==============================
+    // CHẾ ĐỘ XEM DANH SÁCH LỊCH ĐĂNG (TASK 02 & TASK 05)
+    // ==============================
+    function renderListView(container, filteredEvents, conflictIds) {
+        if (!filteredEvents.length) {
+            container.innerHTML = '<div style="padding:40px;text-align:center;background:#fff;border-radius:16px;">' +
+                (global.UI && typeof global.UI.emptyState === "function" ? UI.emptyState({ text: "Chưa có lịch đăng nào khớp với điều kiện lọc." }) : "Chưa có lịch đăng bài.") +
+            '</div>';
+            return;
+        }
+
+        const sorted = filteredEvents.slice().sort(function (a, b) {
+            return (a.date + " " + a.time).localeCompare(b.date + " " + b.time);
+        });
+
+        let html = '<div class="fr11-list-wrap"><table class="fr11-list-table"><thead><tr>' +
+            '<th>THỜI GIAN ĐĂNG</th>' +
+            '<th>BÀI VIẾT</th>' +
+            '<th>KÊNH</th>' +
+            '<th>TÁC GIẢ</th>' +
+            '<th>LOẠI LỊCH / TRẠNG THÁI</th>' +
+            '<th style="text-align:right;">THAO TÁC</th>' +
+        '</tr></thead><tbody>';
+
+        sorted.forEach(function (ev) {
+            const isConflict = conflictIds.has(ev.id);
+            const dateStr = ev.date.split("-").reverse().join("/");
+            let statusPill = "";
+            if (ev.status === "SCHEDULED") {
+                statusPill = '<span class="fr11-status-pill official">✓ Lịch chính thức</span>';
+            } else if (ev.status === "PENDING") {
+                statusPill = '<span class="fr11-status-pill proposal">⏳ Đề xuất chờ duyệt</span>';
+            } else {
+                statusPill = '<span class="fr11-status-pill revision">⚠️ Cần điều chỉnh</span>';
+            }
+
+            html += '<tr>' +
+                '<td><b>' + ev.time + '</b><br><small style="color:var(--muted);">' + dateStr + '</small></td>' +
+                '<td><b style="color:var(--text-strong);">' + (global.UI ? UI.esc(ev.title) : ev.title) + '</b><br><small style="color:var(--pink);font-weight:600;">' + ev.code + '</small>' +
+                    (isConflict ? ' <span class="fr11-conflict-pill">⚠️ Xung đột &lt;30p</span>' : '') +
+                '</td>' +
+                '<td><span class="fr11-platform-dot" style="background:' + platformDotColor(ev.platform) + ';display:inline-block;margin-right:4px;"></span> ' + ev.platform + '</td>' +
+                '<td><b>' + (global.UI ? UI.esc(ev.author || "—") : (ev.author || "—")) + '</b></td>' +
+                '<td>' + statusPill + '</td>' +
+                '<td style="text-align:right;">' +
+                    '<button type="button" class="fr11-btn-outline" style="height:32px;padding:0 12px;font-size:12.5px;" data-open-event-id="' + ev.id + '">Chi tiết</button>' +
+                '</td>' +
+            '</tr>';
+        });
+
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+
+        container.querySelectorAll("[data-open-event-id]").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                openScheduleModal(parseInt(btn.getAttribute("data-open-event-id"), 10));
+            });
+        });
+    }
+
     function bindDragAndDrop(container) {
         const cards = container.querySelectorAll(".fr11-event-card");
         cards.forEach(function (card) {
@@ -607,8 +668,22 @@
     function openScheduleModal(eventId) {
         const modal = document.getElementById("fr11ScheduleModal");
         const errBox = document.getElementById("fr11ModalError");
+        const reasonBox = document.getElementById("fr11ReasonAlertBox");
+        const revisionGroup = document.getElementById("fr11RevisionInputGroup");
+        const btnConfirm = document.getElementById("btnConfirmOfficialSchedule");
+        const btnRevision = document.getElementById("btnRequestScheduleRevision");
+        const btnSave = document.getElementById("btnSaveScheduleForm") || modal.querySelector("button[type='submit']");
+
         if (!modal) return;
         if (errBox) errBox.hidden = true;
+        if (reasonBox) reasonBox.hidden = true;
+        if (revisionGroup) revisionGroup.hidden = true;
+        if (btnConfirm) btnConfirm.hidden = true;
+        if (btnRevision) btnRevision.hidden = true;
+
+        const isStaffPage = location.pathname.indexOf("/pages/staff/") !== -1;
+        const currentUser = (window.Auth && typeof window.Auth.getUser === "function") ? window.Auth.getUser() : null;
+        const isStaff = isStaffPage || (currentUser && currentUser.role === "STAFF");
 
         const ev = state.events.find(function (x) { return x.id === eventId; });
         const idInput = document.getElementById("fr11FormId");
@@ -620,29 +695,50 @@
         const modalTitle = document.getElementById("fr11ModalHeading");
 
         const editLink = document.getElementById("btnOpenPostEditorFromCal");
-        const baseEditPath = location.pathname.indexOf("/pages/admin/") !== -1 ? "../staff/edit-post.html" : "edit-post.html";
+        const baseEditPath = isStaffPage ? "edit-post.html" : "../staff/edit-post.html";
 
         if (ev) {
-            modalTitle.textContent = "Điều chỉnh lịch đăng bài (" + ev.code + ")";
+            modalTitle.textContent = (isStaff ? "Xem & Cập nhật lịch đăng (" : "Điều chỉnh lịch đăng bài (") + ev.code + ")";
             idInput.value = String(ev.id);
             titleInput.value = ev.title;
             platformSelect.value = ev.platform;
             statusSelect.value = ev.status;
             dateInput.value = ev.date;
             timeInput.value = ev.time;
+
             if (editLink) {
                 editLink.href = baseEditPath + "?id=" + encodeURIComponent(ev.id) + "&state=" + encodeURIComponent(ev.status === "PENDING" ? "PENDING_APPROVAL" : "DRAFT");
                 editLink.hidden = false;
             }
+
+            // Hiển thị lý do điều chỉnh nếu có
+            if (ev.revisionReason && reasonBox) {
+                reasonBox.innerHTML = '<b>' + (isStaff ? '⚠️ Manager yêu cầu điều chỉnh lịch:' : 'Ghi chú điều chỉnh hiện tại:') + '</b> ' +
+                    UI.esc(ev.revisionReason);
+                reasonBox.hidden = false;
+            }
+
+            // Nếu là Manager: mở các nút duyệt chính thức & yêu cầu điều chỉnh
+            if (!isStaff) {
+                if (btnConfirm) btnConfirm.hidden = false;
+                if (btnRevision) btnRevision.hidden = false;
+                if (revisionGroup) revisionGroup.hidden = false;
+                if (btnSave) btnSave.textContent = "Lưu lịch đăng";
+            } else {
+                if (btnSave) {
+                    btnSave.textContent = (ev.status === "EDITING") ? "Gửi lại đề xuất lịch" : "Cập nhật lịch đăng";
+                }
+            }
         } else {
-            modalTitle.textContent = "Thêm lịch đăng bài mới";
+            modalTitle.textContent = isStaff ? "Đề xuất lịch đăng bài mới" : "Thêm lịch đăng bài mới";
             idInput.value = "";
             titleInput.value = "Serum Hoa Anh Đào — Bí quyết căng bóng chuẩn Hàn";
             platformSelect.value = "FB & IG";
-            statusSelect.value = "SCHEDULED";
+            statusSelect.value = isStaff ? "PENDING" : "SCHEDULED";
             dateInput.value = TODAY_STR;
             timeInput.value = "08:15";
             if (editLink) editLink.hidden = true;
+            if (btnSave) btnSave.textContent = isStaff ? "Gửi đề xuất lịch" : "Lưu lịch đăng";
         }
 
         modal.hidden = false;
@@ -653,13 +749,64 @@
         if (modal) modal.hidden = true;
     }
 
+    // ==============================
+    // MANAGER DUYỆT & ĐIỀU CHỈNH LỊCH (TASK 05)
+    // ==============================
+    function handleConfirmOfficial() {
+        const idVal = document.getElementById("fr11FormId").value;
+        if (!idVal) return;
+        const ev = state.events.find(function (x) { return x.id === parseInt(idVal, 10); });
+        if (ev) {
+            ev.status = "SCHEDULED";
+            ev.revisionReason = null;
+            saveEvents();
+            closeScheduleModal();
+            render();
+
+            if (window.NotificationsStore && typeof NotificationsStore.addNotification === "function") {
+                NotificationsStore.addNotification({
+                    type: "CALENDAR_CONFIRMED",
+                    title: "Lịch đăng bài được xác nhận chính thức",
+                    message: 'Lịch đăng bài "' + ev.title + '" (' + ev.code + ') đã được Manager xác nhận là Lịch chính thức ngày ' + ev.date.split("-").reverse().join("/") + ' lúc ' + ev.time + '.',
+                    recipient: ev.author
+                });
+            }
+            if (global.Toast) Toast.success('Đã xác nhận bài "' + ev.title + '" là Lịch chính thức!');
+        }
+    }
+
+    function handleRequestRevision() {
+        const idVal = document.getElementById("fr11FormId").value;
+        if (!idVal) return;
+        const reasonInput = document.getElementById("fr11RevisionInput");
+        const reason = (reasonInput ? reasonInput.value.trim() : "") || "Khung giờ này trùng chiến dịch lớn, đề xuất dời sang 14:00.";
+        const ev = state.events.find(function (x) { return x.id === parseInt(idVal, 10); });
+        if (ev) {
+            ev.status = "EDITING";
+            ev.revisionReason = reason;
+            saveEvents();
+            closeScheduleModal();
+            render();
+
+            if (window.NotificationsStore && typeof NotificationsStore.addNotification === "function") {
+                NotificationsStore.addNotification({
+                    type: "CALENDAR_REVISION",
+                    title: "Yêu cầu điều chỉnh lịch đăng",
+                    message: 'Manager yêu cầu điều chỉnh thời gian đăng bài "' + ev.title + '": ' + reason,
+                    recipient: ev.author
+                });
+            }
+            if (global.Toast) Toast.info('Đã gửi phản hồi yêu cầu nhân viên ' + (ev.author || "") + ' điều chỉnh lịch đăng!');
+        }
+    }
+
     function handleModalSubmit(e) {
         e.preventDefault();
         const errBox = document.getElementById("fr11ModalError");
         const idVal = document.getElementById("fr11FormId").value;
         const title = document.getElementById("fr11FormTitle").value.trim();
         const platform = document.getElementById("fr11FormPlatform").value;
-        const status = document.getElementById("fr11FormStatus").value;
+        let status = document.getElementById("fr11FormStatus").value;
         const date = document.getElementById("fr11FormDate").value;
         const time = document.getElementById("fr11FormTime").value;
 
@@ -676,17 +823,36 @@
             return;
         }
 
+        const isStaffPage = location.pathname.indexOf("/pages/staff/") !== -1;
+        const currentUser = (window.Auth && typeof window.Auth.getUser === "function") ? window.Auth.getUser() : null;
+        const isStaff = isStaffPage || (currentUser && currentUser.role === "STAFF");
+
         if (idVal) {
             const ev = state.events.find(function (x) { return x.id === parseInt(idVal, 10); });
             if (ev) {
                 ev.title = title;
                 ev.platform = platform;
-                ev.status = status;
                 ev.date = date;
                 ev.time = time;
+                // Nếu Staff đang gửi lại bài bị yêu cầu sửa -> tự chuyển thành PENDING (Chờ duyệt lại)
+                if (isStaff && ev.status === "EDITING") {
+                    ev.status = "PENDING";
+                    ev.revisionReason = null;
+                    if (window.NotificationsStore && typeof NotificationsStore.addNotification === "function") {
+                        NotificationsStore.addNotification({
+                            type: "SCHEDULE_PROPOSAL_UPDATED",
+                            title: "Nhân viên đã cập nhật đề xuất lịch",
+                            message: 'Nhân viên ' + (ev.author || "Staff") + ' đã cập nhật lại lịch đề xuất cho bài viết "' + ev.title + '" (' + date.split("-").reverse().join("/") + ' lúc ' + time + ').',
+                            recipient: "Manager"
+                        });
+                    }
+                } else if (!isStaff) {
+                    ev.status = status;
+                }
             }
         } else {
             const newId = Date.now();
+            const authorName = isStaff ? ((currentUser && currentUser.fullName) || "Staff") : "Doãn Thị Minh Anh";
             state.events.push({
                 id: newId,
                 code: "BL-0" + (state.events.length + 118),
@@ -694,9 +860,18 @@
                 date: date,
                 time: time,
                 platform: platform,
-                status: status,
-                author: "Minh Anh"
+                status: isStaff ? "PENDING" : status,
+                author: authorName
             });
+
+            if (isStaff && window.NotificationsStore && typeof NotificationsStore.addNotification === "function") {
+                NotificationsStore.addNotification({
+                    type: "SCHEDULE_PROPOSAL",
+                    title: "Đề xuất lịch đăng bài mới",
+                    message: 'Nhân viên ' + authorName + ' đã gửi đề xuất lịch đăng bài "' + title + '" ngày ' + date.split("-").reverse().join("/") + ' lúc ' + time + '.',
+                    recipient: "Manager"
+                });
+            }
         }
 
         saveEvents();
@@ -705,9 +880,9 @@
 
         const conflicts = detectConflicts(state.events);
         if (conflicts.pairs.length > 0 && global.Toast) {
-            Toast.warn("Cảnh báo xung đột lịch đăng dưới 30 phút trên cùng nền tảng!");
+            Toast.warn("Cảnh báo: Lịch đăng vừa lưu bị trùng/cách nhau dưới 30 phút trên cùng nền tảng!");
         } else if (global.Toast) {
-            Toast.success("Đã lưu lịch đăng bài thành công!");
+            Toast.success(isStaff ? "Đã gửi đề xuất lịch đăng bài thành công!" : "Đã lưu lịch đăng bài thành công!");
         }
     }
 
@@ -741,19 +916,39 @@
             if (isStaff && !isMyPost(ev, currentUser)) {
                 return false;
             }
+            if (!isStaff && state.staffFilter !== "ALL" && ev.author !== state.staffFilter) {
+                return false;
+            }
             return matchesChannelFilter(ev, state.channelFilter);
         });
 
         const conflictData = detectConflicts(filteredEvents);
         updateConflictBanner(conflictData);
 
+        // CẬP NHẬT BANNER NHẮC LỊCH ĐĂNG HÔM NAY (TASK 05)
+        const reminderEl = document.getElementById("reminderBanner");
+        const reminderText = document.getElementById("reminderBannerText");
+        if (reminderEl && reminderText) {
+            const todayEvents = filteredEvents.filter(function (ev) { return ev.date === TODAY_STR; });
+            if (todayEvents.length > 0) {
+                reminderText.textContent = "Có " + todayEvents.length + ' bài viết cần phát hành hôm nay: ' +
+                    todayEvents.map(function (e) { return '"' + e.title + '" (' + e.time + ')'; }).join(", ");
+                reminderEl.hidden = false;
+            } else {
+                reminderText.textContent = "Không có bài viết nào được lên lịch trong ngày hôm nay.";
+                reminderEl.hidden = false;
+            }
+        }
+
         if (periodLabel) {
             if (state.mode === "MONTH") {
                 periodLabel.textContent = "Tháng 11, 2026";
             } else if (state.mode === "WEEK") {
                 periodLabel.textContent = "02/11 – 08/11, 2026";
-            } else {
+            } else if (state.mode === "DAY") {
                 periodLabel.textContent = "04/11/2026 (Hôm nay)";
+            } else {
+                periodLabel.textContent = "Danh sách lịch xuất bản";
             }
         }
 
@@ -767,19 +962,22 @@
 
         if (state.mode === "MONTH") {
             renderMonthView(board, filteredEvents, conflictData.conflictIds);
+            bindDragAndDrop(board);
         } else if (state.mode === "WEEK") {
             renderWeekView(board, filteredEvents, conflictData.conflictIds);
-        } else {
+            bindDragAndDrop(board);
+        } else if (state.mode === "DAY") {
             renderDayView(board, filteredEvents, conflictData.conflictIds);
+            bindDragAndDrop(board);
+        } else {
+            renderListView(board, filteredEvents, conflictData.conflictIds);
         }
-
-        bindDragAndDrop(board);
     }
 
     function init() {
         loadEvents();
 
-        // Nút chuyển đổi chế độ Tháng / Tuần / Ngày
+        // Nút chuyển đổi chế độ Tháng / Tuần / Ngày / Danh sách (TASK 02)
         document.querySelectorAll("[data-cal-mode]").forEach(function (btn) {
             btn.addEventListener("click", function () {
                 state.mode = btn.getAttribute("data-cal-mode") || "MONTH";
@@ -792,6 +990,15 @@
         if (channelSelect) {
             channelSelect.addEventListener("change", function () {
                 state.channelFilter = channelSelect.value;
+                render();
+            });
+        }
+
+        // Lọc theo nhân viên (TASK 02)
+        const staffSelect = document.getElementById("staffFilterSelect");
+        if (staffSelect) {
+            staffSelect.addEventListener("change", function () {
+                state.staffFilter = staffSelect.value;
                 render();
             });
         }
@@ -831,13 +1038,18 @@
             });
         }
 
-        // Modal events
+        // Modal events & Manager buttons (TASK 05)
         const closeBtn = document.getElementById("btnCloseScheduleModal");
         const cancelBtn = document.getElementById("btnCancelScheduleModal");
         const form = document.getElementById("fr11ScheduleForm");
+        const btnConfirm = document.getElementById("btnConfirmOfficialSchedule");
+        const btnRevision = document.getElementById("btnRequestScheduleRevision");
+
         if (closeBtn) closeBtn.addEventListener("click", closeScheduleModal);
         if (cancelBtn) cancelBtn.addEventListener("click", closeScheduleModal);
         if (form) form.addEventListener("submit", handleModalSubmit);
+        if (btnConfirm) btnConfirm.addEventListener("click", handleConfirmOfficial);
+        if (btnRevision) btnRevision.addEventListener("click", handleRequestRevision);
 
         render();
     }

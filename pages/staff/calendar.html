@@ -72,8 +72,18 @@
                         <button type="button" class="fr11-mode-btn is-active" data-cal-mode="MONTH">Tháng</button>
                         <button type="button" class="fr11-mode-btn" data-cal-mode="WEEK">Tuần</button>
                         <button type="button" class="fr11-mode-btn" data-cal-mode="DAY">Ngày</button>
+                        <button type="button" class="fr11-mode-btn" data-cal-mode="LIST">Danh sách</button>
                     </div>
                 </div>
+            </section>
+
+            <!-- REMINDER BANNER (TASK 05) -->
+            <section class="fr11-reminder-banner" id="reminderBanner">
+                <div>
+                    <strong>🔔 Nhắc nhở lịch phát hành hôm nay (04/11/2026):</strong>
+                    <span id="reminderBannerText">Có bài viết cần đăng theo kế hoạch hôm nay.</span>
+                </div>
+                <a href="#calendarBoard" class="link" style="font-weight:600;font-size:13px;color:#9a3412;">Xem lịch hôm nay →</a>
             </section>
 
             <!-- 3. CONFLICT WARNING BANNER -->
@@ -128,6 +138,8 @@
 
             <form id="fr11ScheduleForm">
                 <input type="hidden" id="fr11FormId">
+
+                <div class="fr11-reason-box" id="fr11ReasonAlertBox" hidden></div>
 
                 <div class="fr11-form-group" style="margin-bottom:12px">
                     <label class="fr11-form-label" for="fr11FormTitle">Bài viết</label>

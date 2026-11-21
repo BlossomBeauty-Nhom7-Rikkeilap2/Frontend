@@ -272,6 +272,23 @@
             return;
         }
 
+        // KIỂM TRA PHÂN QUYỀN: Staff chỉ được xem chi tiết bài viết của chính mình
+        const currentUser = (global.Auth && typeof global.Auth.getUser === "function") ? global.Auth.getUser() : null;
+        const isStaff = (location.pathname.indexOf("/pages/staff/") !== -1) || (currentUser && currentUser.role === "STAFF");
+        if (isStaff && currentUser && post && post.author) {
+            const myFull = (currentUser.fullName || "").toLowerCase().trim();
+            const myShort = (global.Auth && typeof global.Auth.shortName === "function" ? global.Auth.shortName(currentUser) : "").toLowerCase().trim();
+            const myUser = (currentUser.username || "").toLowerCase().trim();
+            const author = (post.author || "").toLowerCase().trim();
+            const isMine = (myFull && (author === myFull || author.includes(myFull) || myFull.includes(author))) ||
+                           (myShort && (author === myShort || author.includes(myShort) || myShort.includes(author))) ||
+                           (myUser && (author === myUser || author.includes(myUser)));
+            if (!isMine) {
+                UI.toast("warn", "Không có quyền truy cập", "Bạn chỉ được xem chi tiết bài viết do chính mình phụ trách.");
+                return;
+            }
+        }
+
         const st = STATUS_MAP[post.status] || { label: post.status, color: "#8c8294", bg: "#f0edf3" };
         const mediaUrl = post.mediaUrl || "../../assets/figma/skincare-editorial.png";
         const captionText = post.caption || "Chưa có nội dung caption.";

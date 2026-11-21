@@ -857,3 +857,137 @@
         flex: 1;
     }
 }
+
+/* ---------- 6. LIST VIEW & REMINDER (TASK 02 & TASK 05) ---------- */
+.fr11-reminder-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 20px;
+    background: #fff8f5;
+    border: 1px solid #fed7aa;
+    border-radius: 12px;
+    font-size: 14px;
+    color: #9a3412;
+    margin-bottom: 8px;
+}
+
+.fr11-reminder-banner strong {
+    font-weight: 600;
+}
+
+.fr11-list-wrap {
+    background: #ffffff;
+    border-radius: 16px;
+    overflow-x: auto;
+    border: 1px solid var(--pink-line);
+}
+
+.fr11-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+    text-align: left;
+}
+
+.fr11-list-table th {
+    padding: 14px 18px;
+    background: #faf7f8;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--pink-line);
+    white-space: nowrap;
+}
+
+.fr11-list-table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #f8eef2;
+    color: var(--text);
+    vertical-align: middle;
+}
+
+.fr11-list-table tr:last-child td {
+    border-bottom: none;
+}
+
+.fr11-list-table tr:hover td {
+    background: #fdf8fa;
+}
+
+.fr11-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.fr11-status-pill.official {
+    background: #ebf6ef;
+    color: #1e7e48;
+}
+
+.fr11-status-pill.proposal {
+    background: #fff2e4;
+    color: #b45309;
+}
+
+.fr11-status-pill.revision {
+    background: #fdf2f4;
+    color: var(--pink);
+}
+
+.fr11-reason-box {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 13.5px;
+    color: #92400e;
+}
+
+.fr11-reason-box b {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.fr11-btn-confirm-official {
+    background: #1e7e48;
+    color: #ffffff;
+    border: 1px solid #1e7e48;
+    border-radius: 8px;
+    padding: 0 16px;
+    height: 42px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.fr11-btn-confirm-official:hover {
+    background: #166534;
+}
+
+.fr11-btn-request-revision {
+    background: #fff2e4;
+    color: #b45309;
+    border: 1px solid #fed7aa;
+    border-radius: 8px;
+    padding: 0 16px;
+    height: 42px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.fr11-btn-request-revision:hover {
+    background: #ffedd5;
+}

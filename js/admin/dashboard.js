@@ -173,9 +173,38 @@
     let allPosts = loadAllPosts();
     let currentAuthorFilter = "ALL";
     let currentCampaignFilter = "ALL";
+    let currentTimePeriodFilter = "ALL";
+    let currentStatusFilter = "ALL";
     let currentTab = "board"; // "board" | "members"
 
-    function getActiveFilteredPosts() {
+    const STATUS_MAP = {
+        PUBLISHED:          { label: "Đã xuất bản",    cls: "st-published" },
+        PENDING_APPROVAL:   { label: "Chờ duyệt",      cls: "st-pending"   },
+        REVISION_REQUESTED: { label: "Cần chỉnh sửa",  cls: "st-revision"  },
+        DRAFT:              { label: "Bản nháp",       cls: "st-draft"     },
+        SCHEDULED:          { label: "Đã lên lịch",    cls: "st-scheduled" },
+        APPROVED:           { label: "Đã phê duyệt",   cls: "st-approved"  },
+        REJECTED:           { label: "Bị từ chối",     cls: "st-rejected"  }
+    };
+
+    const STATUS_FILTER_NAMES = {
+        ALL: "Tất cả bài viết",
+        PUBLISHED: "Đã xuất bản (PUBLISHED)",
+        PROCESSING: "Đang xử lý (Nháp / Lên lịch)",
+        PENDING_APPROVAL: "Chờ duyệt (PENDING_APPROVAL)",
+        REVISION_REQUESTED: "Cần chỉnh sửa (REVISION_REQUESTED)"
+    };
+
+    function matchesStatusFilter(post, filter) {
+        if (!filter || filter === "ALL") return true;
+        if (filter === "PUBLISHED") return post.status === "PUBLISHED";
+        if (filter === "PROCESSING") return post.status === "DRAFT" || post.status === "SCHEDULED" || post.status === "APPROVED";
+        if (filter === "PENDING_APPROVAL") return post.status === "PENDING_APPROVAL";
+        if (filter === "REVISION_REQUESTED") return post.status === "REVISION_REQUESTED" || post.status === "REJECTED";
+        return post.status === filter;
+    }
+
+    function getActiveFilteredPosts(ignoreStatus) {
         return allPosts.filter(function (p) {
             if (p.deleted_at) return false;
             if (currentAuthorFilter !== "ALL" && p.author !== currentAuthorFilter) {
@@ -186,12 +215,24 @@
                 const needle = currentCampaignFilter.toLowerCase();
                 if (!hay.includes(needle)) return false;
             }
+            if (currentTimePeriodFilter !== "ALL") {
+                const date = p.planned_date || "";
+                if (currentTimePeriodFilter === "2026-11" && !date.startsWith("2026-11")) return false;
+                if (currentTimePeriodFilter === "2026-10" && !date.startsWith("2026-10")) return false;
+                if (currentTimePeriodFilter === "2026-Q4") {
+                    const m = date.slice(0, 7);
+                    if (m !== "2026-10" && m !== "2026-11" && m !== "2026-12") return false;
+                }
+            }
+            if (!ignoreStatus && currentStatusFilter !== "ALL") {
+                if (!matchesStatusFilter(p, currentStatusFilter)) return false;
+            }
             return true;
         });
     }
 
     // ==============================
-    // STATISTICS
+    // STATISTICS (TASK 03)
     // ==============================
     function renderStats(activePosts) {
         const statsEl = document.getElementById("stats");
@@ -199,58 +240,107 @@
 
         const totalActive = activePosts.length;
         const publishedCount = activePosts.filter(function (p) { return p.status === "PUBLISHED"; }).length;
-        const readyCount = activePosts.filter(function (p) { return p.status === "SCHEDULED" || p.status === "APPROVED"; }).length;
+        const processingCount = activePosts.filter(function (p) { return p.status === "DRAFT" || p.status === "SCHEDULED" || p.status === "APPROVED"; }).length;
         const reviewCount = activePosts.filter(function (p) { return p.status === "PENDING_APPROVAL"; }).length;
         const editCount = activePosts.filter(function (p) { return p.status === "REVISION_REQUESTED" || p.status === "REJECTED"; }).length;
 
-        // Quá hạn: ngày đăng nhỏ hơn hôm nay và chưa xuất bản
-        const todayIso = new Date().toISOString().split("T")[0];
-        const overdueCount = activePosts.filter(function (p) {
-            return p.status !== "PUBLISHED" && p.planned_date && p.planned_date < todayIso;
-        }).length;
-
-        const planPercent = totalActive ? Math.round((publishedCount / totalActive) * 100) : 0;
-        const onSchedulePercent = totalActive ? Math.round(((publishedCount + readyCount) / totalActive) * 100) : 0;
-
         const statItems = [
             {
+                key: "ALL",
                 icon: "doc",
                 tone: "pink",
-                label: "Hoàn thành kế hoạch",
-                value: planPercent + "%",
-                note: publishedCount + " / " + totalActive + " bài đã xuất bản"
+                label: "Tổng số bài viết",
+                value: UI.pad(totalActive),
+                note: "Dữ liệu bài viết thực tế"
             },
             {
+                key: "PUBLISHED",
                 icon: "check",
                 tone: "green",
-                label: "Đúng tiến độ",
-                value: onSchedulePercent + "%",
-                note: readyCount + " bài sẵn sàng phát hành",
+                label: "Đã xuất bản",
+                value: UI.pad(publishedCount),
+                note: "Trạng thái PUBLISHED",
                 noteTone: "green"
             },
             {
+                key: "PROCESSING",
+                icon: "edit",
+                tone: "orange",
+                label: "Đang xử lý",
+                value: UI.pad(processingCount),
+                note: "Nháp & Lên lịch đăng",
+                noteTone: "orange"
+            },
+            {
+                key: "PENDING_APPROVAL",
                 icon: "clock",
                 tone: "orange",
-                label: "Cần xử lý hôm nay",
-                value: UI.pad(reviewCount + editCount),
-                note: reviewCount + " bài duyệt · " + editCount + " chỉnh sửa",
+                label: "Chờ duyệt",
+                value: UI.pad(reviewCount),
+                note: "Trạng thái PENDING_APPROVAL",
                 noteTone: "pink"
             },
             {
+                key: "REVISION_REQUESTED",
                 icon: "alert",
-                tone: "pink",
-                label: "Quá hạn",
-                value: UI.pad(overdueCount),
-                note: overdueCount > 0 ? "Cần ưu tiên xử lý ngay" : "Không có bài quá hạn",
-                noteTone: overdueCount > 0 ? "pink" : "green"
+                tone: "purple",
+                label: "Cần chỉnh sửa",
+                value: UI.pad(editCount),
+                note: "Trạng thái REVISION_REQUESTED",
+                noteTone: "pink"
             }
         ];
 
-        statsEl.innerHTML = statItems.map(UI.statCard).join("");
+        statsEl.innerHTML = statItems.map(function (item) {
+            const isActive = currentStatusFilter === item.key;
+            const cardHtml = UI.statCard(item);
+            return '<div class="stat-card-wrap' + (isActive ? ' is-active' : '') + '" data-status-filter="' + item.key + '">' +
+                cardHtml.replace('class="stat-card"', 'class="stat-card is-clickable' + (isActive ? ' is-active' : '') + '"') +
+            '</div>';
+        }).join("");
+
+        // Gắn sự kiện click vào từng thẻ thống kê
+        statsEl.querySelectorAll("[data-status-filter]").forEach(function (el) {
+            el.addEventListener("click", function () {
+                const targetKey = el.dataset.statusFilter;
+                if (currentStatusFilter === targetKey && targetKey !== "ALL") {
+                    currentStatusFilter = "ALL";
+                } else {
+                    currentStatusFilter = targetKey;
+                }
+                refreshUI();
+            });
+        });
+
+        updateFilterBadge();
+    }
+
+    function updateFilterBadge() {
+        const wrap = document.getElementById("activeFilterBadgeWrap");
+        if (!wrap) return;
+        if (currentStatusFilter === "ALL") {
+            wrap.style.display = "none";
+            wrap.innerHTML = "";
+            return;
+        }
+        const filteredPosts = getActiveFilteredPosts(false);
+        const name = STATUS_FILTER_NAMES[currentStatusFilter] || currentStatusFilter;
+        wrap.style.display = "block";
+        wrap.innerHTML = '<div class="active-filter-pill-bar">' +
+            '<span>🔍 Đang lọc: <b>' + UI.esc(name) + '</b> (' + filteredPosts.length + ' bài viết)</span>' +
+            '<button type="button" id="btnResetStatusFilter">✕ Bỏ lọc (Hiển thị tất cả)</button>' +
+        '</div>';
+        const resetBtn = document.getElementById("btnResetStatusFilter");
+        if (resetBtn) {
+            resetBtn.addEventListener("click", function () {
+                currentStatusFilter = "ALL";
+                refreshUI();
+            });
+        }
     }
 
     // ==============================
-    // KANBAN BOARD
+    // KANBAN BOARD & MEMBERS DASHBOARD (TASK 03 & 04)
     // ==============================
     function renderBoard(activePosts) {
         const boardEl = document.getElementById("board");
@@ -258,6 +348,28 @@
 
         if (currentTab === "members") {
             renderMembersView(activePosts, boardEl);
+            return;
+        }
+
+        boardEl.className = "board";
+
+        // Nếu người dùng lọc bài Đã xuất bản (PUBLISHED)
+        if (currentStatusFilter === "PUBLISHED") {
+            const pubPosts = activePosts.filter(function (p) { return p.status === "PUBLISHED"; });
+            boardEl.innerHTML = '<div class="kb-col ready" style="grid-column: 1 / -1; max-width: 680px; margin: 0 auto; width: 100%; min-height: 380px;">' +
+                '<div class="kb-head">' +
+                    '<h3>Đã xuất bản (PUBLISHED)</h3>' +
+                    '<span class="count">' + UI.pad(pubPosts.length) + '</span>' +
+                '</div>' +
+                '<div class="cards">' + (pubPosts.length ? pubPosts.map(function (post) {
+                    const plat = post.platform_label || (Array.isArray(post.platforms) ? post.platforms.join(" & ") : "Mạng xã hội");
+                    return '<div class="post" data-post-id="' + post.post_id + '" role="button" tabindex="0" title="Nhấn để xem chi tiết bài viết">' +
+                        '<b>' + UI.esc(post.title) + '</b>' +
+                        '<small>' + UI.esc(post.author) + ' · ' + UI.esc(plat) + ' · Ngày: ' + UI.esc(post.planned_label || post.planned_date) + '</small>' +
+                    '</div>';
+                }).join("") : UI.emptyState({ text: "Chưa có bài viết nào ở trạng thái Đã xuất bản." })) + '</div>' +
+                '<a href="posts.html?status=PUBLISHED" class="see-all">Xem tất cả ' + pubPosts.length + ' bài đã xuất bản trong danh sách →</a>' +
+            '</div>';
             return;
         }
 
@@ -319,36 +431,118 @@
         }).join("");
     }
 
+    // ==============================
+    // TASK 04 – DASHBOARD THEO DÕI NHÂN VIÊN
+    // ==============================
     function renderMembersView(activePosts, boardEl) {
-        const authors = [];
-        activePosts.forEach(function (p) {
-            if (p.author && !authors.includes(p.author)) authors.push(p.author);
+        boardEl.className = "members-grid";
+
+        let memberList = [];
+        if (window.AccountStore && typeof AccountStore.load === "function") {
+            try {
+                memberList = AccountStore.load().filter(function (a) { return a.status !== "locked"; });
+            } catch (_) {}
+        }
+
+        const staffNames = [];
+        memberList.forEach(function (m) {
+            if (m.fullName && !staffNames.includes(m.fullName)) staffNames.push(m.fullName);
+        });
+        allPosts.forEach(function (p) {
+            if (p.author && !staffNames.includes(p.author)) staffNames.push(p.author);
         });
 
-        if (!authors.length) {
+        const filteredStaff = currentAuthorFilter !== "ALL"
+            ? staffNames.filter(function (name) { return name === currentAuthorFilter; })
+            : staffNames;
+
+        if (!filteredStaff.length) {
             boardEl.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;background:#fff;border-radius:16px;">' +
-                UI.emptyState({ text: "Chưa có thành viên nào tạo bài viết." }) + '</div>';
+                UI.emptyState({ text: "Không tìm thấy dữ liệu nhân viên phù hợp với bộ lọc." }) + '</div>';
             return;
         }
 
-        boardEl.innerHTML = authors.map(function (author) {
-            const authorPosts = activePosts.filter(function (p) { return p.author === author; });
-            const cardsHtml = authorPosts.map(function (post) {
-                const plat = post.platform_label || (Array.isArray(post.platforms) ? post.platforms.join(" & ") : "Mạng xã hội");
-                return '<div class="post" data-post-id="' + post.post_id + '" role="button" tabindex="0">' +
-                    '<b>' + UI.esc(post.title) + '</b>' +
-                    '<small>' + UI.esc(plat) + ' · Lịch: ' + UI.esc(post.planned_label || post.planned_date) + '</small>' +
-                '</div>';
-            }).join("");
+        boardEl.innerHTML = filteredStaff.map(function (authorName) {
+            const authorPosts = allPosts.filter(function (p) {
+                if (p.deleted_at) return false;
+                if (p.author !== authorName) return false;
+                if (currentCampaignFilter !== "ALL") {
+                    const hay = (p.title + " " + (p.caption || "")).toLowerCase();
+                    if (!hay.includes(currentCampaignFilter.toLowerCase())) return false;
+                }
+                if (currentTimePeriodFilter !== "ALL") {
+                    const d = p.planned_date || "";
+                    if (currentTimePeriodFilter === "2026-11" && !d.startsWith("2026-11")) return false;
+                    if (currentTimePeriodFilter === "2026-10" && !d.startsWith("2026-10")) return false;
+                }
+                if (currentStatusFilter !== "ALL") {
+                    if (!matchesStatusFilter(p, currentStatusFilter)) return false;
+                }
+                return true;
+            });
 
-            return '<div class="kb-col draft">' +
-                '<div class="kb-head">' +
-                    '<h3>' + UI.esc(author) + '</h3>' +
-                    '<span class="count">' + UI.pad(authorPosts.length) + '</span>' +
+            const totalAssigned = authorPosts.length;
+            const published = authorPosts.filter(function (p) { return p.status === "PUBLISHED"; }).length;
+            const inProgress = authorPosts.filter(function (p) { return p.status === "DRAFT" || p.status === "SCHEDULED" || p.status === "APPROVED"; }).length;
+            const review = authorPosts.filter(function (p) { return p.status === "PENDING_APPROVAL"; }).length;
+            const edit = authorPosts.filter(function (p) { return p.status === "REVISION_REQUESTED" || p.status === "REJECTED"; }).length;
+            const completionRate = totalAssigned > 0 ? Math.round((published / totalAssigned) * 100) : 0;
+
+            const acc = memberList.find(function (a) { return a.fullName === authorName; }) || {};
+            const roleTitle = acc.position || (acc.role === "MANAGER" ? "Marketing Manager" : "Marketing Staff");
+            const initials = authorName.split(/\s+/).filter(Boolean).map(function (w) { return w[0]; }).slice(-2).join("").toUpperCase();
+
+            const recentPosts = authorPosts.slice().sort(function (a, b) {
+                return String(b.planned_date || "").localeCompare(String(a.planned_date || ""));
+            }).slice(0, 3);
+
+            let recentHtml = "";
+            if (recentPosts.length > 0) {
+                recentHtml = recentPosts.map(function (p) {
+                    const plat = p.platform_label || (Array.isArray(p.platforms) ? p.platforms.join(" & ") : "Mạng xã hội");
+                    const dateStr = p.planned_label || p.planned_date || "Đang cập nhật";
+                    const st = STATUS_MAP[p.status] || { label: p.status, cls: "st-draft" };
+                    return '<div class="member-recent-item" data-post-id="' + p.post_id + '" role="button" tabindex="0" title="Nhấn xem chi tiết">' +
+                        '<div class="member-recent-item-title">' + UI.esc(p.title) + '</div>' +
+                        '<div class="member-recent-item-meta">' + UI.esc(plat) + ' · ' + UI.esc(dateStr) + '</div>' +
+                        '<span class="badge" style="font-size:11px;padding:2px 6px;">' + UI.esc(st.label || p.status) + '</span>' +
+                    '</div>';
+                }).join("");
+            } else {
+                recentHtml = '<div style="font-size:13px;color:var(--muted);text-align:center;padding:10px;">Chưa có bài viết nào trong kỳ này.</div>';
+            }
+
+            return '<article class="member-card">' +
+                '<div class="member-card-header">' +
+                    '<div class="member-avatar">' + initials + '</div>' +
+                    '<div class="member-info">' +
+                        '<h3 class="member-name">' + UI.esc(authorName) + '</h3>' +
+                        '<p class="member-role">' + UI.esc(roleTitle) + ' · <b>' + totalAssigned + ' bài được giao</b></p>' +
+                    '</div>' +
                 '</div>' +
-                '<div class="cards">' + cardsHtml + '</div>' +
-                '<a href="posts.html?author=' + encodeURIComponent(author) + '" class="see-all">Xem danh sách của ' + UI.esc(author) + ' →</a>' +
-            '</div>';
+
+                '<div class="member-stats-row">' +
+                    '<div class="member-stat-box st-pub"><small>Đã đăng</small><strong>' + published + '</strong></div>' +
+                    '<div class="member-stat-box st-proc"><small>Đang xử lý</small><strong>' + inProgress + '</strong></div>' +
+                    '<div class="member-stat-box st-rev"><small>Chờ duyệt</small><strong>' + review + '</strong></div>' +
+                    '<div class="member-stat-box st-edit"><small>Cần sửa</small><strong>' + edit + '</strong></div>' +
+                '</div>' +
+
+                '<div class="member-progress-wrap">' +
+                    '<div class="member-progress-meta">' +
+                        '<span>Tỷ lệ hoàn thành</span>' +
+                        '<b>' + completionRate + '% (' + published + '/' + totalAssigned + ')</b>' +
+                    '</div>' +
+                    UI.progress(completionRate) +
+                '</div>' +
+
+                '<div class="member-recent-posts">' +
+                    '<div class="member-recent-title">Bài đăng gần đây:</div>' +
+                    recentHtml +
+                '</div>' +
+
+                '<a href="posts.html?author=' + encodeURIComponent(authorName) + '" class="see-all" style="margin-top:auto;padding-top:10px;">Xem toàn bộ danh sách bài của ' + UI.esc(authorName) + ' →</a>' +
+            '</article>';
         }).join("");
     }
 
@@ -452,6 +646,15 @@
             });
         }
 
+        // Time Period Filter (TASK 04)
+        const timeSel = document.getElementById("filterTimePeriod");
+        if (timeSel) {
+            timeSel.addEventListener("change", function () {
+                currentTimePeriodFilter = timeSel.value;
+                refreshUI();
+            });
+        }
+
         // Tabs (Bảng tiến độ vs Theo thành viên)
         const tabProgress = document.getElementById("tabProgress");
         const tabMembers = document.getElementById("tabMembers");
@@ -470,11 +673,11 @@
             });
         }
 
-        // Board Card Click
+        // Board Card Click & Member Recent Item Click
         const boardEl = document.getElementById("board");
         if (boardEl) {
             boardEl.addEventListener("click", function (e) {
-                const card = e.target.closest(".post[data-post-id]");
+                const card = e.target.closest(".post[data-post-id], .member-recent-item[data-post-id]");
                 if (card) {
                     const pid = card.dataset.postId;
                     const found = allPosts.find(function (p) {
@@ -485,7 +688,7 @@
             });
             boardEl.addEventListener("keydown", function (e) {
                 if (e.key === "Enter" || e.key === " ") {
-                    const card = e.target.closest(".post[data-post-id]");
+                    const card = e.target.closest(".post[data-post-id], .member-recent-item[data-post-id]");
                     if (card) {
                         e.preventDefault();
                         const pid = card.dataset.postId;
@@ -493,14 +696,6 @@
                             return String(p.post_id) === String(pid) || p.code === String(pid);
                         });
                         handlePostClick(found || Number(pid));
-                    }
-                }
-            });
-        }
-                    const card = e.target.closest(".post[data-post-id]");
-                    if (card) {
-                        e.preventDefault();
-                        handlePostClick(Number(card.dataset.postId));
                     }
                 }
             });
@@ -520,10 +715,11 @@
     }
 
     function refreshUI() {
-        const filtered = getActiveFilteredPosts();
-        renderStats(filtered);
+        const allContextPosts = getActiveFilteredPosts(true);
+        renderStats(allContextPosts);
+        const filtered = getActiveFilteredPosts(false);
         renderBoard(filtered);
-        updatePriorityBanner(filtered);
+        updatePriorityBanner(allContextPosts);
     }
 
     // Initialize

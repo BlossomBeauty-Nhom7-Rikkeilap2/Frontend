@@ -301,15 +301,15 @@
             if (mPending) mPending.textContent = String(myPending);
             if (mPub) mPub.textContent = String(myPub);
         } else {
-            // Đối với Quản lý (Admin): số liệu toàn công ty
+            // Đối với Quản lý (Admin): số liệu toàn công ty từ dữ liệu bài viết thực tế
             const draftCount = activeList.filter(function (p) { return p.status === "DRAFT"; }).length;
             const pendingCount = activeList.filter(function (p) { return p.status === "PENDING_APPROVAL"; }).length;
             const pubCount = activeList.filter(function (p) { return p.status === "PUBLISHED"; }).length;
 
-            if (mTotal) mTotal.textContent = String(119 + activeList.length);
-            if (mDraft) mDraft.textContent = String(12 + draftCount);
-            if (mPending) mPending.textContent = String(17 + pendingCount);
-            if (mPub) mPub.textContent = String(94 + pubCount);
+            if (mTotal) mTotal.textContent = String(activeList.length);
+            if (mDraft) mDraft.textContent = String(draftCount);
+            if (mPending) mPending.textContent = String(pendingCount);
+            if (mPub) mPub.textContent = String(pubCount);
         }
     }
 
@@ -564,6 +564,31 @@
                 updateAuthorFilterUI();
                 renderTable();
             });
+        });
+
+        // Metric cards click to filter status (TASK 03)
+        const metricStatusMap = {
+            metricPostTotal: "ALL",
+            metricPostDraft: "DRAFT",
+            metricPostPending: "PENDING_APPROVAL",
+            metricPostPublished: "PUBLISHED"
+        };
+        Object.keys(metricStatusMap).forEach(function (id) {
+            const cardEl = document.getElementById(id);
+            if (!cardEl) return;
+            const parentCard = cardEl.closest(".fr07-metric-card");
+            if (parentCard) {
+                parentCard.style.cursor = "pointer";
+                parentCard.setAttribute("title", "Nhấn để lọc bài viết theo trạng thái này");
+                parentCard.addEventListener("click", function () {
+                    const stSelect = document.getElementById("filterStatusSelect");
+                    if (stSelect) {
+                        stSelect.value = metricStatusMap[id];
+                        currentPage = 1;
+                        renderTable();
+                    }
+                });
+            }
         });
 
         // Filters

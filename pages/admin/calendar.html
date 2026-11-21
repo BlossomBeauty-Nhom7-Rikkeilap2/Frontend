@@ -68,12 +68,30 @@
                         <option value="Threads">Threads</option>
                     </select>
 
+                    <select class="fr11-channel-select" id="staffFilterSelect" aria-label="Lọc theo nhân viên">
+                        <option value="ALL">Tất cả nhân sự ⌄</option>
+                        <option value="Doãn Thị Minh Anh">Doãn Thị Minh Anh</option>
+                        <option value="Phạm Thùy Dương">Phạm Thùy Dương</option>
+                        <option value="Trần Ngọc Mai">Trần Ngọc Mai</option>
+                        <option value="Nhân viên Marketing">Nhân viên Marketing</option>
+                    </select>
+
                     <div class="fr11-mode-group" role="tablist" aria-label="Chế độ xem lịch">
                         <button type="button" class="fr11-mode-btn is-active" data-cal-mode="MONTH" data-node-id="3:45324">Tháng</button>
                         <button type="button" class="fr11-mode-btn" data-cal-mode="WEEK" data-node-id="3:45326">Tuần</button>
                         <button type="button" class="fr11-mode-btn" data-cal-mode="DAY">Ngày</button>
+                        <button type="button" class="fr11-mode-btn" data-cal-mode="LIST">Danh sách</button>
                     </div>
                 </div>
+            </section>
+
+            <!-- REMINDER BANNER (TASK 05) -->
+            <section class="fr11-reminder-banner" id="reminderBanner">
+                <div>
+                    <strong>🔔 Nhắc nhở lịch phát hành hôm nay (04/11/2026):</strong>
+                    <span id="reminderBannerText">Có 1 bài viết cần đăng theo kế hoạch.</span>
+                </div>
+                <a href="#calendarBoard" class="link" style="font-weight:600;font-size:13px;color:#9a3412;">Xem lịch hôm nay →</a>
             </section>
 
             <!-- 3. CONFLICT WARNING BANNER (ERR-03 / BR-12) -->
@@ -129,6 +147,8 @@
             <form id="fr11ScheduleForm">
                 <input type="hidden" id="fr11FormId">
 
+                <div class="fr11-reason-box" id="fr11ReasonAlertBox" hidden></div>
+
                 <div class="fr11-form-group" style="margin-bottom:12px">
                     <label class="fr11-form-label" for="fr11FormTitle">Bài viết</label>
                     <input type="text" class="fr11-form-input" id="fr11FormTitle" required>
@@ -145,11 +165,11 @@
                         </select>
                     </div>
                     <div class="fr11-form-group">
-                        <label class="fr11-form-label" for="fr11FormStatus">Trạng thái</label>
+                        <label class="fr11-form-label" for="fr11FormStatus">Trạng thái lịch</label>
                         <select class="fr11-form-select" id="fr11FormStatus">
-                            <option value="SCHEDULED">Đã lên lịch / Đã đăng</option>
-                            <option value="PENDING">Chờ duyệt</option>
-                            <option value="EDITING">Đang chỉnh sửa</option>
+                            <option value="SCHEDULED">Lịch chính thức (Đã xác nhận)</option>
+                            <option value="PENDING">Lịch đề xuất (Chờ duyệt)</option>
+                            <option value="EDITING">Cần điều chỉnh thời gian</option>
                         </select>
                     </div>
                 </div>
@@ -165,13 +185,20 @@
                     </div>
                 </div>
 
+                <div class="fr11-form-group" id="fr11RevisionInputGroup" style="margin-bottom:12px" hidden>
+                    <label class="fr11-form-label" for="fr11RevisionInput">Lý do yêu cầu điều chỉnh lịch</label>
+                    <input type="text" class="fr11-form-input" id="fr11RevisionInput" placeholder="Ví dụ: Khung giờ này trùng chiến dịch lớn, đề xuất dời sang 14:00...">
+                </div>
+
                 <div class="fr11-modal-error" id="fr11ModalError" hidden></div>
 
                 <div class="fr11-modal-foot">
                     <a href="../staff/edit-post.html" class="fr11-btn-outline" id="btnOpenPostEditorFromCal" style="display:inline-flex;align-items:center;text-decoration:none;">Chỉnh sửa bài viết →</a>
                     <div class="fr11-modal-foot-right">
+                        <button type="button" class="fr11-btn-request-revision" id="btnRequestScheduleRevision" hidden>Yêu cầu đổi lịch</button>
+                        <button type="button" class="fr11-btn-confirm-official" id="btnConfirmOfficialSchedule" hidden>Xác nhận lịch chính thức</button>
                         <button type="button" class="fr11-btn-outline" id="btnCancelScheduleModal">Hủy bỏ</button>
-                        <button type="submit" class="fr11-btn-primary">Lưu lịch đăng</button>
+                        <button type="submit" class="fr11-btn-primary" id="btnSaveScheduleForm">Lưu lịch đăng</button>
                     </div>
                 </div>
             </form>

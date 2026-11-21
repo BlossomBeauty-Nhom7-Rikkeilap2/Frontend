@@ -183,3 +183,226 @@
         flex: 1;
     }
 }
+
+/* ---------- Stat Cards Tương tác (TASK 03) ---------- */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.stat-card.is-clickable {
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    user-select: none;
+}
+
+.stat-card.is-clickable:hover {
+    transform: translateY(-2px);
+    border-color: #e8c5d1;
+    box-shadow: 0 4px 14px rgba(184, 80, 117, 0.08);
+}
+
+.stat-card.is-active {
+    border-color: var(--pink) !important;
+    background: #fffafa !important;
+    box-shadow: 0 0 0 2px var(--pink), 0 6px 16px rgba(184, 80, 117, 0.12) !important;
+}
+
+.stat-card.is-active::after {
+    content: "Đang lọc";
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--pink);
+    background: var(--pink-soft);
+    padding: 2px 7px;
+    border-radius: 100px;
+}
+
+.active-filter-pill-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 14px;
+    background: #fff0f5;
+    border: 1px solid #f2b9cc;
+    border-radius: 10px;
+    font-size: 14px;
+    color: var(--pink);
+    margin-bottom: 16px;
+}
+
+.active-filter-pill-bar button {
+    background: transparent;
+    border: none;
+    color: var(--pink);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-left: auto;
+}
+
+/* ---------- Dashboard Theo Dõi Nhân Viên (TASK 04) ---------- */
+.members-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+    width: 100%;
+}
+
+.member-card {
+    background: #fff;
+    border: 1px solid var(--pink-line);
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.member-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(184, 80, 117, 0.08);
+}
+
+.member-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.member-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--pink-soft);
+    color: var(--pink);
+    font-weight: 700;
+    font-size: 18px;
+    display: grid;
+    place-items: center;
+    flex: none;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.member-info {
+    flex: 1;
+}
+
+.member-name {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--text-strong);
+    margin: 0 0 2px 0;
+}
+
+.member-role {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0;
+}
+
+.member-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    background: #fbf9fa;
+    border-radius: 12px;
+    padding: 10px 8px;
+    text-align: center;
+}
+
+.member-stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.member-stat-box small {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+}
+
+.member-stat-box strong {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-2);
+}
+
+.member-stat-box.st-pub strong { color: var(--green); }
+.member-stat-box.st-proc strong { color: var(--orange); }
+.member-stat-box.st-rev strong { color: #d97706; }
+.member-stat-box.st-edit strong { color: var(--pink); }
+
+.member-progress-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.member-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+}
+
+.member-recent-posts {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-top: 1px dashed var(--pink-line);
+    padding-top: 12px;
+}
+
+.member-recent-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.member-recent-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,0.04);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    font-size: 13.5px;
+}
+
+.member-recent-item:hover {
+    background: #fdf5f7;
+    border-color: var(--pink-soft);
+}
+
+.member-recent-item-title {
+    font-weight: 500;
+    color: var(--text-strong);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+}
+
+.member-recent-item-meta {
+    font-size: 12px;
+    color: var(--muted);
+    flex: none;
+}

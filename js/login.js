@@ -30,15 +30,39 @@
             email: "admin@blossom.vn",
             password: "Blossom@123",
             role: "MANAGER",
-            fullName: "Đoàn Thị Minh Anh",
+            fullName: "Quản trị Hệ thống",
             position: "Marketing Manager"
+        },
+        {
+            username: "manager",
+            email: "manager@blossom.vn",
+            password: "Blossom@123",
+            role: "MANAGER",
+            fullName: "Quản lý Blossom",
+            position: "Marketing Manager"
+        },
+        {
+            username: "minhanh",
+            email: "minhanh@blossom.vn",
+            password: "Blossom@123",
+            role: "STAFF",
+            fullName: "Doãn Thị Minh Anh",
+            position: "Marketing Staff"
+        },
+        {
+            username: "thuyduong",
+            email: "thuyduong@blossom.vn",
+            password: "Blossom@123",
+            role: "STAFF",
+            fullName: "Phạm Thùy Dương",
+            position: "Marketing Staff"
         },
         {
             username: "manh",
             email: "manh@blossom.vn",
             password: "Manh@2026",
             role: "STAFF",
-            fullName: "Doãn Thị Minh Anh",
+            fullName: "Trần Quốc Mạnh",
             position: "Marketing Staff"
         }
     ];
@@ -124,7 +148,8 @@
         let matched = accounts.find((a) => {
             const em = (a.email || "").trim().toLowerCase();
             const un = (a.username || (a.email ? a.email.split("@")[0] : "")).trim().toLowerCase();
-            return em === key || un === key;
+            const fn = (a.fullName || "").trim().toLowerCase();
+            return em === key || un === key || fn === key || fn.includes(key) || key.includes(fn);
         });
 
         // 2. Tìm dự phòng trong USERS hardcoded
@@ -132,7 +157,8 @@
             matched = USERS.find((u) => {
                 const em = (u.email || "").trim().toLowerCase();
                 const un = (u.username || "").trim().toLowerCase();
-                return em === key || un === key;
+                const fn = (u.fullName || "").trim().toLowerCase();
+                return em === key || un === key || fn === key || fn.includes(key) || key.includes(fn);
             });
         }
 

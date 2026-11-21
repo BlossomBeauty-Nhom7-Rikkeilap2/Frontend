@@ -61,8 +61,17 @@
                         <option value="Tuần lễ hoa anh đào">Tuần lễ hoa anh đào</option>
                         <option value="Bộ sưu tập son thuần chay">Bộ sưu tập son thuần chay</option>
                     </select>
+
+                    <select class="select" id="filterTimePeriod" aria-label="Lọc theo thời gian">
+                        <option value="ALL">Tất cả thời gian</option>
+                        <option value="2026-11">Tháng 11, 2026</option>
+                        <option value="2026-10">Tháng 10, 2026</option>
+                        <option value="2026-Q4">Quý 4, 2026</option>
+                    </select>
                 </div>
             </div>
+
+            <div id="activeFilterBadgeWrap" style="margin-bottom: 16px; display: none;"></div>
 
             <section class="board" id="board"></section>
 
