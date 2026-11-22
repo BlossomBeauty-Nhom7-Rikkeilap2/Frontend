@@ -72,7 +72,20 @@
        Dữ liệu + quyền
        --------------------------------------------------------- */
     function reload() { state.events = Scope.loadEvents(); }
-    function persist() { Scope.saveEvents(state.events); }
+    async function persist(ev) {
+        Scope.saveEvents(state.events);
+        if (ev && ev.post_id && window.BlossomAPI && typeof window.BlossomAPI.request === "function") {
+            const dtStr = ev.date + "T" + (ev.time || "09:00") + ":00";
+            try {
+                await BlossomAPI.request("/schedules/" + ev.post_id, {
+                    method: "PUT",
+                    body: { scheduled_time: dtStr, remind_before_minutes: 30 }
+                });
+            } catch (e) {
+                console.warn("[Calendar] PUT schedule error:", e.message);
+            }
+        }
+    }
     function findEvent(id) {
         return state.events.find(function (e) { return Number(e.id) === Number(id); }) || null;
     }

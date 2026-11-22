@@ -111,8 +111,52 @@
         return !!acc && acc.status === "locked";
     }
 
+    async function syncFromBackend() {
+        if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
+        try {
+            const users = await global.BlossomAPI.request("/users");
+            if (Array.isArray(users) && users.length) {
+                const list = load();
+                const listMap = {};
+                list.forEach(function (a) { listMap[a.username || a.email] = a; });
+
+                users.forEach(function (u) {
+                    const isMgr = (u.role && u.role.role_code === "MANAGER") || u.role_id === 1;
+                    const statusStr = (u.status === "ACTIVE" ? "active" : "locked");
+                    const dateStr = u.created_at ? u.created_at.slice(0, 10) : "2026-01-01";
+                    
+                    const acc = Object.assign({}, listMap[u.username] || {}, {
+                        id: u.user_id,
+                        username: u.username,
+                        fullName: u.full_name,
+                        email: u.email,
+                        role: isMgr ? "MANAGER" : "STAFF",
+                        status: statusStr,
+                        createdAt: dateStr
+                    });
+                    listMap[u.username] = acc;
+                });
+
+                const merged = Object.values(listMap);
+                save(merged);
+                try { global.dispatchEvent(new Event("blossom_accounts_updated")); } catch (e) {}
+            }
+        } catch (e) {
+            console.warn("[AccountStore] syncFromBackend error:", e.message);
+        }
+    }
+
     global.AccountStore = {
         KEY, load, save, isLocked, normEmail,
-        usernameFromEmail, defaultPasswordFor, findByIdentifier, verifyPassword, updatePassword
+        usernameFromEmail, defaultPasswordFor, findByIdentifier, verifyPassword, updatePassword,
+        syncFromBackend: syncFromBackend
     };
+
+    if (typeof window !== "undefined") {
+        window.addEventListener("DOMContentLoaded", function () {
+            if (global.BlossomAPI && global.BlossomAPI.getToken()) {
+                syncFromBackend();
+            }
+        });
+    }
 })(window);

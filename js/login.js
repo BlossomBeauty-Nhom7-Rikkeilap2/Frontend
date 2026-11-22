@@ -34,11 +34,27 @@
             position: "Marketing Manager"
         },
         {
+            username: "manager",
+            email: "manager@rikkeilab.vn",
+            password: "Manager@123",
+            role: "MANAGER",
+            fullName: "Marketing Manager",
+            position: "Marketing Manager"
+        },
+        {
             username: "minhanh",
             email: "minhanh@blossom.vn",
             password: "Staff@123",
             role: "STAFF",
             fullName: "Doãn Thị Minh Anh",
+            position: "Marketing Staff"
+        },
+        {
+            username: "staff1",
+            email: "staff1@rikkeilab.vn",
+            password: "Staff@123",
+            role: "STAFF",
+            fullName: "Marketing Staff 1",
             position: "Marketing Staff"
         },
         {
@@ -221,65 +237,85 @@
             return;
         }
 
-        // 5.2 Giả lập gọi API
+        // 5.2 Goi API Backend qua BlossomAPI (hoac fallback neu offline)
         btnLogin.disabled = true;
         btnLogin.classList.add("is-loading");
 
-        setTimeout(() => {
-            const result = authenticate(identifier, password);
+        (async () => {
+            let result = null;
+            let backendSuccess = false;
+
+            if (window.BlossomAPI && typeof window.BlossomAPI.login === "function") {
+                try {
+                    const loginRes = await window.BlossomAPI.login(identifier, password);
+                    if (loginRes && loginRes.user) {
+                        result = { ok: true, user: loginRes.user };
+                        backendSuccess = true;
+                    }
+                } catch (apiErr) {
+                    console.warn("[Login] Backend error:", apiErr.message);
+                    // Neu la loi mat khau / sai email / bi khoa tu backend:
+                    const msg = apiErr.message || "";
+                    if (msg.includes("khóa") || msg.includes("LOCKED")) {
+                        result = { ok: false, reason: "locked" };
+                    } else if (msg.includes("Không tìm thấy") || msg.includes("không chính xác")) {
+                        result = { ok: false, reason: "password" };
+                    }
+                }
+            }
+
+            // Neu chua dang nhap duoc qua Backend, thu fallback qua AccountStore / danh sach demo cuc bo
+            if (!result || (!result.ok && !backendSuccess)) {
+                const localRes = authenticate(identifier, password);
+                if (localRes.ok) {
+                    result = localRes;
+                } else if (!result) {
+                    result = localRes;
+                }
+            }
 
             btnLogin.disabled = false;
             btnLogin.classList.remove("is-loading");
 
             // 5.3 Đăng nhập thất bại
-            if (!result.ok) {
-
-                if (result.reason === "locked") {
+            if (!result || !result.ok) {
+                if (result && result.reason === "locked") {
                     setError(
                         fieldEmail,
                         emailError,
                         "Tài khoản đã bị khóa. Vui lòng liên hệ quản trị viên."
                     );
-
                     showToast(
                         "error",
                         "Đăng nhập thất bại",
                         "Tài khoản của bạn đã bị khóa."
                     );
-
                     emailInput.focus();
-
-                } else if (result.reason === "email") {
+                } else if (result && result.reason === "email") {
                     setError(
                         fieldEmail,
                         emailError,
                         "Email hoặc tên đăng nhập không tồn tại."
                     );
-
                     showToast(
                         "error",
                         "Đăng nhập thất bại",
                         "Sai email hoặc tên đăng nhập."
                     );
-
                     emailInput.focus();
-
                 } else {
                     setError(
                         fieldPass,
                         passError,
                         "Mật khẩu không chính xác."
                     );
-
                     showToast(
                         "error",
                         "Đăng nhập thất bại",
                         "Sai mật khẩu, vui lòng thử lại."
                     );
-
                     passInput.select();
                 }
-
                 return;
             }
 
@@ -307,7 +343,6 @@
 
             // Phân quyền chuyển trang
             let redirectURL;
-
             if (user.role === "MANAGER") {
                 redirectURL = MANAGER_URL;
             } else if (user.role === "STAFF") {
@@ -318,9 +353,7 @@
                     "Không có quyền truy cập",
                     "Vai trò tài khoản không hợp lệ."
                 );
-
                 localStorage.removeItem(USER_KEY);
-
                 return;
             }
 
@@ -335,8 +368,7 @@
             setTimeout(() => {
                 window.location.href = redirectURL;
             }, TOAST_DURATION);
-
-        }, 600);
+        })();
     }
 
     /* ---------- 6. SỰ KIỆN VÀ KHỞI TẠO ---------- */

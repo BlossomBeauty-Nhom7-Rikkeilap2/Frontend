@@ -627,6 +627,83 @@
         if (postsChanged) writeJson(POSTS_KEY, posts);
     }
 
+    async function syncFromBackend() {
+        if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
+        try {
+            const res = await global.BlossomAPI.request("/posts?page_size=100");
+            if (Array.isArray(res) && res.length) {
+                const platNames = { 1: "Facebook", 2: "Instagram", 3: "Threads" };
+                const currentList = loadPosts();
+                const listMap = {};
+                currentList.forEach(function (p) { listMap[p.post_id] = p; });
+
+                res.forEach(function (bp) {
+                    const plat = platNames[bp.platform_id] || "Facebook";
+                    const plannedDate = bp.planned_publish_time ? bp.planned_publish_time.slice(0, 10) : "";
+                    const plannedTime = bp.planned_publish_time ? bp.planned_publish_time.slice(11, 16) : "09:00";
+                    
+                    const item = Object.assign({}, listMap[bp.post_id] || {}, {
+                        post_id: bp.post_id,
+                        code: "BL-0" + bp.post_id,
+                        title: bp.title,
+                        caption: bp.caption || "",
+                        hashtags: bp.hashtags || "",
+                        platforms: [plat],
+                        platform_label: plat,
+                        status: bp.status,
+                        planned_date: plannedDate,
+                        planned_time: plannedTime,
+                        planned_label: plannedDate ? viDate(plannedDate) + " " + plannedTime : "",
+                        updated_at: bp.updated_at || bp.created_at,
+                        deleted_at: null
+                    });
+
+                    if (bp.media_files && Array.isArray(bp.media_files) && bp.media_files.length) {
+                        savePostMedia(bp.post_id, {
+                            url: bp.media_files[0],
+                            serverUrl: bp.media_files[0],
+                            type: bp.media_type || "IMAGE"
+                        });
+                    }
+
+                    listMap[bp.post_id] = item;
+                });
+
+                const merged = Object.values(listMap);
+                savePosts(merged, false);
+            }
+
+            try {
+                const cal = await global.BlossomAPI.request("/schedules/calendar");
+                if (Array.isArray(cal) && cal.length) {
+                    const currentEvs = loadEvents();
+                    const evMap = {};
+                    currentEvs.forEach(function (e) { evMap[e.event_id || e.post_id] = e; });
+
+                    cal.forEach(function (cev) {
+                        const plat = cev.platform_name || "Facebook";
+                        const dateStr = cev.publish_time ? cev.publish_time.slice(0, 10) : "";
+                        const timeStr = cev.publish_time ? cev.publish_time.slice(11, 16) : "09:00";
+                        const evId = "ev_be_" + cev.schedule_id;
+                        evMap[evId] = {
+                            event_id: evId,
+                            post_id: cev.post_id,
+                            title: cev.post_title,
+                            platform: plat,
+                            date: dateStr,
+                            time: timeStr,
+                            status: cev.status || "SCHEDULED",
+                            author: cev.author_name || ""
+                        };
+                    });
+                    saveEvents(Object.values(evMap), false);
+                }
+            } catch (calErr) {}
+        } catch (err) {
+            console.warn("[Scope] syncFromBackend error:", err.message);
+        }
+    }
+
     global.Scope = {
         POSTS_KEY: POSTS_KEY, CAL_KEY: CAL_KEY,
         STAFF: STAFF, CAMPAIGNS: CAMPAIGNS, GROUPS: GROUPS, STATUS_LABEL: STATUS_LABEL,
@@ -640,6 +717,14 @@
         activityDate: activityDate, inRange: inRange, groupOfStatus: groupOfStatus, countByGroup: countByGroup,
         postsUrl: postsUrl, getPostMedia: getPostMedia, savePostMedia: savePostMedia, plannedLabelOf: plannedLabelOf, upsertEventForPost: upsertEventForPost,
         loadEvents: loadEvents, saveEvents: saveEvents, visibleEvents: visibleEvents, eventTime: eventTime,
-        runReminders: runReminders
+        runReminders: runReminders, syncFromBackend: syncFromBackend
     };
+
+    if (typeof window !== "undefined") {
+        window.addEventListener("DOMContentLoaded", function () {
+            if (global.BlossomAPI && global.BlossomAPI.getToken()) {
+                syncFromBackend();
+            }
+        });
+    }
 })(window);

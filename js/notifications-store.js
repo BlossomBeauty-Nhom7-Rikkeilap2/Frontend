@@ -288,6 +288,9 @@
             if (item && !item.is_read) {
                 item.is_read = true;
                 this.saveNotifications(list);
+                if (global.BlossomAPI && global.BlossomAPI.getToken() && Number(id)) {
+                    global.BlossomAPI.request("/notifications/" + id + "/read", { method: "PATCH" }).catch(function () {});
+                }
             }
             return item;
         },
@@ -334,6 +337,82 @@
                     badge.remove();
                 }
             }
+        },
+
+        syncFromBackend: async function () {
+            if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
+            try {
+                const list = await global.BlossomAPI.request("/notifications");
+                if (Array.isArray(list) && list.length) {
+                    const current = this.getNotifications();
+                    const map = {};
+                    current.forEach(function (n) { map[n.id] = n; });
+
+                    list.forEach(function (beN) {
+                        map[beN.notification_id] = {
+                            id: beN.notification_id,
+                            type: beN.type ? beN.type.toLowerCase() : "submitted",
+                            title: beN.title,
+                            message: beN.content || beN.message || "",
+                            time: beN.created_at,
+                            time_relative: "Gần đây",
+                            is_read: beN.is_read,
+                            postId: beN.post_id
+                        };
+                    });
+                    this.saveNotifications(Object.values(map));
+                }
+            } catch (e) {
+                console.warn("[NotificationsStore] syncFromBackend error:", e.message);
+            }
+        },
+
+        initWebSocket: function () {
+            if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
+            const token = global.BlossomAPI.getToken();
+            const wsProtocol = location.protocol === "https:" ? "wss:" : "ws:";
+            const wsUrl = wsProtocol + "//localhost:8000/api/ws/notifications?token=" + encodeURIComponent(token);
+
+            try {
+                const socket = new WebSocket(wsUrl);
+
+                socket.onopen = function () {
+                    console.log("[WebSocket] Kết nối WebSocket thông báo thành công.");
+                };
+
+                socket.onmessage = function (event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        if (data && data.title) {
+                            NotificationsStore.addNotification({
+                                title: data.title,
+                                message: data.message || "",
+                                type: data.type || "submitted",
+                                postId: data.post_id || null,
+                                author: data.author || "Hệ thống Blossom"
+                            });
+                            if (global.UI && typeof global.UI.toast === "function") {
+                                global.UI.toast("info", data.title, data.message || "");
+                            }
+                        }
+                    } catch (e) {
+                        console.warn("[WebSocket] Lỗi phân tích tin nhắn:", e);
+                    }
+                };
+
+                socket.onerror = function (err) {
+                    console.warn("[WebSocket] Lỗi kết nối WebSocket:", err);
+                };
+
+                socket.onclose = function () {
+                    console.log("[WebSocket] Đã đóng kết nối. Thử lại sau 15 giây.");
+                    setTimeout(function () {
+                        NotificationsStore.initWebSocket();
+                    }, 15000);
+                };
+            } catch (e) {
+                console.warn("[WebSocket] Không thể khởi tạo kết nối:", e.message);
+            }
         }
     };
 
@@ -346,6 +425,10 @@
             setInterval(function () { global.Scope.runReminders(); }, 60000);
         }
         NotificationsStore.syncBellUI();
+        if (global.BlossomAPI && global.BlossomAPI.getToken()) {
+            NotificationsStore.syncFromBackend();
+            NotificationsStore.initWebSocket();
+        }
     });
 
     window.addEventListener("blossom_notifications_updated", function () {

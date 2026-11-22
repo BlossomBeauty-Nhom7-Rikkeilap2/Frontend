@@ -257,23 +257,14 @@
 
         // Thử upload lên Backend /api/posts/upload-media nếu server đang chạy
         try {
-            const formData = new FormData();
-            formData.append("file", file);
-            const token = localStorage.getItem("blossom_access_token");
-            const headers = token ? { "Authorization": "Bearer " + token } : {};
-            const resp = await fetch(BlossomAPI.API_BASE + "/posts/upload-media", {
-                method: "POST",
-                headers: headers,
-                body: formData,
-                credentials: "include"
-            });
-            if (resp.ok) {
-                const uploaded = await resp.json();
+            if (window.BlossomAPI && typeof window.BlossomAPI.uploadMedia === "function") {
+                const uploaded = await window.BlossomAPI.uploadMedia(file);
                 if (uploaded && uploaded.file_url) {
                     currentMedia.serverUrl = uploaded.file_url;
                 }
             }
         } catch (e) {
+            console.warn("[PostEditor] Upload media fallback:", e.message);
             /* fallback local preview URL */
         }
     }
@@ -294,19 +285,26 @@
         }
 
         try {
-            await BlossomAPI.request("/posts/autosave", {
-                method: "POST",
-                body: JSON.stringify({
-                    post_id: currentPostId,
-                    title: payload.title,
-                    caption: payload.headline + "\n\n" + payload.caption,
-                    hashtags: payload.hashtags,
-                    platforms: payload.platforms,
-                    media_type: (currentMedia || {}).type || "NONE",
-                    media_files: currentMedia ? [currentMedia.serverUrl || currentMedia.url] : [],
-                    total_media_size_bytes: (currentMedia || {}).sizeBytes || 0
-                })
-            });
+            if (window.BlossomAPI && typeof window.BlossomAPI.request === "function") {
+                const platformCodeMap = { facebook: 1, instagram: 2, threads: 3, tiktok: 1 };
+                const platKey = (payload.platforms && payload.platforms[0]) || "facebook";
+                const platId = platformCodeMap[platKey] || 1;
+                const mType = currentMedia && currentMedia.type === "VIDEO" ? "VIDEO" : "IMAGE";
+
+                await BlossomAPI.request("/posts/autosave", {
+                    method: "POST",
+                    body: {
+                        post_id: currentPostId,
+                        title: payload.title || "Bản nháp",
+                        caption: (payload.headline ? payload.headline + "\n\n" : "") + (payload.caption || ""),
+                        hashtags: payload.hashtags || null,
+                        platform_id: platId,
+                        media_type: mType,
+                        media_files: currentMedia && currentMedia.serverUrl ? [currentMedia.serverUrl] : [],
+                        total_media_size_bytes: (currentMedia || {}).sizeBytes || 0
+                    }
+                });
+            }
         } catch (e) {
             /* offline fallback already saved to localStorage */
         }
@@ -713,34 +711,54 @@
 
         // Gọi API Backend nếu đang chạy
         try {
-            if (!isNew) {
-                await BlossomAPI.request("/posts/" + currentPostId, {
-                    method: "PUT",
-                    body: JSON.stringify({
-                        title: payload.title,
-                        caption: payload.headline + "\n\n" + payload.caption,
-                        hashtags: payload.hashtags,
-                        platforms: payload.platforms,
-                        media_type: (currentMedia || {}).type || "NONE",
-                        media_files: currentMedia ? [currentMedia.serverUrl || currentMedia.url] : [],
-                        total_media_size_bytes: (currentMedia || {}).sizeBytes || 0
-                    })
-                });
-            } else {
-                await BlossomAPI.request("/posts", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        title: payload.title,
-                        caption: payload.headline + "\n\n" + payload.caption,
-                        hashtags: payload.hashtags,
-                        platforms: payload.platforms,
-                        media_type: (currentMedia || {}).type || "NONE",
-                        media_files: currentMedia ? [currentMedia.serverUrl || currentMedia.url] : [],
-                        total_media_size_bytes: (currentMedia || {}).sizeBytes || 0
-                    })
-                });
+            if (window.BlossomAPI && typeof window.BlossomAPI.request === "function") {
+                const platformCodeMap = { facebook: 1, instagram: 2, threads: 3, tiktok: 1 };
+                const platKey = (payload.platforms && payload.platforms[0]) || "facebook";
+                const platId = platformCodeMap[platKey] || 1;
+                const mType = currentMedia && currentMedia.type === "VIDEO" ? "VIDEO" : "IMAGE";
+                const mediaUrls = currentMedia ? [currentMedia.serverUrl || currentMedia.url].filter(Boolean) : [];
+
+                const backendBody = {
+                    title: payload.title,
+                    caption: (payload.headline ? payload.headline + "\n\n" : "") + (payload.caption || ""),
+                    hashtags: payload.hashtags || null,
+                    platform_id: platId,
+                    media_type: mType,
+                    media_files: mediaUrls,
+                    total_media_size_bytes: (currentMedia || {}).sizeBytes || 0,
+                    planned_publish_time: plannedParsed && plannedParsed.isoString ? plannedParsed.isoString : null
+                };
+
+                let savedBackendPost = null;
+                const isNumericId = currentPostId && !isNaN(Number(currentPostId)) && !String(currentPostId).startsWith("demo_");
+
+                if (!isNew && isNumericId) {
+                    savedBackendPost = await BlossomAPI.request("/posts/" + currentPostId, {
+                        method: "PUT",
+                        body: backendBody
+                    });
+                } else {
+                    savedBackendPost = await BlossomAPI.request("/posts", {
+                        method: "POST",
+                        body: backendBody
+                    });
+                    if (savedBackendPost && savedBackendPost.post_id) {
+                        post.post_id = savedBackendPost.post_id;
+                        currentPostId = savedBackendPost.post_id;
+                    }
+                }
+
+                // Nếu người dùng chọn Gửi duyệt (SUBMIT):
+                if (targetAction === "SUBMIT" && currentPostId) {
+                    try {
+                        await BlossomAPI.request("/posts/" + currentPostId + "/submit", { method: "POST" });
+                    } catch (subErr) {
+                        console.warn("[PostEditor] Submit approval endpoint:", subErr.message);
+                    }
+                }
             }
         } catch (e) {
+            console.warn("[PostEditor] Backend save error:", e.message);
             /* offline fallback */
         }
 

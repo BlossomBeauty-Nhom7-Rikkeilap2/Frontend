@@ -187,7 +187,7 @@
         return (u && u.fullName) ? u.fullName : "Đoàn Thị Minh Anh";
     }
 
-    function handleApprove(postId) {
+    async function handleApprove(postId) {
         const posts = getPosts();
         const post = posts.find(function (p) { return p.post_id === Number(postId); });
         if (!post) return;
@@ -195,6 +195,14 @@
         if (isPostScheduleInPast(post)) {
             UI.toast("error", "Lịch đăng trong quá khứ", "Không thể phê duyệt bài viết '" + post.code + "' vì lịch đăng dự kiến (" + (post.planned_label || post.planned_date) + ") nằm trong quá khứ.");
             return;
+        }
+
+        try {
+            if (window.BlossomAPI && typeof window.BlossomAPI.request === "function" && Number(postId)) {
+                await BlossomAPI.request("/posts/" + postId + "/approve", { method: "POST" });
+            }
+        } catch (apiErr) {
+            console.warn("[Approvals] Backend approve error:", apiErr.message);
         }
 
         post.status = "APPROVED"; post._touched = true;
@@ -273,6 +281,17 @@
                     return;
                 }
 
+                try {
+                    if (window.BlossomAPI && typeof window.BlossomAPI.request === "function" && Number(postId)) {
+                        await BlossomAPI.request("/posts/" + postId + "/reject", {
+                            method: "POST",
+                            body: { action: "REJECTED", comment: reason }
+                        });
+                    }
+                } catch (apiErr) {
+                    console.warn("[Approvals] Backend reject error:", apiErr.message);
+                }
+
                 post.status = "REJECTED"; post._touched = true;
                 post.rejection_reason = reason;
                 savePosts(posts);
@@ -346,6 +365,17 @@
                     return;
                 }
                 const note = rawNote;
+
+                try {
+                    if (window.BlossomAPI && typeof window.BlossomAPI.request === "function" && Number(postId)) {
+                        await BlossomAPI.request("/posts/" + postId + "/reject", {
+                            method: "POST",
+                            body: { action: "REVISION_REQUESTED", comment: note }
+                        });
+                    }
+                } catch (apiErr) {
+                    console.warn("[Approvals] Backend revision error:", apiErr.message);
+                }
 
                 post.status = "REVISION_REQUESTED"; post._touched = true;
                 post.revision_note = note;

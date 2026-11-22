@@ -419,10 +419,12 @@
         const dateStamp = "20261120";
 
         try {
+            const token = window.BlossomAPI ? BlossomAPI.getToken() : localStorage.getItem("blossom_access_token");
+            const headers = token ? { "Authorization": "Bearer " + token } : {};
             const resp = await fetch(
                 (global.BlossomAPI ? global.BlossomAPI.API_BASE : "http://localhost:8000/api") +
                 "/analytics/export?format=" + encodeURIComponent(format),
-                { credentials: "include" }
+                { headers: headers, credentials: "include" }
             );
             if (resp.ok) {
                 const blob = await resp.blob();
