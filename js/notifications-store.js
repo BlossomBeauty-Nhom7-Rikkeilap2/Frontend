@@ -111,14 +111,14 @@
         {
             id: 201,
             type: "assigned",
-            postId: 132,
+            postId: 129,
             title: "Bạn được giao bài viết mới",
-            message: "Quản lý đã giao cho bạn phụ trách bài viết 'Bộ quà tặng mùa lễ hội Blossom'. Hạn hoàn thành: 28/11/2026.",
+            message: "Quản lý đã giao cho bạn phụ trách bài viết 'Kem dưỡng trắng da Blossom'. Hạn hoàn thành: 28/11/2026.",
             time: "2026-11-22T09:00:00",
             time_relative: "30 phút trước",
             is_read: false,
             recipientRole: "STAFF",
-            recipientUser: "thuyduong",
+            recipientUser: "minhanh",
             author: "Marketing Manager"
         },
         {
@@ -178,12 +178,12 @@
             type: "calendar_revision",
             eventId: 204,
             title: "Lịch đăng cần điều chỉnh",
-            message: "Manager yêu cầu thay đổi lịch bài 'Tips làm đẹp mùa lễ hội': Vui lòng dời sang khung 19:00 để tránh trùng giờ cao điểm.",
+            message: "Manager yêu cầu thay đổi lịch bài 'Một chút yêu thương cho làn da': Vui lòng dời sang khung 19:00 để tránh trùng giờ cao điểm.",
             time: "2026-11-21T11:00:00",
             time_relative: "Hôm qua",
             is_read: true,
             recipientRole: "STAFF",
-            recipientUser: "thuyduong",
+            recipientUser: "minhanh",
             author: "Marketing Manager"
         },
         {
@@ -237,6 +237,32 @@
             recipientRole: "STAFF",
             recipientUser: "minhanh",
             author: "Hệ thống Blossom Auto-Scheduler"
+        },
+        {
+            id: 211,
+            type: "assigned",
+            postId: 132,
+            title: "Bạn được giao bài viết mới",
+            message: "Quản lý đã giao cho bạn phụ trách bài viết 'Bộ quà tặng mùa lễ hội Blossom'. Hạn hoàn thành: 28/11/2026.",
+            time: "2026-11-22T09:00:00",
+            time_relative: "30 phút trước",
+            is_read: false,
+            recipientRole: "STAFF",
+            recipientUser: "thuyduong",
+            author: "Marketing Manager"
+        },
+        {
+            id: 212,
+            type: "calendar_revision",
+            eventId: 204,
+            title: "Lịch đăng cần điều chỉnh",
+            message: "Manager yêu cầu thay đổi lịch bài 'Tips làm đẹp mùa lễ hội': Vui lòng dời sang khung 19:00 để tránh trùng giờ cao điểm.",
+            time: "2026-11-21T11:00:00",
+            time_relative: "Hôm qua",
+            is_read: true,
+            recipientRole: "STAFF",
+            recipientUser: "thuyduong",
+            author: "Marketing Manager"
         }
     ];
 

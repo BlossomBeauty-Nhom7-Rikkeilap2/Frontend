@@ -133,8 +133,8 @@
 
         // 1. Tìm tài khoản trong AccountStore (chứa 8 tài khoản + tài khoản do Admin tạo mới)
         let accounts = [];
-        if (window.AccountStore && typeof AccountStore.load === "function") {
-            try { accounts = AccountStore.load(); } catch (_) { accounts = []; }
+        if (typeof window !== "undefined" && window.AccountStore && typeof window.AccountStore.load === "function") {
+            try { accounts = window.AccountStore.load(); } catch (_) { accounts = []; }
         }
 
         let matched = accounts.find((a) => {
@@ -160,22 +160,33 @@
         }
 
         // 3. Tài khoản đã bị khóa -> chặn đăng nhập
-        if (matched.status === "locked" || (window.AccountStore && AccountStore.isLocked(key))) {
+        if (matched.status === "locked" || (typeof window !== "undefined" && window.AccountStore && window.AccountStore.isLocked(key))) {
             return {
                 ok: false,
                 reason: "locked"
             };
         }
 
-        // 4. Kiểm tra mật khẩu (chỉ chấp nhận mật khẩu hiện tại, nếu đổi mật khẩu rồi thì mật khẩu cũ không dùng được nữa)
+        // 4. Kiểm tra mật khẩu (chấp nhận mật khẩu mặc định hoặc <username>123; sau khi đổi mật khẩu thì chỉ dùng mật khẩu mới)
         const uname = matched.username || (matched.email ? matched.email.split("@")[0].toLowerCase() : "");
-        const activePwd = localStorage.getItem("blossom_pwd_" + uname) || matched.password || (matched.role === "MANAGER" ? "Blossom@123" : "Staff@123");
+        const customPwd = localStorage.getItem("blossom_pwd_" + uname);
 
-        if (password !== activePwd) {
-            return {
-                ok: false,
-                reason: "password"
-            };
+        if (customPwd) {
+            if (password !== customPwd) {
+                return {
+                    ok: false,
+                    reason: "password"
+                };
+            }
+        } else {
+            const defaultPwd = matched.password || (matched.role === "MANAGER" ? "Blossom@123" : "Staff@123");
+            const easyPwd = uname + "123";
+            if (password !== defaultPwd && password !== easyPwd) {
+                return {
+                    ok: false,
+                    reason: "password"
+                };
+            }
         }
 
         return {
@@ -354,44 +365,56 @@
 
     // 6.1 Ẩn / hiện mật khẩu
     function renderEye(visible) {
-        eyeIcon.innerHTML = visible ? ICON_EYE : ICON_EYE_OFF;
+        if (eyeIcon) eyeIcon.innerHTML = visible ? ICON_EYE : ICON_EYE_OFF;
 
-        btnToggle.setAttribute(
-            "aria-label",
-            visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"
-        );
+        if (btnToggle) {
+            btnToggle.setAttribute(
+                "aria-label",
+                visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+            );
+        }
     }
 
-    btnToggle.addEventListener("click", () => {
-        const show = passInput.type === "password";
-
-        passInput.type = show ? "text" : "password";
-
-        renderEye(show);
-    });
+    if (btnToggle && passInput) {
+        btnToggle.addEventListener("click", () => {
+            const show = passInput.type === "password";
+            passInput.type = show ? "text" : "password";
+            renderEye(show);
+        });
+    }
 
     // 6.2 Xóa lỗi khi nhập lại
-    emailInput.addEventListener("input", () => {
-        fieldEmail.classList.remove("is-error");
-        emailError.textContent = "";
-    });
+    if (emailInput) {
+        emailInput.addEventListener("input", () => {
+            if (fieldEmail) fieldEmail.classList.remove("is-error");
+            if (emailError) emailError.textContent = "";
+        });
+    }
 
-    passInput.addEventListener("input", () => {
-        fieldPass.classList.remove("is-error");
-        passError.textContent = "";
-    });
+    if (passInput) {
+        passInput.addEventListener("input", () => {
+            if (fieldPass) fieldPass.classList.remove("is-error");
+            if (passError) passError.textContent = "";
+        });
+    }
 
     // 6.3 Gửi form
-    form.addEventListener("submit", handleSubmit);
+    if (form) {
+        form.addEventListener("submit", handleSubmit);
+    }
 
     // 6.4 Khởi tạo
     renderEye(false);
 
     const saved = localStorage.getItem(REMEMBER_KEY);
 
-    if (saved) {
+    if (saved && emailInput) {
         emailInput.value = saved;
-        rememberBox.checked = true;
+        if (rememberBox) rememberBox.checked = true;
+    }
+
+    if (typeof window !== "undefined") {
+        window.AuthLogin = { authenticate, USERS };
     }
 
 })();

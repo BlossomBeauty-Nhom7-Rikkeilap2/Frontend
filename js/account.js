@@ -99,9 +99,11 @@
         return delay(400).then(function () {
             let acc = findStoreAccount();
             const storedPwd = localStorage.getItem("blossom_pwd_" + user.username);
-            const activePwd = storedPwd || (acc && acc.password) || (user.role === "MANAGER" ? "Blossom@123" : "Staff@123");
+            const defaultPwd = (acc && acc.password) || (user.role === "MANAGER" ? "Blossom@123" : "Staff@123");
+            const easyPwd = (user.username || "") + "123";
 
-            if (current !== activePwd) {
+            const isValidCurrent = storedPwd ? (current === storedPwd) : (current === defaultPwd || current === easyPwd);
+            if (!isValidCurrent) {
                 const err = new Error("Mật khẩu hiện tại không chính xác.");
                 err.field = "current";
                 throw err;

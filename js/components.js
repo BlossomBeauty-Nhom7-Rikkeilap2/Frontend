@@ -166,7 +166,10 @@
         el.className = "toast toast--" + (type || "info");
         el.innerHTML = '<span class="toast__icon">' + symbol + '</span><div class="toast__body"><strong>' + esc(title) + "</strong>" + (message ? "<span>" + esc(message) + "</span>" : "") + "</div>";
         toastStack.appendChild(el);
-        setTimeout(function () { el.remove(); }, duration || 3000);
+        setTimeout(function () {
+            if (el && typeof el.remove === "function") el.remove();
+            else if (el && el.parentNode) el.parentNode.removeChild(el);
+        }, duration || 3000);
         return el;
     }
 
