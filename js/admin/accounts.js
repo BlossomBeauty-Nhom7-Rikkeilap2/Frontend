@@ -83,9 +83,15 @@
             const list = AccountStore.load();                       // đọc lại để chặn trùng khi mở nhiều tab
             if (emailTaken(list, data.email)) throw fail("Email này đã được sử dụng.", "email");
             const rec = {
-                id: nextId(list), fullName: data.fullName, email: data.email,
-                role: data.role, status: "active", createdAt: today()
-            };                                                      // KHÔNG lưu mật khẩu ở trình duyệt
+                id: nextId(list),
+                username: AccountStore.usernameFromEmail(data.email),
+                fullName: data.fullName,
+                email: data.email,
+                password: data.password,
+                role: data.role,
+                status: "active",
+                createdAt: today()
+            };
             list.push(rec);
             AccountStore.save(list);
             return rec;
@@ -104,8 +110,12 @@
             }
             rec.fullName = data.fullName;
             rec.email = data.email;
+            rec.username = AccountStore.usernameFromEmail(data.email);
             rec.role = data.role;
-            AccountStore.save(list);                                // data.password (nếu có) chỉ gửi lên server
+            if (data.password) {
+                rec.password = data.password;
+            }
+            AccountStore.save(list);
             return rec;
         });
     }
@@ -151,6 +161,12 @@
     }
 
     function initials(name) { return Auth.initials({ fullName: name }); }
+    function avatarContent(a) {
+        if (window.Auth && typeof Auth.avatarHtml === "function") {
+            return Auth.avatarHtml(a, a.fullName);
+        }
+        return esc(initials(a.fullName));
+    }
 
     function roleBadge(role) { const r = ROLE[role] || ROLE.STAFF; return UI.badge(r.label, r.tone); }
     function statusBadge(status) { const s = STATUS[status] || STATUS.active; return UI.badge(s.label, s.tone); }
@@ -225,7 +241,7 @@
             listEl.innerHTML = view.map(function (a) {
                 const cls = (a.id === state.selectedId ? "is-selected " : "") + (a.status === "locked" ? "is-locked" : "");
                 return '<tr data-id="' + esc(a.id) + '" class="' + cls.trim() + '" tabindex="0">' +
-                    '<td><div class="acc-user"><span class="avatar avatar--sm">' + esc(initials(a.fullName)) + "</span>" +
+                    '<td><div class="acc-user"><span class="avatar avatar--sm">' + avatarContent(a) + "</span>" +
                         "<div><b>" + esc(a.fullName) + "</b><small>" + esc(a.email) + "</small></div></div></td>" +
                     "<td>" + roleBadge(a.role) + "</td>" +
                     "<td>" + statusBadge(a.status) + "</td>" +
@@ -273,7 +289,7 @@
         detailEl.innerHTML =
             '<div class="card__head"><h3 class="card__title">Chi tiết tài khoản</h3>' +
                 '<button type="button" class="icon-btn" data-act="close-detail" aria-label="Đóng chi tiết">' + UI.icon("close") + "</button></div>" +
-            '<div class="acc-detail__who"><span class="avatar avatar--lg">' + esc(initials(a.fullName)) + "</span>" +
+            '<div class="acc-detail__who"><span class="avatar avatar--lg">' + avatarContent(a) + "</span>" +
                 "<div><b>" + esc(a.fullName) + "</b><small>" + esc(a.email) + "</small></div></div>" +
             '<dl class="kv">' +
                 "<dt>Vai trò</dt><dd>" + roleBadge(a.role) + "</dd>" +

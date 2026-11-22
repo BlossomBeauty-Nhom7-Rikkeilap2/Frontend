@@ -34,6 +34,22 @@
             position: "Marketing Manager"
         },
         {
+            username: "minhanh",
+            email: "minhanh@blossom.vn",
+            password: "Staff@123",
+            role: "STAFF",
+            fullName: "Doãn Thị Minh Anh",
+            position: "Marketing Staff"
+        },
+        {
+            username: "thuyduong",
+            email: "thuyduong@blossom.vn",
+            password: "Staff@123",
+            role: "STAFF",
+            fullName: "Nguyễn Thùy Dương",
+            position: "Marketing Staff"
+        },
+        {
             username: "manh",
             email: "manh@blossom.vn",
             password: "Manh@2026",
@@ -111,40 +127,56 @@
 
     /* ---------- 5. XÁC THỰC VÀ PHÂN QUYỀN ---------- */
 
-    // Kiểm tra tài khoản
+    // Kiểm tra tài khoản trực tiếp từ AccountStore (đồng bộ 100% với mục Tài khoản & Phân quyền + Đổi mật khẩu)
     function authenticate(identifier, password) {
         const key = identifier.trim().toLowerCase();
+
+        if (window.AccountStore && typeof AccountStore.findByIdentifier === "function") {
+            const acc = AccountStore.findByIdentifier(key);
+            if (!acc) {
+                return { ok: false, reason: "email" };
+            }
+
+            // Tài khoản đã bị khóa -> tuyệt đối không cho đăng nhập
+            if (acc.status === "locked") {
+                return { ok: false, reason: "locked" };
+            }
+
+            if (!AccountStore.verifyPassword(acc, password)) {
+                return { ok: false, reason: "password" };
+            }
+
+            const role = acc.role === "MANAGER" ? "MANAGER" : "STAFF";
+            return {
+                ok: true,
+                user: {
+                    id: acc.id,
+                    username: acc.username || AccountStore.usernameFromEmail(acc.email),
+                    email: acc.email,
+                    role: role,
+                    fullName: acc.fullName,
+                    position: role === "MANAGER" ? "Marketing Manager" : "Marketing Staff"
+                }
+            };
+        }
 
         const user = USERS.find((u) => {
             return u.email === key || u.username === key;
         });
 
         if (!user) {
-            return {
-                ok: false,
-                reason: "email"
-            };
+            return { ok: false, reason: "email" };
+        }
+
+        if (window.AccountStore && AccountStore.isLocked(user.email)) {
+            return { ok: false, reason: "locked" };
         }
 
         if (user.password !== password) {
-            return {
-                ok: false,
-                reason: "password"
-            };
+            return { ok: false, reason: "password" };
         }
 
-        // Tài khoản đã bị Manager khóa (Tài khoản & Phân quyền) -> không cho đăng nhập
-        if (window.AccountStore && AccountStore.isLocked(user.email)) {
-            return {
-                ok: false,
-                reason: "locked"
-            };
-        }
-
-        return {
-            ok: true,
-            user: user
-        };
+        return { ok: true, user: user };
     }
 
     // Xử lý đăng nhập

@@ -43,17 +43,7 @@
             }
         } catch (e) {}
 
-        // Tự động nhận diện phiên mặc định nếu mở trực tiếp bằng Live Server / dev
-        if (location.pathname.indexOf("/pages/") !== -1 && location.pathname.indexOf("/pages/auth/") === -1) {
-            const inStaff = location.pathname.indexOf("/pages/staff/") !== -1;
-            const fallbackUser = inStaff
-                ? { username: "datnp", email: "datnp@blossom.vn", role: "STAFF", fullName: "Nguyễn Phát Đạt", position: "BA / UI-UX" }
-                : { username: "admin", email: "admin@blossom.vn", role: "MANAGER", fullName: "Doãn Thị Minh Anh", position: "Marketing Manager" };
-            try {
-                localStorage.setItem(USER_KEY, JSON.stringify(fallbackUser));
-                return fallbackUser;
-            } catch (e) {}
-        }
+        // Không còn tự động đăng nhập: chưa có phiên => trang bảo vệ sẽ chuyển về trang đăng nhập
         return null;
     }
 
@@ -110,9 +100,80 @@
         }
     }
 
+    // Chuẩn hóa chuỗi để tra cứu ảnh đại diện đồng bộ theo username, email hoặc họ tên
+    function normAvatarKey(s) {
+        return String(s == null ? "" : s)
+            .toLowerCase()
+            .replace(/đ/g, "d")
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    function avatarKeysFor(target) {
+        const keys = [];
+        const add = function (k) { if (k && keys.indexOf(k) === -1) keys.push(k); };
+        if (!target) return keys;
+        if (typeof target === "string") {
+            const raw = target.trim().toLowerCase();
+            if (raw) {
+                add("blossom_avatar_" + raw);
+                if (raw.indexOf("@") !== -1) {
+                    add("blossom_avatar_email_" + raw);
+                    add("blossom_avatar_" + raw.split("@")[0]);
+                }
+            }
+            const nm = normAvatarKey(target);
+            if (nm) add("blossom_avatar_name_" + nm);
+            return keys;
+        }
+        const uname = String(target.username || "").trim().toLowerCase();
+        const email = String(target.email || "").trim().toLowerCase();
+        const emailPrefix = email && email.indexOf("@") !== -1 ? email.split("@")[0] : "";
+        const fullName = normAvatarKey(target.fullName || target.name || "");
+        if (uname) add("blossom_avatar_" + uname);
+        if (emailPrefix) add("blossom_avatar_" + emailPrefix);
+        if (email) add("blossom_avatar_email_" + email);
+        if (fullName) add("blossom_avatar_name_" + fullName);
+        return keys;
+    }
+
+    function getAvatarFor(target) {
+        const keys = avatarKeysFor(target);
+        for (let i = 0; i < keys.length; i++) {
+            try {
+                const v = localStorage.getItem(keys[i]);
+                if (v) return v;
+            } catch (e) { /* bỏ qua */ }
+        }
+        return "";
+    }
+
+    function setAvatarFor(user, dataUrl) {
+        const keys = avatarKeysFor(user);
+        keys.forEach(function (k) {
+            try {
+                if (dataUrl) localStorage.setItem(k, dataUrl);
+                else localStorage.removeItem(k);
+            } catch (e) { /* bỏ qua */ }
+        });
+        try { global.dispatchEvent(new Event("blossom_avatar_updated")); } catch (e) { /* bỏ qua */ }
+    }
+
+    function avatarHtml(target, fallbackName) {
+        const src = getAvatarFor(target);
+        if (src) {
+            const safeSrc = String(src).replace(/"/g, "&quot;");
+            return '<img src="' + safeSrc + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">';
+        }
+        const obj = (typeof target === "string") ? { fullName: fallbackName || target } : (target || { fullName: fallbackName || "" });
+        return initials(obj);
+    }
+
     global.Auth = {
         USER_KEY, REMEMBER_KEY, ROLES, ROLE_LABEL,
         normalizeRole, pagesBase, getUser, getRole, isLoggedIn,
-        homeUrl, loginUrl, logout, shortName, initials, setFlash, takeFlash
+        homeUrl, loginUrl, logout, shortName, initials, setFlash, takeFlash,
+        getAvatarFor, setAvatarFor, avatarHtml
     };
 })(window);

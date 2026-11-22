@@ -73,6 +73,9 @@
 
     // Ảnh đại diện (đặt ở Hồ sơ cá nhân) nếu có, không thì chữ cái viết tắt
     function avatarHTML(user) {
+        if (window.Auth && typeof Auth.avatarHtml === "function") {
+            return Auth.avatarHtml(user);
+        }
         let src = "";
         try { src = localStorage.getItem("blossom_avatar_" + (user.username || "")) || ""; } catch (e) { /* bỏ qua */ }
         return src
@@ -196,6 +199,17 @@
 
         const flash = Auth.takeFlash();
         if (flash) UI.toast(flash.type, flash.title, flash.message, 4000);
+
+        // Đồng bộ ảnh đại diện trên thanh topbar ngay khi đổi (cùng tab hoặc tab khác)
+        const syncTopbarAvatar = function () {
+            const u = Auth.getUser();
+            const av = document.querySelector("#topbar .avatar");
+            if (u && av) av.innerHTML = avatarHTML(u);
+        };
+        window.addEventListener("blossom_avatar_updated", syncTopbarAvatar);
+        window.addEventListener("storage", function (e) {
+            if (e.key && e.key.indexOf("blossom_avatar_") === 0) syncTopbarAvatar();
+        });
     }
 
     global.Layout = { NAV, mount, setUnread };

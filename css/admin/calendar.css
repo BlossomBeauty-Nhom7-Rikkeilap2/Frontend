@@ -427,7 +427,7 @@
 .fr11-event-card.platform-ig {
     border-left-color: #E1306C;
 }
-.fr11-event-card.platform-tiktok {
+.fr11-event-card.platform-threads {
     border-left-color: #111111;
 }
 .fr11-event-card.platform-fbig {
@@ -857,3 +857,26 @@
         flex: 1;
     }
 }
+
+/* ---- Phân quyền + quy trình xác nhận ---- */
+.fr11-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.fr11-kpi{background:#fff;border:1px solid var(--pink-line);border-radius:14px;padding:14px 16px;display:grid;gap:2px}
+.fr11-kpi small{color:var(--muted);font-size:13px}.fr11-kpi strong{font-size:26px;color:var(--text-strong)}.fr11-kpi span{font-size:12.5px;color:var(--muted)}
+.fr11-kpi.pending strong{color:var(--orange)}.fr11-kpi.confirmed strong{color:var(--green)}.fr11-kpi.posted strong{color:var(--purple)}
+.fr11-event-card.is-proposal{border-style:dashed}
+.fr11-event-foot{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px;font-size:11px}
+.fr11-event-chip{display:inline-block;padding:1px 8px;border-radius:100px;background:rgba(255,255,255,.7);font-weight:600;font-size:11px}
+.fr11-event-owner{color:var(--muted)}
+.fr11-quick{margin-left:auto;display:inline-flex;gap:4px}
+.fr11-quick-btn{border:1px solid var(--pink-border);background:#fff;border-radius:6px;width:22px;height:22px;cursor:pointer;line-height:1}
+.fr11-quick-btn.ok{color:var(--green);border-color:var(--green-bd)}
+.fr11-status-banner{margin-bottom:12px;padding:10px 12px;border-radius:10px;background:var(--pink-bg);border:1px solid var(--pink-line);font-size:13.5px;display:grid;gap:4px}
+.fr11-conflict-box{margin-bottom:12px;padding:10px 12px;border-radius:10px;background:var(--orange-bg);border:1px solid var(--orange-bd);color:#8a5a14;font-size:13.5px;display:grid;gap:2px}
+.fr11-list-wrap{overflow-x:auto;padding:8px}
+.fr11-list-table{width:100%;border-collapse:collapse;font-size:14px}
+.fr11-list-table th{text-align:left;color:var(--muted);font-weight:500;padding:10px;border-bottom:1px solid var(--pink-line)}
+.fr11-list-table td{padding:10px;border-bottom:1px solid #fbeff3;vertical-align:top}
+.fr11-list-actions{white-space:nowrap;text-align:right}
+.fr11-reason-inline{color:var(--red)}
+.fr11-list-empty{padding:30px}
+@media(max-width:768px){.fr11-kpis{grid-template-columns:repeat(2,1fr)}}
