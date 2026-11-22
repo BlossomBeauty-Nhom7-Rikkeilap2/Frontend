@@ -43,17 +43,7 @@
             }
         } catch (e) {}
 
-        // Tự động nhận diện phiên mặc định nếu mở trực tiếp bằng Live Server / dev
-        if (location.pathname.indexOf("/pages/") !== -1 && location.pathname.indexOf("/pages/auth/") === -1) {
-            const inStaff = location.pathname.indexOf("/pages/staff/") !== -1;
-            const fallbackUser = inStaff
-                ? { username: "datnp", email: "datnp@blossom.vn", role: "STAFF", fullName: "Nguyễn Phát Đạt", position: "BA / UI-UX" }
-                : { username: "admin", email: "admin@blossom.vn", role: "MANAGER", fullName: "Doãn Thị Minh Anh", position: "Marketing Manager" };
-            try {
-                localStorage.setItem(USER_KEY, JSON.stringify(fallbackUser));
-                return fallbackUser;
-            } catch (e) {}
-        }
+        // Không còn tự động đăng nhập: chưa có phiên => trang bảo vệ sẽ chuyển về trang đăng nhập
         return null;
     }
 

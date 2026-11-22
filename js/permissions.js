@@ -38,12 +38,8 @@
         "staff/create-post.html": [M, S],
         "staff/edit-post.html":   [M, S],
         "staff/approvals.html":   [M, S],
-        "admin/create-post.html": [M, S],
-        "admin/edit-post.html":   [M, S],
         "staff/posts.html":       [M, S],
-        "admin/posts.html":       [M, S],
         "staff/calendar.html":    [M, S],
-        "admin/calendar.html":    [M, S],
         "staff/notifications.html": [M, S],
         "admin/notifications.html": [M]
     };

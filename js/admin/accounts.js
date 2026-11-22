@@ -82,10 +82,12 @@
         return delay(500).then(function () {
             const list = AccountStore.load();                       // đọc lại để chặn trùng khi mở nhiều tab
             if (emailTaken(list, data.email)) throw fail("Email này đã được sử dụng.", "email");
+            const uname = data.email ? data.email.split("@")[0].toLowerCase() : "";
             const rec = {
-                id: nextId(list), fullName: data.fullName, email: data.email,
-                role: data.role, status: "active", createdAt: today()
-            };                                                      // KHÔNG lưu mật khẩu ở trình duyệt
+                id: nextId(list), fullName: data.fullName, email: data.email, username: uname,
+                role: data.role, status: "active", createdAt: today(),
+                password: data.password || (data.role === "MANAGER" ? "Blossom@123" : "Staff@123")
+            };
             list.push(rec);
             AccountStore.save(list);
             return rec;
@@ -104,8 +106,13 @@
             }
             rec.fullName = data.fullName;
             rec.email = data.email;
+            rec.username = data.email ? data.email.split("@")[0].toLowerCase() : (rec.username || "");
             rec.role = data.role;
-            AccountStore.save(list);                                // data.password (nếu có) chỉ gửi lên server
+            if (data.password) {
+                rec.password = data.password;
+                localStorage.removeItem("blossom_pwd_" + rec.username);
+            }
+            AccountStore.save(list);
             return rec;
         });
     }

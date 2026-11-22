@@ -166,7 +166,10 @@
         el.className = "toast toast--" + (type || "info");
         el.innerHTML = '<span class="toast__icon">' + symbol + '</span><div class="toast__body"><strong>' + esc(title) + "</strong>" + (message ? "<span>" + esc(message) + "</span>" : "") + "</div>";
         toastStack.appendChild(el);
-        setTimeout(function () { el.remove(); }, duration || 3000);
+        setTimeout(function () {
+            if (el && typeof el.remove === "function") el.remove();
+            else if (el && el.parentNode) el.parentNode.removeChild(el);
+        }, duration || 3000);
         return el;
     }
 
@@ -192,10 +195,10 @@
 
             function close(value) {
                 document.removeEventListener("keydown", onKey, true);
-                backdrop.remove();
                 document.body.classList.remove("modal-open");
                 if (previous && previous.focus) previous.focus();
                 resolve(value);
+                try { backdrop.remove(); } catch (_) {}
             }
 
             function onKey(e) {
@@ -212,7 +215,15 @@
             backdrop.addEventListener("click", function (e) {
                 if (e.target.closest("[data-close]")) return close(null);
                 const btn = e.target.closest("[data-action]");
-                if (btn) close(actions[Number(btn.dataset.action)].value);
+                if (btn) {
+                    const actIndex = Number(btn.dataset.action);
+                    const act = actions[actIndex];
+                    if (act && typeof act.onClick === "function") {
+                        const canClose = act.onClick(backdrop, close);
+                        if (canClose === false) return;
+                    }
+                    close(act ? act.value : null);
+                }
             });
 
             document.addEventListener("keydown", onKey, true);

@@ -19,98 +19,15 @@
         DRAFT:              { label: "Bản nháp",       cls: "st-draft",     color: "#8c8294", bg: "#f0edf3" }
     };
 
+    // Dữ liệu bài viết dùng chung qua Scope (một nguồn duy nhất cho mọi trang)
     function getPosts() {
-        try {
-            const data = localStorage.getItem(STORAGE_KEY);
-            if (data) {
-                const list = JSON.parse(data);
-                if (Array.isArray(list) && list.length > 0) return list;
-            }
-        } catch (e) {}
-
-        // Khởi tạo danh sách mặc định nếu chưa có
-        const initial = [
-            {
-                post_id: 129,
-                code: "BL-0129",
-                title: "Kem dưỡng trắng da Blossom",
-                platforms: ["Instagram"],
-                platform_label: "Instagram",
-                author: "Doãn Thị Minh Anh",
-                status: "PENDING_APPROVAL",
-                planned_label: "05/11/2026 08:00",
-                caption: "Kem dưỡng trắng da Blossom chứa chiết xuất hoa anh đào giúp nâng tông nhẹ nhàng và cấp ẩm sâu. Thành phần thuần chay lành tính cho mọi loại da.",
-                mediaUrl: "../../assets/figma/skincare-editorial.png"
-            },
-            {
-                post_id: 128,
-                code: "BL-0128",
-                title: "5 bước dưỡng da cho buổi sáng rạng rỡ",
-                platforms: ["Facebook", "Instagram"],
-                platform_label: "Facebook & Instagram",
-                author: "Doãn Thị Minh Anh",
-                status: "PUBLISHED",
-                planned_label: "04/11/2026 08:00",
-                caption: "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng Blossom.",
-                mediaUrl: "../../assets/figma/skincare-editorial.png"
-            },
-            {
-                post_id: 127,
-                code: "BL-0127",
-                title: "Bí quyết chăm da mùa hanh khô",
-                platforms: ["Facebook", "Instagram"],
-                platform_label: "Facebook & Instagram",
-                author: "Trần Ngọc Mai",
-                status: "PENDING_APPROVAL",
-                planned_label: "05/11/2026 08:00",
-                caption: "Cấp ẩm chuyên sâu bảo vệ hàng rào tự nhiên của làn da trong tiết trời thu đông.",
-                mediaUrl: "../../assets/figma/skincare-editorial.png"
-            },
-            {
-                post_id: 126,
-                code: "BL-0126",
-                title: "Một chút yêu thương cho làn da",
-                platforms: ["Facebook", "Instagram"],
-                platform_label: "Facebook & Instagram",
-                author: "Lê Thu Hương",
-                status: "REVISION_REQUESTED",
-                planned_label: "06/11/2026 10:00",
-                caption: "Dành 10 phút mỗi tối để thư giãn và phục hồi làn da với mặt nạ hoa hồng.",
-                mediaUrl: "../../assets/figma/skincare-editorial.png"
-            },
-            {
-                post_id: 125,
-                code: "BL-0125",
-                title: "Chọn serum phù hợp với làn da của bạn",
-                platforms: ["Facebook", "Instagram"],
-                platform_label: "Facebook & Instagram",
-                author: "Nguyễn Hà Linh",
-                status: "PENDING_APPROVAL",
-                planned_label: "07/11/2026 09:30",
-                caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C.",
-                mediaUrl: "../../assets/figma/skincare-editorial.png"
-            },
-            {
-                post_id: 124,
-                code: "BL-0124",
-                title: "Bộ cọ trang điểm Rose Gold 12 món",
-                platforms: ["TikTok"],
-                platform_label: "TikTok",
-                author: "Nguyễn Phát Đạt",
-                status: "REJECTED",
-                planned_label: "08/11/2026 15:00",
-                caption: "Bộ cọ trang điểm siêu mềm mại từ sợi nhân tạo cao cấp.",
-                mediaUrl: "../../assets/figma/skincare-editorial.png",
-                rejection_reason: "Hình ảnh cận cảnh sợi cọ chưa đủ độ sắc nét và thiếu bảng giá niêm yết."
-            }
-        ];
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-        return initial;
+        return Scope.loadPosts();
     }
 
     function savePosts(posts) {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
-        window.dispatchEvent(new Event("blossom_posts_updated"));
+        // Ghi nhận thời điểm cập nhật để Tổng quan lọc theo thời gian đúng
+        posts.forEach(function (p) { if (p._touched) { p.updated_at = new Date().toISOString(); delete p._touched; } });
+        Scope.savePosts(posts);
     }
 
     function updateMetrics() {
@@ -200,7 +117,7 @@
             let platBadges = (post.platforms || [post.platform_label || "Đa kênh"]).map(function (pl) {
                 let cls = "fb";
                 if (pl.toLowerCase().indexOf("insta") !== -1) cls = "ig";
-                else if (pl.toLowerCase().indexOf("tik") !== -1) cls = "tiktok";
+                else if (pl.toLowerCase().indexOf("thread") !== -1) cls = "threads";
                 return '<span class="channel-tag ' + cls + '">' + UI.esc(pl) + '</span>';
             }).join(" ");
 
@@ -252,7 +169,7 @@
         const post = posts.find(function (p) { return p.post_id === Number(postId); });
         if (!post) return;
 
-        post.status = "APPROVED";
+        post.status = "APPROVED"; post._touched = true;
         savePosts(posts);
         updateMetrics();
         renderTable();
@@ -262,10 +179,11 @@
             window.NotificationsStore.addNotification({
                 type: "approved",
                 postId: post.post_id,
-                title: "Bài viết đã được phê duyệt! 🎉",
-                message: "Bài viết '" + post.title + "' đã được Manager Đoàn Thị Minh Anh phê duyệt và sẵn sàng xuất bản.",
-                author: "Đoàn Thị Minh Anh (Manager)",
-                recipientRole: "STAFF"
+                title: "Bài viết đã được duyệt",
+                message: "Bài viết '" + post.title + "' đã được Manager phê duyệt.",
+                author: "Marketing Manager",
+                recipientRole: "STAFF",
+                recipientUser: Scope.ownerOf(post)
             });
         }
 
@@ -284,7 +202,7 @@
                 '<div>' +
                     '<label for="rejectReasonInput" style="display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:6px;">Lý do từ chối (Tối thiểu 10 ký tự):</label>' +
                     '<textarea id="rejectReasonInput" style="width:100%;height:100px;padding:10px;border:1px solid var(--pink-border);border-radius:8px;font-size:14px;outline:none;" placeholder="VD: Hình ảnh mờ, chưa đúng nhận diện thương hiệu hoặc caption chưa đủ tiêu chuẩn..."></textarea>' +
-                    '<span id="rejectErrorMsg" style="color:var(--red);font-size:12px;margin-top:4px;display:none;">⚠️ Lý do từ chối bắt buộc phải có ít nhất 10 ký tự!</span>' +
+                    '<span id="rejectErrorMsg" style="color:var(--red, #d64545);font-size:12px;margin-top:4px;display:none;">⚠️ Lý do từ chối bắt buộc phải có ít nhất 10 ký tự!</span>' +
                 '</div>' +
             '</div>';
 
@@ -293,39 +211,52 @@
             body: bodyHtml,
             actions: [
                 { label: "Hủy bỏ", variant: "ghost", value: false },
-                { label: "Xác nhận từ chối", variant: "primary", value: "CONFIRM" }
+                {
+                    label: "Xác nhận từ chối",
+                    variant: "primary",
+                    value: "CONFIRM",
+                    onClick: function (modalEl, closeModal) {
+                        const reasonInput = modalEl.querySelector("#rejectReasonInput") || document.getElementById("rejectReasonInput");
+                        const errorMsg = modalEl.querySelector("#rejectErrorMsg") || document.getElementById("rejectErrorMsg");
+                        const reason = reasonInput ? reasonInput.value.trim() : "";
+
+                        if (reason.length < 10) {
+                            if (errorMsg) errorMsg.style.display = "block";
+                            if (reasonInput) {
+                                reasonInput.style.borderColor = "var(--red, #d64545)";
+                                reasonInput.focus();
+                            }
+                            UI.toast("error", "Lỗi nhập liệu", "Lý do từ chối bắt buộc phải có ít nhất 10 ký tự.");
+                            return false; // Chặn đóng modal nếu chưa đủ 10 ký tự
+                        }
+
+                        post.status = "REJECTED";
+                        post._touched = true;
+                        post.rejection_reason = reason;
+                        post.revision_notes = reason;
+                        post.manager_comment = reason;
+                        savePosts(posts);
+                        updateMetrics();
+                        renderTable();
+
+                        if (window.NotificationsStore) {
+                            window.NotificationsStore.addNotification({
+                                type: "rejected",
+                                postId: post.post_id,
+                                title: "Bài viết bị từ chối",
+                                message: "Lý do: " + reason,
+                                author: "Marketing Manager",
+                                recipientRole: "STAFF",
+                                recipientUser: Scope.ownerOf(post)
+                            });
+                        }
+
+                        UI.toast("info", "Đã từ chối bài viết", "Bài viết đã được chuyển sang trạng thái BỊ TỪ CHỐI kèm lý do phản hồi.");
+                        closeModal("CONFIRM");
+                        return true;
+                    }
+                }
             ]
-        }).then(function (act) {
-            if (act === "CONFIRM") {
-                const reasonInput = document.getElementById("rejectReasonInput");
-                const errorMsg = document.getElementById("rejectErrorMsg");
-                const reason = reasonInput ? reasonInput.value.trim() : "";
-
-                if (reason.length < 10) {
-                    if (errorMsg) errorMsg.style.display = "block";
-                    UI.toast("error", "Lỗi nhập liệu", "Lý do từ chối bắt buộc phải có ít nhất 10 ký tự.");
-                    return;
-                }
-
-                post.status = "REJECTED";
-                post.rejection_reason = reason;
-                savePosts(posts);
-                updateMetrics();
-                renderTable();
-
-                if (window.NotificationsStore) {
-                    window.NotificationsStore.addNotification({
-                        type: "rejected",
-                        postId: post.post_id,
-                        title: "Bài viết bị từ chối phê duyệt ❌",
-                        message: "Lý do: " + reason,
-                        author: "Đoàn Thị Minh Anh (Manager)",
-                        recipientRole: "STAFF"
-                    });
-                }
-
-                UI.toast("info", "Đã từ chối bài viết", "Bài viết đã được chuyển sang trạng thái BỊ TỪ CHỐI kèm lý do phản hồi.");
-            }
         });
     }
 
@@ -348,32 +279,41 @@
             body: bodyHtml,
             actions: [
                 { label: "Hủy bỏ", variant: "ghost", value: false },
-                { label: "Gửi yêu cầu", variant: "secondary", value: "CONFIRM" }
-            ]
-        }).then(function (act) {
-            if (act === "CONFIRM") {
-                const noteInput = document.getElementById("revisionNoteInput");
-                const note = noteInput ? noteInput.value.trim() : "Cần rà soát và chỉnh sửa lại nội dung.";
+                {
+                    label: "Gửi yêu cầu",
+                    variant: "secondary",
+                    value: "CONFIRM",
+                    onClick: function (modalEl, closeModal) {
+                        const noteInput = modalEl.querySelector("#revisionNoteInput") || document.getElementById("revisionNoteInput");
+                        const note = (noteInput ? noteInput.value.trim() : "") || "Cần rà soát và chỉnh sửa lại nội dung.";
 
-                post.status = "REVISION_REQUESTED";
-                post.revision_note = note;
-                savePosts(posts);
-                updateMetrics();
-                renderTable();
+                        post.status = "REVISION_REQUESTED";
+                        post._touched = true;
+                        post.revision_note = note;
+                        post.revision_notes = note;
+                        post.manager_comment = note;
+                        savePosts(posts);
+                        updateMetrics();
+                        renderTable();
 
-                if (window.NotificationsStore) {
-                    window.NotificationsStore.addNotification({
-                        type: "revision",
-                        postId: post.post_id,
-                        title: "Yêu cầu chỉnh sửa bài viết ✍️",
-                        message: "Ghi chú: " + note,
-                        author: "Đoàn Thị Minh Anh (Manager)",
-                        recipientRole: "STAFF"
-                    });
+                        if (window.NotificationsStore) {
+                            window.NotificationsStore.addNotification({
+                                type: "revision",
+                                postId: post.post_id,
+                                title: "Bài viết cần chỉnh sửa",
+                                message: "Manager yêu cầu chỉnh sửa: " + note,
+                                author: "Marketing Manager",
+                                recipientRole: "STAFF",
+                                recipientUser: Scope.ownerOf(post)
+                            });
+                        }
+
+                        UI.toast("info", "Đã gửi yêu cầu chỉnh sửa", "Đã gửi phản hồi yêu cầu nhân viên hoàn thiện bài viết.");
+                        closeModal("CONFIRM");
+                        return true;
+                    }
                 }
-
-                UI.toast("info", "Đã gửi yêu cầu chỉnh sửa", "Đã gửi phản hồi yêu cầu nhân viên hoàn thiện bài viết.");
-            }
+            ]
         });
     }
 

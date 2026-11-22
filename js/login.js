@@ -34,6 +34,22 @@
             position: "Marketing Manager"
         },
         {
+            username: "minhanh",
+            email: "minhanh@blossom.vn",
+            password: "Staff@123",
+            role: "STAFF",
+            fullName: "Doãn Thị Minh Anh",
+            position: "Marketing Staff"
+        },
+        {
+            username: "thuyduong",
+            email: "thuyduong@blossom.vn",
+            password: "Staff@123",
+            role: "STAFF",
+            fullName: "Nguyễn Thùy Dương",
+            position: "Marketing Staff"
+        },
+        {
             username: "manh",
             email: "manh@blossom.vn",
             password: "Manh@2026",
@@ -115,35 +131,73 @@
     function authenticate(identifier, password) {
         const key = identifier.trim().toLowerCase();
 
-        const user = USERS.find((u) => {
-            return u.email === key || u.username === key;
+        // 1. Tìm tài khoản trong AccountStore (chứa 8 tài khoản + tài khoản do Admin tạo mới)
+        let accounts = [];
+        if (typeof window !== "undefined" && window.AccountStore && typeof window.AccountStore.load === "function") {
+            try { accounts = window.AccountStore.load(); } catch (_) { accounts = []; }
+        }
+
+        let matched = accounts.find((a) => {
+            const em = (a.email || "").trim().toLowerCase();
+            const un = (a.username || (a.email ? a.email.split("@")[0] : "")).trim().toLowerCase();
+            return em === key || un === key;
         });
 
-        if (!user) {
+        // 2. Dự phòng trong USERS
+        if (!matched) {
+            matched = USERS.find((u) => {
+                const em = (u.email || "").trim().toLowerCase();
+                const un = (u.username || "").trim().toLowerCase();
+                return em === key || un === key;
+            });
+        }
+
+        if (!matched) {
             return {
                 ok: false,
                 reason: "email"
             };
         }
 
-        if (user.password !== password) {
-            return {
-                ok: false,
-                reason: "password"
-            };
-        }
-
-        // Tài khoản đã bị Manager khóa (Tài khoản & Phân quyền) -> không cho đăng nhập
-        if (window.AccountStore && AccountStore.isLocked(user.email)) {
+        // 3. Tài khoản đã bị khóa -> chặn đăng nhập
+        if (matched.status === "locked" || (typeof window !== "undefined" && window.AccountStore && window.AccountStore.isLocked(key))) {
             return {
                 ok: false,
                 reason: "locked"
             };
         }
 
+        // 4. Kiểm tra mật khẩu (chấp nhận mật khẩu mặc định hoặc <username>123; sau khi đổi mật khẩu thì chỉ dùng mật khẩu mới)
+        const uname = matched.username || (matched.email ? matched.email.split("@")[0].toLowerCase() : "");
+        const customPwd = localStorage.getItem("blossom_pwd_" + uname);
+
+        if (customPwd) {
+            if (password !== customPwd) {
+                return {
+                    ok: false,
+                    reason: "password"
+                };
+            }
+        } else {
+            const defaultPwd = matched.password || (matched.role === "MANAGER" ? "Blossom@123" : "Staff@123");
+            const easyPwd = uname + "123";
+            if (password !== defaultPwd && password !== easyPwd) {
+                return {
+                    ok: false,
+                    reason: "password"
+                };
+            }
+        }
+
         return {
             ok: true,
-            user: user
+            user: {
+                username: uname,
+                email: matched.email,
+                role: matched.role,
+                fullName: matched.fullName,
+                position: matched.position || (matched.role === "MANAGER" ? "Marketing Manager" : "Marketing Staff")
+            }
         };
     }
 
@@ -311,44 +365,56 @@
 
     // 6.1 Ẩn / hiện mật khẩu
     function renderEye(visible) {
-        eyeIcon.innerHTML = visible ? ICON_EYE : ICON_EYE_OFF;
+        if (eyeIcon) eyeIcon.innerHTML = visible ? ICON_EYE : ICON_EYE_OFF;
 
-        btnToggle.setAttribute(
-            "aria-label",
-            visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"
-        );
+        if (btnToggle) {
+            btnToggle.setAttribute(
+                "aria-label",
+                visible ? "Ẩn mật khẩu" : "Hiện mật khẩu"
+            );
+        }
     }
 
-    btnToggle.addEventListener("click", () => {
-        const show = passInput.type === "password";
-
-        passInput.type = show ? "text" : "password";
-
-        renderEye(show);
-    });
+    if (btnToggle && passInput) {
+        btnToggle.addEventListener("click", () => {
+            const show = passInput.type === "password";
+            passInput.type = show ? "text" : "password";
+            renderEye(show);
+        });
+    }
 
     // 6.2 Xóa lỗi khi nhập lại
-    emailInput.addEventListener("input", () => {
-        fieldEmail.classList.remove("is-error");
-        emailError.textContent = "";
-    });
+    if (emailInput) {
+        emailInput.addEventListener("input", () => {
+            if (fieldEmail) fieldEmail.classList.remove("is-error");
+            if (emailError) emailError.textContent = "";
+        });
+    }
 
-    passInput.addEventListener("input", () => {
-        fieldPass.classList.remove("is-error");
-        passError.textContent = "";
-    });
+    if (passInput) {
+        passInput.addEventListener("input", () => {
+            if (fieldPass) fieldPass.classList.remove("is-error");
+            if (passError) passError.textContent = "";
+        });
+    }
 
     // 6.3 Gửi form
-    form.addEventListener("submit", handleSubmit);
+    if (form) {
+        form.addEventListener("submit", handleSubmit);
+    }
 
     // 6.4 Khởi tạo
     renderEye(false);
 
     const saved = localStorage.getItem(REMEMBER_KEY);
 
-    if (saved) {
+    if (saved && emailInput) {
         emailInput.value = saved;
-        rememberBox.checked = true;
+        if (rememberBox) rememberBox.checked = true;
+    }
+
+    if (typeof window !== "undefined") {
+        window.AuthLogin = { authenticate, USERS };
     }
 
 })();

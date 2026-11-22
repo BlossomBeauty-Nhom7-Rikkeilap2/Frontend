@@ -26,18 +26,12 @@
 
     function getFilteredList() {
         if (!window.NotificationsStore) return [];
-        const all = window.NotificationsStore.getNotifications();
-        const role = (window.Auth && window.Auth.getRole()) || "MANAGER";
+        const all = window.NotificationsStore.getVisibleNotifications();
 
         return all.filter(function (n) {
-            // Role filter
-            if (n.recipientRole && n.recipientRole !== role && n.recipientRole !== "ALL") {
-                return false;
-            }
-
             if (activeTab === "UNREAD") return !n.is_read;
-            if (activeTab === "APPROVAL") return n.type === "approved" || n.type === "rejected" || n.type === "revision" || n.type === "submitted";
-            if (activeTab === "SYSTEM") return n.type === "system" || n.type === "reminder" || n.type === "published";
+            if (activeTab === "APPROVAL") return n.type === "approved" || n.type === "rejected" || n.type === "revision" || n.type === "submitted" || n.type === "resubmitted" || n.type === "assigned";
+            if (activeTab === "SYSTEM") return n.type === "system" || n.type === "reminder" || n.type === "published" || n.type === "due_soon" || n.type === "overdue" || n.type === "conflict" || (n.type && n.type.indexOf("calendar") !== -1);
             return true;
         });
     }
@@ -61,28 +55,31 @@
             let iconBoxClass = "system";
             let iconSvg = UI.icon("bell");
 
-            if (n.type === "approved") {
+            if (n.type === "approved" || n.type === "calendar_confirmed") {
                 iconBoxClass = "approved";
                 iconSvg = UI.icon("tick");
-            } else if (n.type === "revision") {
+            } else if (n.type === "revision" || n.type === "calendar_revision" || n.type === "calendar_changed") {
                 iconBoxClass = "revision";
                 iconSvg = UI.icon("edit");
-            } else if (n.type === "rejected") {
+            } else if (n.type === "rejected" || n.type === "overdue") {
                 iconBoxClass = "rejected";
                 iconSvg = UI.icon("close");
-            } else if (n.type === "reminder") {
+            } else if (n.type === "reminder" || n.type === "due_soon") {
                 iconBoxClass = "reminder";
                 iconSvg = UI.icon("clock");
-            } else if (n.type === "submitted") {
+            } else if (n.type === "submitted" || n.type === "resubmitted" || n.type === "assigned" || (n.type && n.type.indexOf("calendar") !== -1)) {
                 iconBoxClass = "submitted";
                 iconSvg = UI.icon("clipboard");
+            } else if (n.type === "conflict") {
+                iconBoxClass = "rejected";
+                iconSvg = UI.icon("close");
             }
 
             const unreadClass = n.is_read ? "" : " unread";
             const timeText = n.time_relative || formatRelative(n.time);
 
             return (
-                '<div class="notif-item' + unreadClass + '" data-notif-id="' + n.id + '" data-post-id="' + (n.postId || '') + '">' +
+                '<div class="notif-item' + unreadClass + '" data-notif-id="' + n.id + '" data-post-id="' + (n.postId || '') + '" data-event-id="' + (n.eventId || '') + '">' +
                     '<div class="notif-icon-box ' + iconBoxClass + '">' + iconSvg + '</div>' +
                     '<div class="notif-content">' +
                         '<div class="notif-title-row">' +
@@ -92,7 +89,7 @@
                         '<p class="notif-msg">' + UI.esc(n.message) + '</p>' +
                         '<div class="notif-meta">' +
                             '<span>Gửi bởi: <b>' + UI.esc(n.author || "Hệ thống Blossom") + '</b></span>' +
-                            (n.postId ? '<span style="color:var(--pink);font-weight:600;">· Nhấn để xem chi tiết bài viết →</span>' : '') +
+                            (n.postId ? '<span style="color:var(--pink);font-weight:600;">· Nhấn để xem chi tiết bài viết →</span>' : (n.eventId ? '<span style="color:var(--pink);font-weight:600;">· Nhấn để xem lịch đăng bài →</span>' : '')) +
                         '</div>' +
                     '</div>' +
                 '</div>'
@@ -133,6 +130,7 @@
 
                 const notifId = Number(item.dataset.notifId);
                 const postId = item.dataset.postId ? Number(item.dataset.postId) : null;
+                const eventId = item.dataset.eventId ? Number(item.dataset.eventId) : null;
 
                 if (window.NotificationsStore) {
                     window.NotificationsStore.markAsRead(notifId);
@@ -141,6 +139,8 @@
 
                 if (postId && window.openPostDetailModal) {
                     window.openPostDetailModal(postId);
+                } else if (eventId) {
+                    location.href = "calendar.html";
                 }
             });
         }

@@ -611,3 +611,22 @@
         width: 100%;
     }
 }
+
+
+/* ---------- Thẻ thống kê có thể bấm (Tổng quan -> danh sách bài viết đã lọc) ---------- */
+.stat-link {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.stat-link:hover,
+.stat-link:focus-visible {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-pop);
+    outline: none;
+}
+
+.stat-link .stat-card { height: 100%; }
