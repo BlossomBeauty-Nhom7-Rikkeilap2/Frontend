@@ -300,6 +300,18 @@
             const list = this.getNotifications();
             list.forEach(function (n) { if (self.isVisible(n)) n.is_read = true; });
             this.saveNotifications(list);
+            if (global.BlossomAPI && global.BlossomAPI.getToken()) {
+                global.BlossomAPI.request("/notifications/read-all", { method: "PATCH" }).catch(function () {});
+            }
+        },
+
+        deleteNotification: function (id) {
+            let list = this.getNotifications();
+            list = list.filter(function (n) { return n.id !== Number(id); });
+            this.saveNotifications(list);
+            if (global.BlossomAPI && global.BlossomAPI.getToken() && Number(id)) {
+                global.BlossomAPI.request("/notifications/" + id, { method: "DELETE" }).catch(function () {});
+            }
         },
 
         addNotification: function (notif) {

@@ -83,6 +83,10 @@
     }
 
     function downloadMedia(url, postCode) {
+        if (!url) return;
+        if (window.BlossomAPI && typeof window.BlossomAPI.resolveMediaUrl === "function") {
+            url = window.BlossomAPI.resolveMediaUrl(url);
+        }
         UI.toast("info", "Tải xuống media", "Đang tải tệp media của bài viết " + postCode + " về máy...");
 
         const safeCode = (postCode || "blossom_post").replace(/[^a-zA-Z0-9_-]/g, "_");
@@ -129,7 +133,10 @@
         const st = STATUS_MAP[post.status] || { label: post.status, color: "#8c8294", bg: "#f0edf3" };
         // Ảnh/video do người dùng đã tải lên (không dùng ảnh mặc định)
         const media = (Scope.getPostMedia(post.post_id)) || null;
-        const mediaUrl = (media && media.url) || "";
+        let mediaUrl = (media && media.url) || post.mediaUrl || post.media_url || "";
+        if (mediaUrl && window.BlossomAPI && typeof window.BlossomAPI.resolveMediaUrl === "function") {
+            mediaUrl = window.BlossomAPI.resolveMediaUrl(mediaUrl);
+        }
         const isVideo = !!(media && media.type === "VIDEO");
 
         const headline = (post.headline || "").trim();

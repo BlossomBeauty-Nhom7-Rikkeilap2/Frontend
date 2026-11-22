@@ -118,14 +118,15 @@
             if (mediaBox) mediaBox.hidden = true;
         } else {
             if (mediaBox) mediaBox.hidden = false;
+            const mediaSrc = (window.BlossomAPI && BlossomAPI.resolveMediaUrl) ? BlossomAPI.resolveMediaUrl(currentMedia.url) : currentMedia.url;
             if (currentMedia.type === "VIDEO") {
                 pImg.hidden = true;
                 pVid.hidden = false;
-                if (pVid.src !== currentMedia.url) pVid.src = currentMedia.url;
+                if (pVid.src !== mediaSrc) pVid.src = mediaSrc;
             } else {
                 pVid.hidden = true;
                 pImg.hidden = false;
-                pImg.src = currentMedia.url;
+                pImg.src = mediaSrc;
             }
         }
     }
@@ -141,14 +142,17 @@
         if (!has) {
             thumbImg.hidden = true; thumbVid.hidden = true;
             thumbImg.removeAttribute("src");
-        } else if (currentMedia.type === "VIDEO") {
-            thumbImg.hidden = true;
-            thumbVid.hidden = false;
-            if (thumbVid.src !== currentMedia.url) thumbVid.src = currentMedia.url;
         } else {
-            thumbVid.hidden = true;
-            thumbImg.hidden = false;
-            thumbImg.src = currentMedia.url;
+            const mediaSrc = (window.BlossomAPI && BlossomAPI.resolveMediaUrl) ? BlossomAPI.resolveMediaUrl(currentMedia.url) : currentMedia.url;
+            if (currentMedia.type === "VIDEO") {
+                thumbImg.hidden = true;
+                thumbVid.hidden = false;
+                if (thumbVid.src !== mediaSrc) thumbVid.src = mediaSrc;
+            } else {
+                thumbVid.hidden = true;
+                thumbImg.hidden = false;
+                thumbImg.src = mediaSrc;
+            }
         }
         const rm = document.getElementById("btnRemoveMedia");
         if (rm) rm.hidden = !has;
@@ -286,7 +290,7 @@
 
         try {
             if (window.BlossomAPI && typeof window.BlossomAPI.request === "function") {
-                const platformCodeMap = { facebook: 1, instagram: 2, threads: 3, tiktok: 1 };
+                const platformCodeMap = { facebook: 1, instagram: 2, threads: 3 };
                 const platKey = (payload.platforms && payload.platforms[0]) || "facebook";
                 const platId = platformCodeMap[platKey] || 1;
                 const mType = currentMedia && currentMedia.type === "VIDEO" ? "VIDEO" : "IMAGE";
@@ -468,14 +472,19 @@
     function loadRealPost(p) {
         const media = Scope.getPostMedia(p.post_id);
         const planned = p.planned_date ? (Scope.viDate(p.planned_date) + " " + (p.planned_time || "09:00")) : "";
+        const resolvedMediaUrl = (media && media.url) || p.media_url || p.mediaUrl || (Array.isArray(p.media_files) && p.media_files[0]) || "";
+        const mType = (media && media.type) || p.media_type || "IMAGE";
         applyPostObject({
             post_id: p.post_id, code: p.code || ("BL-0" + p.post_id), title: p.title || "",
             category: p.category, campaign: p.campaign, headline: p.headline || "", caption: p.caption || "",
             hashtags: p.hashtags || "", platforms: p.platforms && p.platforms.length ? p.platforms : ["Facebook"],
             planned_time: planned, approver: p.approver,
             status: p.status, status_label: STATUS_LABEL_FULL[p.status] || p.status,
-            media_name: media && media.name, media_meta: media && media.meta, media_type: media && media.type,
-            media_url: media && media.url, media_size: media && media.sizeBytes,
+            media_name: (media && media.name) || (resolvedMediaUrl ? "Tệp đính kèm" : ""),
+            media_meta: (media && media.meta) || "",
+            media_type: mType,
+            media_url: resolvedMediaUrl,
+            media_size: (media && media.sizeBytes) || p.total_media_size_bytes || 0,
             history: p.history || [], manager_comment: p.revision_note || p.revision_reason || p.manager_comment || "",
             published_url: p.published_url || ""
         });
@@ -712,7 +721,7 @@
         // Gọi API Backend nếu đang chạy
         try {
             if (window.BlossomAPI && typeof window.BlossomAPI.request === "function") {
-                const platformCodeMap = { facebook: 1, instagram: 2, threads: 3, tiktok: 1 };
+                const platformCodeMap = { facebook: 1, instagram: 2, threads: 3 };
                 const platKey = (payload.platforms && payload.platforms[0]) || "facebook";
                 const platId = platformCodeMap[platKey] || 1;
                 const mType = currentMedia && currentMedia.type === "VIDEO" ? "VIDEO" : "IMAGE";
@@ -898,19 +907,59 @@
         setupDatePicker();
 
         if (isEditMode) {
-            // Phân quyền chặt chẽ: chỉ chủ sở hữu bài viết mới được phép chỉnh sửa (kể cả Manager cũng không sửa bài của người khác)
-            const target = urlId ? Scope.getPostById(urlId) : null;
-            if (!target || !Scope.isMine(target)) {
-                Auth.setFlash({
-                    type: "error",
-                    title: target ? "Không có quyền chỉnh sửa" : "Không tìm thấy bài viết",
-                    message: target ? "Bạn chỉ được chỉnh sửa bài viết do chính mình tạo. Bài viết của người khác chỉ được xem chi tiết." : "Bài viết không tồn tại hoặc đã bị xóa."
-                });
-                location.replace(getPostListHref());
-                return;
+            let target = urlId ? Scope.getPostById(urlId) : null;
+            const userNow = (window.Auth && Auth.getUser()) || {};
+            const isMgr = userNow.role === "MANAGER";
+
+            const proceedWithPost = function (postObj) {
+                if (!postObj || (!Scope.isMine(postObj) && !isMgr)) {
+                    Auth.setFlash({
+                        type: "error",
+                        title: postObj ? "Không có quyền chỉnh sửa" : "Không tìm thấy bài viết",
+                        message: postObj ? "Bạn chỉ được chỉnh sửa bài viết của chính mình hoặc bài viết thuộc thẩm quyền quản lý." : "Bài viết không tồn tại hoặc đã bị xóa."
+                    });
+                    location.replace(getPostListHref());
+                    return;
+                }
+                loadRealPost(postObj);
+                currentPostId = postObj.post_id;
+            };
+
+            if (!target && urlId && window.BlossomAPI && BlossomAPI.getToken()) {
+                BlossomAPI.request("/posts/" + urlId)
+                    .then(function (backendPost) {
+                        const platNameMap = { 1: "Facebook", 2: "Instagram", 3: "Threads" };
+                        const platName = platNameMap[backendPost.platform_id] || "Facebook";
+                        target = {
+                            post_id: backendPost.post_id,
+                            code: "BL-0" + backendPost.post_id,
+                            title: backendPost.title,
+                            category: "Chăm sóc da",
+                            campaign: "Chiến dịch chung",
+                            headline: "",
+                            caption: backendPost.caption || "",
+                            hashtags: backendPost.hashtags || "",
+                            platforms: [platName],
+                            platform_label: platName,
+                            author: backendPost.author ? backendPost.author.full_name : "",
+                            owner_username: backendPost.author ? backendPost.author.username : "",
+                            status: backendPost.status,
+                            planned_date: backendPost.planned_publish_time ? backendPost.planned_publish_time.slice(0, 10) : "",
+                            planned_time: backendPost.planned_publish_time ? backendPost.planned_publish_time.slice(11, 16) : "09:00",
+                            media_files: backendPost.media_files || [],
+                            media_type: backendPost.media_type || "IMAGE",
+                            media_url: (backendPost.media_files && backendPost.media_files[0]) || "",
+                            history: []
+                        };
+                        proceedWithPost(target);
+                    })
+                    .catch(function (err) {
+                        console.warn("[PostEditor] Could not fetch post from backend:", err.message);
+                        proceedWithPost(null);
+                    });
+            } else {
+                proceedWithPost(target);
             }
-            loadRealPost(target);
-            currentPostId = target.post_id;
         } else {
             resetFormForCreate();
         }

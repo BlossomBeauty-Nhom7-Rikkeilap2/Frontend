@@ -11,8 +11,20 @@
     "use strict";
 
     const API_BASE = "http://localhost:8000/api";
+    const SERVER_BASE = "http://localhost:8000";
     const TOKEN_KEY = "blossom_access_token";
     const USER_KEY = "blossom_user";
+
+    function resolveMediaUrl(url) {
+        if (!url || typeof url !== "string") return "";
+        if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("data:") || url.startsWith("blob:")) {
+            return url;
+        }
+        if (url.startsWith("/")) {
+            return SERVER_BASE + url;
+        }
+        return SERVER_BASE + "/" + url;
+    }
 
     function getToken() {
         try {
@@ -171,11 +183,13 @@
 
     global.BlossomAPI = {
         API_BASE: API_BASE,
+        SERVER_BASE: SERVER_BASE,
         TOKEN_KEY: TOKEN_KEY,
         USER_KEY: USER_KEY,
         getToken: getToken,
         setToken: setToken,
         clearToken: clearToken,
+        resolveMediaUrl: resolveMediaUrl,
         request: request,
         login: login,
         logout: logout,
