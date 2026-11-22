@@ -21,6 +21,7 @@
     <script src="../../js/api.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
+    <script src="../../js/data-scope.js"></script>
 </head>
 
 <body data-search="Tìm kiếm bài viết gửi duyệt..." data-active="posts.html">
@@ -147,59 +148,9 @@
     (function () {
         "use strict";
 
+        // Staff chỉ thấy các bài do chính mình phụ trách (Scope kiểm tra theo chủ sở hữu)
         function getPosts() {
-            try {
-                const list = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
-                if (list && list.length) return list;
-            } catch (e) {}
-
-            return [
-                {
-                    post_id: 1,
-                    code: "BL-001",
-                    title: "Bộ sưu tập chăm sóc da mùa thu thuần khiết Blossom",
-                    caption: "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng các sản phẩm thiên nhiên từ Blossom Beauty Store.",
-                    platform_label: "Facebook & Instagram",
-                    author: "Nguyễn Phát Đạt",
-                    status: "PENDING_APPROVAL",
-                    planned_label: "20/11/2026 14:00",
-                    created_at: "20/11/2026 09:30"
-                },
-                {
-                    post_id: 2,
-                    code: "BL-002",
-                    title: "Bí quyết phục hồi hàng rào ẩm cho da nhạy cảm",
-                    caption: "Cung cấp ceramide và vitamin B5 thuần chay giúp da khỏe khoắn suốt mùa hanh khô.",
-                    platform_label: "Instagram",
-                    author: "Nguyễn Phát Đạt",
-                    status: "REVISION_REQUESTED",
-                    revision_reason: "Ảnh chụp sản phẩm chưa đủ sáng và logo chưa đúng vị trí góc phải. Vui lòng cập nhật lại ảnh độ phân giải cao.",
-                    planned_label: "21/11/2026 09:00",
-                    created_at: "19/11/2026 15:45"
-                },
-                {
-                    post_id: 3,
-                    code: "BL-003",
-                    title: "Ưu đãi tri ân Black Friday – Giảm tới 40% dòng Serum hoa anh đào",
-                    caption: "Cơ hội sở hữu trọn bộ dưỡng trắng da chiết xuất từ hoa anh đào với giá độc quyền chỉ trong 3 ngày.",
-                    platform_label: "Facebook & Threads",
-                    author: "Nguyễn Phát Đạt",
-                    status: "APPROVED",
-                    planned_label: "25/11/2026 10:00",
-                    created_at: "18/11/2026 11:20"
-                },
-                {
-                    post_id: 4,
-                    code: "BL-004",
-                    title: "Tips tẩy trang đúng cách không gây bít tắc lỗ chân lông",
-                    caption: "Nhũ hóa dầu tẩy trang trong 60 giây để cuốn trôi mọi bụi mịn mà vẫn giữ trọn màng ẩm sinh học.",
-                    platform_label: "Threads",
-                    author: "Nguyễn Phát Đạt",
-                    status: "PENDING_APPROVAL",
-                    planned_label: "22/11/2026 19:30",
-                    created_at: "20/11/2026 10:15"
-                }
-            ];
+            return Scope.visiblePosts();
         }
 
         const STATUS_BADGES = {

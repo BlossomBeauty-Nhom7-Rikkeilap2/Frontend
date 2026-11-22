@@ -7,151 +7,16 @@
 (function (global) {
     "use strict";
 
-    const MASTER_FALLBACK_POSTS = [
-        {
-            post_id: 129,
-            code: "BL-0129",
-            title: "Kem dưỡng trắng da Blossom",
-            platforms: ["Instagram"],
-            platform_label: "Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "PENDING_APPROVAL",
-            planned_label: "05/11/2026 08:00",
-            caption: "Kem dưỡng trắng da Blossom chứa chiết xuất hoa anh đào giúp nâng tông nhẹ nhàng và cấp ẩm sâu. Thành phần thuần chay lành tính cho mọi loại da.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png"
-        },
-        {
-            post_id: 128,
-            code: "BL-0128",
-            title: "5 bước dưỡng da cho buổi sáng rạng rỡ",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "PUBLISHED",
-            planned_label: "04/11/2026 09:00",
-            caption: "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng các sản phẩm thiên nhiên thuần khiết từ Blossom Beauty Store.",
-            mediaUrl: "../../assets/poster.png"
-        },
-        {
-            post_id: 127,
-            code: "BL-0127",
-            title: "Bí quyết chăm da mùa hanh khô",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "DRAFT",
-            planned_label: "07/11/2026 14:00",
-            caption: "Cấp ẩm chuyên sâu bảo vệ hàng rào tự nhiên của làn da trong tiết trời thu đông hanh hao.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png"
-        },
-        {
-            post_id: 126,
-            code: "BL-0126",
-            title: "Một chút yêu thương cho làn da",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "REVISION_REQUESTED",
-            planned_label: "06/11/2026 10:00",
-            caption: "Dành 10 phút mỗi tối để thư giãn và phục hồi làn da với mặt nạ hoa hồng thiên nhiên Blossom.",
-            mediaUrl: "../../assets/poster.png"
-        },
-        {
-            post_id: 125,
-            code: "BL-0125",
-            title: "Chọn serum phù hợp với làn da của bạn",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Phạm Thùy Dương",
-            status: "DRAFT",
-            planned_label: "07/11/2026 09:00",
-            caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C để tìm ra serum chân ái cho làn da.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png"
-        },
-        {
-            post_id: 124,
-            code: "BL-0124",
-            title: "Chống nắng mỗi ngày, nâng niu làn da",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Phạm Thùy Dương",
-            status: "SCHEDULED",
-            planned_label: "08/11/2026 08:00",
-            caption: "Kem chống nắng thuần chay mỏng nhẹ, bảo vệ quang phổ rộng SPF 50+ PA++++ không để lại vệt trắng.",
-            mediaUrl: "../../assets/poster.png"
-        },
-        {
-            post_id: 123,
-            code: "BL-0123",
-            title: "Routine tối giản cho ngày bận rộn",
-            platforms: ["Facebook", "Instagram", "Threads"],
-            platform_label: "Facebook & Instagram",
-            author: "Trần Ngọc Mai",
-            status: "REJECTED",
-            planned_label: "03/11/2026 19:00",
-            caption: "3 bước dưỡng da gọn nhẹ, tiết kiệm thời gian nhưng vẫn đủ ẩm cho cô nàng công sở bận rộn.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png"
-        },
-        {
-            post_id: 122,
-            code: "BL-0122",
-            title: "Review Son Dưỡng Thuần Chay Hương Đào Blossom",
-            platforms: ["Threads"],
-            platform_label: "Threads",
-            author: "Trần Ngọc Mai",
-            status: "DRAFT",
-            planned_label: "10/11/2026 10:00",
-            caption: "Video ngắn unbox và swatch bảng màu son dưỡng thuần chay hương đào ngọt ngào mùa lễ hội.",
-            mediaUrl: "../../assets/poster.png"
-        },
-        {
-            post_id: 121,
-            code: "BL-0121",
-            title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
-            platforms: ["Instagram"],
-            platform_label: "Instagram",
-            author: "Nhân viên Marketing",
-            status: "APPROVED",
-            planned_label: "12/11/2026 08:30",
-            caption: "Phương pháp làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng, đánh bay bã nhờn sâu trong lỗ chân lông.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png"
-        },
-        {
-            post_id: 120,
-            code: "BL-0120",
-            title: "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ",
-            platforms: ["Facebook"],
-            platform_label: "Facebook",
-            author: "Nhân viên Marketing",
-            status: "PUBLISHED",
-            planned_label: "01/11/2026 09:00",
-            caption: "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11 tại hệ thống Blossom Beauty Store.",
-            mediaUrl: "../../assets/poster.png"
-        }
-    ];
-
+    // Trả về bài viết nếu tồn tại. Việc kiểm tra quyền xem nằm ở openPostDetailModal.
     function getSharedPost(postId) {
-        if (!postId) return null;
         try {
-            const list = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
-            const found = list.find(function (p) {
-                return Number(p.post_id) === Number(postId) ||
-                       String(p.post_id) === String(postId) ||
-                       p.code === String(postId);
-            });
+            const found = Scope.getPostById(postId);
             if (found) return found;
         } catch (e) {}
 
-        const masterFound = MASTER_FALLBACK_POSTS.find(function (p) {
-            return Number(p.post_id) === Number(postId) ||
-                   String(p.post_id) === String(postId) ||
-                   p.code === String(postId);
-        });
-        if (masterFound) return masterFound;
-
-        // Fallback từ calendar events
+        // Dự phòng: dữ liệu lấy từ sự kiện lịch đăng (giữ nguyên chủ sở hữu của lịch)
         try {
-            const calEvents = JSON.parse(localStorage.getItem("blossom_fr11_calendar_events_v1") || "[]");
+            const calEvents = Scope.loadEvents();
             const ev = calEvents.find(function (e) {
                 return Number(e.id) === Number(postId) || String(e.id) === String(postId) || e.code === String(postId);
             });
@@ -162,27 +27,16 @@
                     title: ev.title,
                     platforms: [ev.platform || "Facebook & Instagram"],
                     platform_label: ev.platform || "Facebook & Instagram",
-                    author: ev.author || "Doãn Thị Minh Anh",
+                    author: ev.author || "",
+                    owner_username: ev.owner_username,
                     status: ev.status === "SCHEDULED" ? "SCHEDULED" : (ev.status === "PENDING" ? "PENDING_APPROVAL" : "DRAFT"),
-                    planned_label: ev.date + " " + (ev.time || "09:00"),
-                    caption: "Routine chăm sóc da toàn diện cùng các tinh chất dưỡng ẩm từ thiên nhiên của Blossom Beauty.",
-                    mediaUrl: "../../assets/figma/skincare-editorial.png"
+                    planned_label: ev.date + " " + ev.time,
+                    caption: ""
                 };
             }
         } catch (e) {}
 
-        return {
-            post_id: postId,
-            code: "BL-0" + postId,
-            title: "Bài viết #" + postId,
-            platforms: ["Facebook & Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Thành viên Blossom",
-            status: "PENDING_APPROVAL",
-            planned_label: "15/11/2026 09:00",
-            caption: "Nội dung bài viết mới thêm trên hệ thống quản lý nội dung Blossom Beauty Store.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png"
-        };
+        return null;
     }
 
     const STATUS_MAP = {
@@ -260,48 +114,49 @@
             });
     }
 
-    function openPostDetailModal(postOrId) {
-        let post = null;
-        if (postOrId && typeof postOrId === "object") {
-            post = postOrId;
-        } else {
-            post = getSharedPost(postOrId);
-        }
+    function openPostDetailModal(postId) {
+        const post = getSharedPost(postId);
         if (!post) {
-            UI.toast("error", "Lỗi", "Không tìm thấy dữ liệu bài viết ID #" + postOrId);
+            UI.toast("error", "Lỗi", "Không tìm thấy dữ liệu bài viết ID #" + postId);
+            return;
+        }
+        // Phân quyền: Staff không được xem chi tiết bài viết của nhân viên khác
+        if (!Scope.canViewPost(post)) {
+            UI.toast("error", "Không có quyền truy cập", "Bạn chỉ được xem bài viết do chính mình phụ trách.");
             return;
         }
 
-        // KIỂM TRA PHÂN QUYỀN: Staff chỉ được xem chi tiết bài viết của chính mình
-        const currentUser = (global.Auth && typeof global.Auth.getUser === "function") ? global.Auth.getUser() : null;
-        const isStaff = (location.pathname.indexOf("/pages/staff/") !== -1) || (currentUser && currentUser.role === "STAFF");
-        if (isStaff && currentUser && post && post.author) {
-            const myFull = (currentUser.fullName || "").toLowerCase().trim();
-            const myShort = (global.Auth && typeof global.Auth.shortName === "function" ? global.Auth.shortName(currentUser) : "").toLowerCase().trim();
-            const myUser = (currentUser.username || "").toLowerCase().trim();
-            const author = (post.author || "").toLowerCase().trim();
-            const isMine = (myFull && (author === myFull || author.includes(myFull) || myFull.includes(author))) ||
-                           (myShort && (author === myShort || author.includes(myShort) || myShort.includes(author))) ||
-                           (myUser && (author === myUser || author.includes(myUser)));
-            if (!isMine) {
-                UI.toast("warn", "Không có quyền truy cập", "Bạn chỉ được xem chi tiết bài viết do chính mình phụ trách.");
-                return;
-            }
-        }
-
         const st = STATUS_MAP[post.status] || { label: post.status, color: "#8c8294", bg: "#f0edf3" };
-        const mediaUrl = post.mediaUrl || "../../assets/figma/skincare-editorial.png";
-        const captionText = post.caption || "Chưa có nội dung caption.";
+        // Ảnh/video do người dùng đã tải lên (không dùng ảnh mặc định)
+        const media = (Scope.getPostMedia(post.post_id)) || null;
+        const mediaUrl = (media && media.url) || "";
+        const isVideo = !!(media && media.type === "VIDEO");
+
+        const headline = (post.headline || "").trim();
+        const caption = (post.caption || "").trim();
+        const hashtags = (post.hashtags || "").trim();
+        const fullText = [headline, caption, hashtags].filter(Boolean).join("\n\n");
+        const hasContent = !!fullText;
+
+        let mediaHtml;
+        if (mediaUrl && isVideo) {
+            mediaHtml = '<video src="' + UI.esc(mediaUrl) + '" controls class="detail-media-preview-img" style="width:100%;border-radius:10px;background:#000"></video>';
+        } else if (mediaUrl) {
+            mediaHtml = '<img src="' + UI.esc(mediaUrl) + '" alt="Media Preview" class="detail-media-preview-img">';
+        } else {
+            mediaHtml = '<div class="detail-media-empty" style="display:grid;place-content:center;gap:4px;text-align:center;min-height:200px;border:1.5px dashed #f0c6d6;border-radius:10px;color:var(--muted);font-size:13px;padding:16px">' +
+                '<b>Chưa có ảnh/video</b><span>' + (media && media.name ? "Tệp: " + UI.esc(media.name) + " (không có bản xem trước)" : "Bài viết này chưa đính kèm media.") + '</span></div>';
+        }
 
         const bodyHtml =
             '<div class="post-detail-modal-grid">' +
                 '<!-- CỘT 1: MEDIA & DOWNLOAD MEDIA -->' +
                 '<div class="detail-media-pane">' +
-                    '<img src="' + UI.esc(mediaUrl) + '" alt="Media Preview" class="detail-media-preview-img" onerror="this.src=\'../../assets/figma/skincare-editorial.png\'">' +
-                    '<button type="button" class="btn-download-media" id="btnDownloadPostMedia">' +
+                    mediaHtml +
+                    (mediaUrl ? '<button type="button" class="btn-download-media" id="btnDownloadPostMedia">' +
                         UI.icon("chart") + '<span>Tải xuống Media</span>' +
                     '</button>' +
-                    '<small style="font-size:11.5px;color:var(--muted);text-align:center;">Định dạng chuẩn ảnh phân giải cao/video xuất bản đa kênh</small>' +
+                    '<small style="font-size:11.5px;color:var(--muted);text-align:center;">Định dạng chuẩn ảnh phân giải cao/video xuất bản đa kênh</small>' : "") +
                 '</div>' +
 
                 '<!-- CỘT 2: THÔNG TIN CHI TIẾT & COPY CAPTION -->' +
@@ -317,8 +172,8 @@
                     '<h3 style="font-family:var(--font-display);font-size:22px;color:var(--text-strong);line-height:1.35;margin:0;">' + UI.esc(post.title) + '</h3>' +
 
                     '<div style="font-size:13px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap;border-bottom:1px solid #f4dce4;padding-bottom:10px;">' +
-                        '<span>Tác giả: <b style="color:var(--text);">' + UI.esc(post.author || "Nguyễn Phát Đạt") + '</b></span>' +
-                        '<span>Lịch dự kiến: <b style="color:var(--text);">' + UI.esc(post.planned_label || "Chưa lên lịch") + '</b></span>' +
+                        '<span>Tác giả: <b style="color:var(--text);">' + UI.esc(post.author || "—") + '</b></span>' +
+                        '<span>Lịch dự kiến: <b style="color:var(--text);">' + UI.esc(Scope.plannedLabelOf(post) || post.planned_label || "Chưa lên lịch") + '</b></span>' +
                     '</div>' +
 
                     '<div>' +
@@ -328,24 +183,42 @@
                                 UI.icon("clipboard") + '<span>Sao chép Caption</span>' +
                             '</button>' +
                         '</div>' +
-                        '<div class="caption-box" id="postModalCaptionBox">' + UI.esc(captionText) + '</div>' +
+                        '<div class="caption-box" id="postModalCaptionBox" style="white-space:pre-wrap">' +
+                            (hasContent
+                                ? (headline ? '<b>' + UI.esc(headline) + '</b>\n\n' : "") + UI.esc(caption) + (hashtags ? '\n\n<span style="color:var(--pink)">' + UI.esc(hashtags) + '</span>' : "")
+                                : '<span style="color:var(--muted)">Bài viết chưa có nội dung.</span>') +
+                        '</div>' +
                     '</div>' +
                 '</div>' +
             '</div>';
 
-        const inAdmin = location.pathname.indexOf("/pages/admin/") !== -1;
-        const editUrl = (inAdmin ? "../staff/edit-post.html" : "edit-post.html") + "?id=" + encodeURIComponent(post.post_id);
+        const curUser = (global.Auth && typeof Auth.getUser === "function") ? Auth.getUser() : null;
+        const isManager = !!curUser && curUser.role === "MANAGER";
+        const isOwner = curUser && global.Scope ? Scope.isOwner(post, curUser) : false;
+        // Quản lý xem chi tiết không được chỉnh sửa bài viết của người khác. Nhân viên chỉ được sửa bài của mình (khi chưa xuất bản).
+        const canEdit = !isManager && isOwner && post.status !== "PUBLISHED";
+
+        const modalActions = [
+            { label: "Đóng", variant: "secondary", value: false }
+        ];
+
+        if (canEdit) {
+            modalActions.push({
+                label: "Chỉnh sửa bài viết",
+                variant: "primary",
+                value: "EDIT"
+            });
+        }
 
         UI.modal({
             title: "Chi tiết bài viết – " + (post.code || "BL-0" + post.post_id),
             size: "lg",
             body: bodyHtml,
-            actions: [
-                { label: "Đóng", variant: "ghost", value: false },
-                { label: "Chỉnh sửa bài viết", variant: "secondary", value: "EDIT" }
-            ]
+            actions: modalActions
         }).then(function (act) {
             if (act === "EDIT") {
+                const inAdmin = location.pathname.indexOf("/pages/admin/") !== -1;
+                const editUrl = (inAdmin ? "../staff/edit-post.html" : "edit-post.html") + "?id=" + encodeURIComponent(post.post_id);
                 location.href = editUrl;
             }
         });
@@ -355,7 +228,7 @@
             const btnCopy = document.getElementById("btnCopyPostCaption");
             if (btnCopy) {
                 btnCopy.addEventListener("click", function () {
-                    copyCaption(post.caption);
+                    copyCaption(fullText);
                 });
             }
 

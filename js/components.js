@@ -192,10 +192,10 @@
 
             function close(value) {
                 document.removeEventListener("keydown", onKey, true);
-                backdrop.remove();
                 document.body.classList.remove("modal-open");
                 if (previous && previous.focus) previous.focus();
                 resolve(value);
+                try { backdrop.remove(); } catch (_) {}
             }
 
             function onKey(e) {
@@ -212,7 +212,15 @@
             backdrop.addEventListener("click", function (e) {
                 if (e.target.closest("[data-close]")) return close(null);
                 const btn = e.target.closest("[data-action]");
-                if (btn) close(actions[Number(btn.dataset.action)].value);
+                if (btn) {
+                    const actIndex = Number(btn.dataset.action);
+                    const act = actions[actIndex];
+                    if (act && typeof act.onClick === "function") {
+                        const canClose = act.onClick(backdrop, close);
+                        if (canClose === false) return;
+                    }
+                    close(act ? act.value : null);
+                }
             });
 
             document.addEventListener("keydown", onKey, true);

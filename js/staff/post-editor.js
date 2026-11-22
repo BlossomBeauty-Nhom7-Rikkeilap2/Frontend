@@ -14,149 +14,9 @@
     const AUTOSAVE_DRAFT_KEY = "blossom_autosave_draft_v1";
     const AUTOSAVE_INTERVAL_SEC = 30;
 
-    const DEFAULT_SHARED_POSTS = [
-        {
-            post_id: 128,
-            code: "BL-0128",
-            title: "5 bước dưỡng da cho buổi sáng rạng rỡ",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "PUBLISHED",
-            planned_date: "2026-11-04",
-            planned_label: "04/11/2026",
-            updated_label: "04/11/2026",
-            caption: "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng Blossom.",
-            mediaUrl: "../../assets/poster.png",
-            deleted_at: null
-        },
-        {
-            post_id: 127,
-            code: "BL-0127",
-            title: "Bí quyết chăm da mùa hanh khô",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "PENDING_APPROVAL",
-            planned_date: "2026-11-05",
-            planned_label: "05/11/2026",
-            updated_label: "05/11/2026",
-            caption: "Cấp ẩm chuyên sâu bảo vệ hàng rào tự nhiên của làn da trong tiết trời thu đông.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png",
-            deleted_at: null
-        },
-        {
-            post_id: 126,
-            code: "BL-0126",
-            title: "Một chút yêu thương cho làn da",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "REVISION_REQUESTED",
-            planned_date: "2026-11-06",
-            planned_label: "06/11/2026",
-            updated_label: "06/11/2026",
-            caption: "Dành 10 phút mỗi tối để thư giãn và phục hồi làn da với mặt nạ hoa hồng.",
-            mediaUrl: "../../assets/poster.png",
-            deleted_at: null
-        },
-        {
-            post_id: 125,
-            code: "BL-0125",
-            title: "Chọn serum phù hợp với làn da của bạn",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Phạm Thùy Dương",
-            status: "DRAFT",
-            planned_date: "2026-11-07",
-            planned_label: "07/11/2026",
-            updated_label: "04/11/2026",
-            caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png",
-            deleted_at: null
-        },
-        {
-            post_id: 124,
-            code: "BL-0124",
-            title: "Chống nắng mỗi ngày, nâng niu làn da",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Phạm Thùy Dương",
-            status: "SCHEDULED",
-            planned_date: "2026-11-08",
-            planned_label: "08/11/2026",
-            updated_label: "06/11/2026",
-            caption: "Kem chống nắng thuần chay mỏng nhẹ, không để lại vệt trắng.",
-            mediaUrl: "../../assets/poster.png",
-            deleted_at: null
-        },
-        {
-            post_id: 123,
-            code: "BL-0123",
-            title: "Routine tối giản cho ngày bận rộn",
-            platforms: ["Facebook", "Instagram", "Threads"],
-            platform_label: "Facebook & Instagram",
-            author: "Trần Ngọc Mai",
-            status: "REJECTED",
-            planned_date: "2026-11-03",
-            planned_label: "03/11/2026",
-            updated_label: "03/11/2026",
-            caption: "3 bước gọn nhẹ cho cô nàng công sở bận rộn.",
-            deleted_at: null
-        },
-        {
-            post_id: 122,
-            code: "BL-0122",
-            title: "Review Son Dưỡng Thuần Chay Hương Đào Blossom",
-            platforms: ["Threads"],
-            platform_label: "Threads",
-            author: "Trần Ngọc Mai",
-            status: "DRAFT",
-            planned_date: "2026-11-10",
-            planned_label: "10/11/2026",
-            updated_label: "09/11/2026",
-            caption: "Video ngắn unbox và swatch bảng màu son dưỡng thu đông.",
-            deleted_at: null
-        },
-        {
-            post_id: 121,
-            code: "BL-0121",
-            title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
-            platforms: ["Instagram"],
-            platform_label: "Instagram",
-            author: "Nhân viên Marketing",
-            status: "APPROVED",
-            planned_date: "2026-11-12",
-            planned_label: "12/11/2026",
-            updated_label: "10/11/2026",
-            caption: "Làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png",
-            deleted_at: null
-        },
-        {
-            post_id: 120,
-            code: "BL-0120",
-            title: "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ",
-            platforms: ["Facebook"],
-            platform_label: "Facebook",
-            author: "Nhân viên Marketing",
-            status: "PUBLISHED",
-            planned_date: "2026-11-01",
-            planned_label: "01/11/2026",
-            updated_label: "01/11/2026",
-            caption: "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11.",
-            mediaUrl: "../../assets/poster.png",
-            deleted_at: null
-        }
-    ];
-
+    // Danh sách bài viết dùng chung (đọc/ghi qua Scope để mọi trang cùng một nguồn dữ liệu)
     function getSharedPostList() {
-        try {
-            const raw = JSON.parse(localStorage.getItem(POSTS_STORAGE_KEY));
-            if (Array.isArray(raw) && raw.length) return raw;
-        } catch (e) {}
-        localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(DEFAULT_SHARED_POSTS));
-        return DEFAULT_SHARED_POSTS.slice();
+        return Scope.loadPosts();
     }
 
     function getPostListHref() {
@@ -168,117 +28,11 @@
     const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
     const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50 MB
 
-    const DEMO_POSTS = {
-        DRAFT: {
-            post_id: 127,
-            code: "BL-0127",
-            title: "Bí quyết chăm da mùa hanh khô",
-            category: "Chăm sóc da",
-            campaign: "Nâng niu làn da · Tháng 11",
-            headline: "Làn da mềm mại, bất chấp tiết trời.",
-            caption: "Làn da cũng cần được nâng niu mỗi ngày. Cùng Blossom xây dựng chu trình chăm sóc da đơn giản, dịu nhẹ để luôn tự tin với vẻ đẹp tự nhiên của bạn.\n\n1. Làm sạch dịu nhẹ, giữ lại độ ẩm tự nhiên.\n2. Bổ sung serum cấp ẩm chuyên sâu.\n3. Khóa ẩm với kem dưỡng phù hợp.",
-            hashtags: "#BlossomBeauty #ChamSocDa #NangNiuLanDa",
-            platforms: ["Facebook", "Instagram"],
-            planned_time: "05/11/2026         08:00",
-            approver: "Nguyễn Minh Anh",
-            status: "DRAFT",
-            status_label: "Bản nháp",
-            media_name: "blossom-skincare-thang11.jpg",
-            media_meta: "1,8 MB · 1600 × 900 px · Ảnh đại diện",
-            media_type: "IMAGE",
-            media_url: "../../assets/figma/skincare-editorial.png",
-            history: [
-                "09:42 · Đã lưu thay đổi",
-                "09:15 · Trần Ngọc Mai chỉnh sửa",
-                "03/11 · Tạo bản nháp"
-            ]
-        },
-        APPROVED: {
-            post_id: 128,
-            code: "BL-0128",
-            title: "Bộ sưu tập Son Dưỡng Thu Đông 2026 - Hương Đào Tự Nhiên",
-            category: "Trang điểm",
-            campaign: "Nâng niu làn da · Tháng 11",
-            headline: "Đôi môi mềm mượt suốt 24 giờ.",
-            caption: "Khám phá dòng son dưỡng thuần chay chiết xuất từ hoa quả tươi hữu cơ, cấp ẩm sâu 24h và mang lại sắc hồng tự nhiên.",
-            hashtags: "#SonDuong #BlossomBeauty #VeganCosmetics #LipCare",
-            platforms: ["Facebook", "Instagram", "Threads"],
-            planned_time: "20/11/2026         09:30",
-            approver: "Nguyễn Minh Anh",
-            status: "APPROVED",
-            status_label: "Đã phê duyệt (Approved)",
-            media_name: "blossom-lipbalm-collection.webp",
-            media_meta: "2,4 MB · 1600 × 900 px · Ảnh sản phẩm",
-            media_type: "IMAGE",
-            media_url: "../../assets/figma/skincare-editorial.png",
-            history: [
-                "10:15 · Nguyễn Minh Anh đã phê duyệt (Approved)",
-                "09:30 · Trần Ngọc Mai gửi duyệt",
-                "04/11 · Tạo bản nháp"
-            ]
-        },
-        PUBLISHED: {
-            post_id: 129,
-            code: "BL-0129",
-            title: "Đại Tiệc Sale Cuối Tuần - Giảm 50% Toàn Bộ Cửa Hàng",
-            category: "Khuyến mãi",
-            campaign: "Nâng niu làn da · Tháng 11",
-            headline: "Ưu đãi lớn nhất tháng 11 tại Blossom.",
-            caption: "Duy nhất cuối tuần này tại hệ thống showroom Blossom Beauty trên toàn quốc. Đừng bỏ lỡ cơ hội sở hữu bộ đôi serum dưỡng sáng!",
-            hashtags: "#SaleCuoiTuan #KhuyenMai #BlossomBeauty #BigSale",
-            platforms: ["Facebook"],
-            planned_time: "01/11/2026         08:00",
-            approver: "Nguyễn Minh Anh",
-            status: "PUBLISHED",
-            status_label: "Đã xuất bản (Published)",
-            published_url: "https://facebook.com/blossom/posts/1015948302",
-            media_name: "blossom-weekend-sale.jpg",
-            media_meta: "1,5 MB · 1600 × 900 px · Đã xuất bản",
-            media_type: "IMAGE",
-            media_url: "../../assets/figma/skincare-editorial.png",
-            history: [
-                "01/11 08:05 · Đã xuất bản (Published) — Khóa chỉnh sửa nội dung",
-                "31/10 16:00 · Nguyễn Minh Anh phê duyệt",
-                "30/10 10:00 · Tạo bài viết"
-            ]
-        },
-        REVISION_REQUESTED: {
-            post_id: 130,
-            code: "BL-0130",
-            title: "Review Serum Vitamin C Dưỡng Sáng Da Mờ Thâm",
-            category: "Chăm sóc da",
-            campaign: "Nâng niu làn da · Tháng 11",
-            headline: "Đánh thức vẻ rạng rỡ tự nhiên mỗi sáng.",
-            caption: "Công thức 15% Vitamin C tinh khiết kết hợp chiết xuất hoa anh đào giúp làm mờ thâm sạm chỉ sau 14 ngày sử dụng đều đặn.",
-            hashtags: "#VitaminC #SerumBlossom #SkincareRoutine",
-            platforms: ["Instagram", "Threads"],
-            planned_time: "22/11/2026         19:00",
-            approver: "Nguyễn Minh Anh",
-            status: "REVISION_REQUESTED",
-            status_label: "Cần chỉnh sửa",
-            manager_comment: "Nhận xét từ Quản lý Nguyễn Minh Anh: Bổ sung thêm hướng dẫn sử dụng kem chống nắng vào buổi sáng và thay ảnh chụp cận chất serum rõ nét hơn nhé.",
-            media_name: "serum-vitaminc-reel.mp4",
-            media_meta: "14,2 MB · 1080 × 1920 px · Video ngắn",
-            media_type: "IMAGE",
-            media_url: "../../assets/figma/skincare-editorial.png",
-            history: [
-                "11:20 · Nguyễn Minh Anh yêu cầu chỉnh sửa (Revision Requested)",
-                "09:00 · Trần Ngọc Mai gửi duyệt",
-                "02/11 · Tạo bản nháp"
-            ]
-        }
-    };
-
     const isEditMode = document.body.dataset.editorMode === "edit";
     let currentPostStatus = "DRAFT";
-    let currentPostId = isEditMode ? 127 : null;
-    let currentMedia = {
-        name: "blossom-skincare-thang11.jpg",
-        meta: "1,8 MB · 1600 × 900 px · Ảnh đại diện",
-        type: "IMAGE",
-        url: "../../assets/figma/skincare-editorial.png",
-        sizeBytes: 1800000
-    };
+    let currentPostId = null;
+    let currentMedia = null;      // null = chưa tải ảnh/video nào
+    let originalPlanned = "";     // giờ đăng khi mở bài (để biết người dùng có đổi giờ không)
     let activePreviewTab = "Facebook";
     let countdownRemaining = AUTOSAVE_INTERVAL_SEC;
 
@@ -357,34 +111,81 @@
 
         const pImg = document.getElementById("previewMediaImg");
         const pVid = document.getElementById("previewMediaVideo");
-        if (currentMedia.type === "VIDEO") {
-            pImg.hidden = true;
-            pVid.hidden = false;
-            if (pVid.src !== currentMedia.url) pVid.src = currentMedia.url;
+        const mediaBox = pImg.parentElement;
+        if (!currentMedia || !currentMedia.url) {
+            pImg.hidden = true; pVid.hidden = true;
+            pImg.removeAttribute("src");
+            if (mediaBox) mediaBox.hidden = true;
         } else {
-            pVid.hidden = true;
-            pImg.hidden = false;
-            pImg.src = currentMedia.url || "../../assets/figma/skincare-editorial.png";
+            if (mediaBox) mediaBox.hidden = false;
+            if (currentMedia.type === "VIDEO") {
+                pImg.hidden = true;
+                pVid.hidden = false;
+                if (pVid.src !== currentMedia.url) pVid.src = currentMedia.url;
+            } else {
+                pVid.hidden = true;
+                pImg.hidden = false;
+                pImg.src = currentMedia.url;
+            }
         }
     }
 
     function renderMediaAttachment() {
-        document.getElementById("mediaFileName").textContent = currentMedia.name || "Chưa đính kèm tệp";
-        document.getElementById("mediaFileMeta").textContent = currentMedia.meta || "Vui lòng tải lên JPG/PNG/WEBP hoặc MP4/MOV";
+        const has = Boolean(currentMedia && currentMedia.url);
+        document.getElementById("mediaFileName").textContent = currentMedia && currentMedia.name ? currentMedia.name : "Chưa đính kèm tệp";
+        document.getElementById("mediaFileMeta").textContent = currentMedia && currentMedia.meta
+            ? currentMedia.meta : "Vui lòng tải lên JPG/PNG/WEBP hoặc MP4/MOV";
 
         const thumbImg = document.getElementById("mediaThumbImg");
         const thumbVid = document.getElementById("mediaThumbVideo");
-        if (currentMedia.type === "VIDEO") {
+        if (!has) {
+            thumbImg.hidden = true; thumbVid.hidden = true;
+            thumbImg.removeAttribute("src");
+        } else if (currentMedia.type === "VIDEO") {
             thumbImg.hidden = true;
             thumbVid.hidden = false;
             if (thumbVid.src !== currentMedia.url) thumbVid.src = currentMedia.url;
         } else {
             thumbVid.hidden = true;
             thumbImg.hidden = false;
-            thumbImg.src = currentMedia.url || "../../assets/figma/skincare-editorial.png";
+            thumbImg.src = currentMedia.url;
         }
+        const rm = document.getElementById("btnRemoveMedia");
+        if (rm) rm.hidden = !has;
         updateLivePreview();
         updateChecklist();
+    }
+
+    // Đọc tệp -> dataURL; ảnh được thu nhỏ (tối đa 1280px) để lưu được trong bộ nhớ trình duyệt
+    function readAsDataUrl(file) {
+        return new Promise(function (resolve, reject) {
+            const r = new FileReader();
+            r.onload = function () { resolve(r.result); };
+            r.onerror = function () { reject(new Error("Không đọc được tệp.")); };
+            r.readAsDataURL(file);
+        });
+    }
+
+    function compressImage(file) {
+        return readAsDataUrl(file).then(function (src) {
+            return new Promise(function (resolve, reject) {
+                const img = new Image();
+                img.onerror = function () { reject(new Error("Tệp không phải ảnh hợp lệ.")); };
+                img.onload = function () {
+                    const MAX = 1280;
+                    const k = Math.min(1, MAX / Math.max(img.width, img.height));
+                    const c = document.createElement("canvas");
+                    c.width = Math.round(img.width * k);
+                    c.height = Math.round(img.height * k);
+                    const ctx = c.getContext("2d");
+                    ctx.fillStyle = "#fff";
+                    ctx.fillRect(0, 0, c.width, c.height);
+                    ctx.drawImage(img, 0, 0, c.width, c.height);
+                    resolve({ url: c.toDataURL("image/jpeg", 0.85), w: img.width, h: img.height });
+                };
+                img.src = src;
+            });
+        });
     }
 
     /* ---------- KIỂM TRA ĐỊNH DẠNG & DUNG LƯỢNG MEDIA (JPG/PNG/WEBP/MP4/MOV) ---------- */
@@ -419,14 +220,36 @@
             return;
         }
 
-        const objectUrl = URL.createObjectURL(file);
         const sizeMb = (file.size / (1024 * 1024)).toFixed(2).replace(".", ",");
+        let url = "";
+        let dims = "";
+        let persistable = true;
+        try {
+            if (isImage) {
+                const out = await compressImage(file);
+                url = out.url;
+                dims = " · " + out.w + " × " + out.h + " px";
+            } else {
+                url = URL.createObjectURL(file);
+                persistable = false;
+                if (file.size <= 2.5 * 1024 * 1024) {      // video nhỏ mới lưu được vào trình duyệt
+                    url = await readAsDataUrl(file);
+                    persistable = true;
+                }
+            }
+        } catch (e) {
+            errEl.textContent = e.message;
+            errEl.classList.add("is-visible");
+            UI.toast("error", "Không thể đọc tệp", e.message);
+            return;
+        }
         currentMedia = {
             name: fileName,
-            meta: sizeMb + " MB · " + (isVideo ? "Video ngắn (MP4/MOV)" : "Hình ảnh (JPG/PNG/WEBP)"),
+            meta: sizeMb + " MB" + dims + " · " + (isVideo ? "Video ngắn (MP4/MOV)" : "Hình ảnh (JPG/PNG/WEBP)"),
             type: isVideo ? "VIDEO" : "IMAGE",
-            url: objectUrl,
-            sizeBytes: file.size
+            url: url,
+            sizeBytes: file.size,
+            persistable: persistable
         };
 
         renderMediaAttachment();
@@ -464,7 +287,7 @@
             localStorage.setItem(AUTOSAVE_DRAFT_KEY, JSON.stringify({
                 savedAt: new Date().toISOString(),
                 mode: isEditMode ? "edit" : "create",
-                data: payload
+                data: Object.assign({}, payload, { media: payload.media ? { name: payload.media.name, meta: payload.media.meta, type: payload.media.type } : null })
             }));
         } catch (e) {
             /* ignore */
@@ -479,9 +302,9 @@
                     caption: payload.headline + "\n\n" + payload.caption,
                     hashtags: payload.hashtags,
                     platforms: payload.platforms,
-                    media_type: currentMedia.type,
-                    media_files: [currentMedia.serverUrl || currentMedia.url],
-                    total_media_size_bytes: currentMedia.sizeBytes
+                    media_type: (currentMedia || {}).type || "NONE",
+                    media_files: currentMedia ? [currentMedia.serverUrl || currentMedia.url] : [],
+                    total_media_size_bytes: (currentMedia || {}).sizeBytes || 0
                 })
             });
         } catch (e) {
@@ -491,7 +314,7 @@
         const timeLabel = formatTimeNow();
         document.getElementById("autoSaveText").textContent = "✓ Đã tự động lưu lúc " + timeLabel;
         if (isEditMode) {
-            const code = (DEMO_POSTS[currentPostStatus] && DEMO_POSTS[currentPostStatus].code) || "BL-0127";
+            const code = currentPostId ? ("BL-0" + currentPostId) : "Bài mới";
             document.getElementById("editorSubTitle").textContent =
                 code + " · " + (payload.title || "Bài viết") + " · Đã lưu lúc " + timeLabel;
         }
@@ -534,31 +357,31 @@
     }
 
     /* ---------- ÁP DỤNG TRẠNG THÁI BÀI VIẾT TRONG FR-05 (DRAFT / APPROVED / PUBLISHED / REVISION) ---------- */
-    function applyPostState(stateKey) {
-        const post = DEMO_POSTS[stateKey] || DEMO_POSTS.DRAFT;
+    function applyPostObject(post) {
         currentPostStatus = post.status;
         currentPostId = post.post_id;
 
         document.getElementById("editorCrumb").textContent = "Blossom / Bài viết / " + post.code + " / Chỉnh sửa";
         document.getElementById("editorSubTitle").textContent = post.code + " · " + post.title + " · Đã lưu lúc " + formatTimeNow();
         document.getElementById("postTitle").value = post.title;
-        document.getElementById("postCategory").value = post.category;
-        document.getElementById("postCampaign").value = post.campaign;
+        setSelectValue("postCategory", post.category);
+        setSelectValue("postCampaign", post.campaign);
         document.getElementById("postHeadline").value = post.headline;
         document.getElementById("postCaption").value = post.caption;
         document.getElementById("postHashtags").value = post.hashtags;
         document.getElementById("plannedPublishInput").value = post.planned_time;
-        document.getElementById("approverSelect").value = post.approver;
+        setSelectValue("approverSelect", post.approver);
+        originalPlanned = String(post.planned_time || "").replace(/\s+/g, " ").trim();
 
         setSelectedPlatforms(post.platforms);
 
-        currentMedia = {
+        currentMedia = post.media_url ? {
             name: post.media_name,
             meta: post.media_meta,
-            type: post.media_type,
+            type: post.media_type || "IMAGE",
             url: post.media_url,
-            sizeBytes: 1800000
-        };
+            sizeBytes: post.media_size || 0
+        } : (post.media_name ? { name: post.media_name, meta: post.media_meta, type: post.media_type || "IMAGE", url: "", sizeBytes: 0 } : null);
         renderMediaAttachment();
 
         // Status badge
@@ -601,7 +424,8 @@
         } else if (post.status === "REVISION_REQUESTED") {
             bannerEl.hidden = false;
             bannerEl.className = "fr05-banner fr05-banner--revision";
-            bannerEl.innerHTML = '<div><b>💬 Yêu cầu chỉnh sửa từ Marketing Manager:</b> ' + UI.esc(post.manager_comment || "") + '</div>';
+            const comment = post.manager_comment || post.revision_note || post.revision_notes || post.rejection_reason || "Bổ sung thêm hình ảnh cận cảnh sản phẩm, tinh chỉnh hashtag thương hiệu #BlossomBeauty và kiểm tra lại giá niêm yết trong caption.";
+            bannerEl.innerHTML = '<div><b>💬 Yêu cầu chỉnh sửa từ Marketing Manager:</b> ' + UI.esc(comment) + '</div>';
         } else {
             bannerEl.hidden = true;
             bannerEl.innerHTML = "";
@@ -624,6 +448,142 @@
 
         updateWordAndCharStats();
         updateLivePreview();
+    }
+
+    // Gán giá trị cho <select>; nếu giá trị chưa có trong danh sách thì thêm vào
+    function setSelectValue(id, value) {
+        const el = document.getElementById(id);
+        if (!el || !value) return;
+        if (!Array.from(el.options).some(function (o) { return o.value === value; })) {
+            const opt = document.createElement("option");
+            opt.value = value; opt.textContent = value;
+            el.appendChild(opt);
+        }
+        el.value = value;
+    }
+
+    const STATUS_LABEL_FULL = {
+        DRAFT: "Bản nháp", PENDING_APPROVAL: "Chờ phê duyệt (Pending Approval)", APPROVED: "Đã phê duyệt",
+        PUBLISHED: "Đã xuất bản", REVISION_REQUESTED: "Cần chỉnh sửa", REJECTED: "Bị từ chối", SCHEDULED: "Đã lên lịch"
+    };
+
+    // Nạp bài viết THẬT (dữ liệu người dùng đã lưu) vào form
+    function loadRealPost(p) {
+        const media = Scope.getPostMedia(p.post_id);
+        const planned = p.planned_date ? (Scope.viDate(p.planned_date) + " " + (p.planned_time || "09:00")) : "";
+        applyPostObject({
+            post_id: p.post_id, code: p.code || ("BL-0" + p.post_id), title: p.title || "",
+            category: p.category, campaign: p.campaign, headline: p.headline || "", caption: p.caption || "",
+            hashtags: p.hashtags || "", platforms: p.platforms && p.platforms.length ? p.platforms : ["Facebook"],
+            planned_time: planned, approver: p.approver,
+            status: p.status, status_label: STATUS_LABEL_FULL[p.status] || p.status,
+            media_name: media && media.name, media_meta: media && media.meta, media_type: media && media.type,
+            media_url: media && media.url, media_size: media && media.sizeBytes,
+            history: p.history || [], manager_comment: p.revision_reason || p.manager_comment || "",
+            published_url: p.published_url || ""
+        });
+        const author = document.getElementById("postAuthor");
+        if (author) author.value = p.author || "";
+    }
+
+    // Form tạo mới luôn trống: không có nội dung, ảnh hay giờ đăng có sẵn
+    function resetFormForCreate() {
+        ["postTitle", "postHeadline", "postCaption", "postHashtags", "plannedPublishInput"].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) el.value = "";
+        });
+        const u = (window.Auth && Auth.getUser()) || null;
+        const author = document.getElementById("postAuthor");
+        if (author) author.value = u ? u.fullName : "";
+        currentMedia = null;
+        originalPlanned = "";
+        renderMediaAttachment();
+        updateWordAndCharStats();
+    }
+
+    /* ---------- Ngày giờ đăng dự kiến: DD/MM/YYYY HH:mm, không được ở quá khứ ---------- */
+    function parsePlanned(str) {
+        const m = String(str || "").trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+        if (!m) return null;
+        const d = +m[1], mo = +m[2], y = +m[3], h = +m[4], mi = +m[5];
+        const dt = new Date(y, mo - 1, d, h, mi, 0);
+        if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d || h > 23 || mi > 59) return null;
+        const pad = function (n) { return String(n).padStart(2, "0"); };
+        return { date: y + "-" + pad(mo) + "-" + pad(d), time: pad(h) + ":" + pad(mi), dt: dt, text: pad(d) + "/" + pad(mo) + "/" + y + " " + pad(h) + ":" + pad(mi) };
+    }
+
+    function showPlannedError(msg) {
+        const input = document.getElementById("plannedPublishInput");
+        const wrap = input.closest(".fr04-date-input-wrap");
+        let err = document.getElementById("errPlanned");
+        if (!err) {
+            err = document.createElement("p");
+            err.id = "errPlanned";
+            err.className = "fr04-error";
+            err.style.cssText = "color:#d6336c;font-size:12.5px;margin:6px 0 0;";
+            wrap.parentElement.appendChild(err);
+        }
+        err.textContent = msg || "";
+        err.hidden = !msg;
+    }
+
+    function setupDatePicker() {
+        const input = document.getElementById("plannedPublishInput");
+        const wrap = input.closest(".fr04-date-input-wrap");
+        const icon = wrap.querySelector("img");
+        const pick = document.createElement("input");
+        pick.type = "datetime-local";
+        pick.setAttribute("aria-hidden", "true");
+        pick.tabIndex = -1;
+        pick.style.cssText = "position:absolute;opacity:0;pointer-events:none;width:1px;height:1px;";
+        wrap.style.position = "relative";
+        wrap.appendChild(pick);
+
+        const toLocalIso = function (d) {
+            const pad = function (n) { return String(n).padStart(2, "0"); };
+            return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+        };
+        const open = function () {
+            if (input.disabled) return;
+            pick.min = toLocalIso(new Date());           // không cho chọn quá khứ
+            const cur = parsePlanned(input.value);
+            pick.value = cur ? toLocalIso(cur.dt) : "";
+            if (pick.showPicker) { try { pick.showPicker(); } catch (e) { pick.focus(); } } else { pick.focus(); }
+        };
+        if (icon) { icon.style.cursor = "pointer"; icon.addEventListener("click", open); }
+        pick.addEventListener("change", function () {
+            if (!pick.value) return;
+            const d = new Date(pick.value);
+            const pad = function (n) { return String(n).padStart(2, "0"); };
+            input.value = pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear() + " " + pad(d.getHours()) + ":" + pad(d.getMinutes());
+            showPlannedError("");
+            updateChecklist(); updateLivePreview();
+        });
+        input.addEventListener("blur", function () {
+            const v = parsePlanned(input.value);
+            if (v) input.value = v.text;                 // chuẩn hóa khoảng trắng
+        });
+        input.addEventListener("input", function () { showPlannedError(""); });
+    }
+
+    function validatePlannedTime() {
+        const raw = document.getElementById("plannedPublishInput").value;
+        const v = parsePlanned(raw);
+        if (!v) {
+            const msg = "Vui lòng nhập ngày giờ đăng đúng định dạng DD/MM/YYYY HH:mm (hoặc bấm biểu tượng lịch để chọn).";
+            showPlannedError(msg);
+            UI.toast("error", "Ngày đăng chưa hợp lệ", msg);
+            return null;
+        }
+        const unchanged = originalPlanned && originalPlanned === v.text;
+        if (!unchanged && v.dt.getTime() <= Date.now()) {
+            const msg = "Thời gian đăng dự kiến phải lớn hơn thời điểm hiện tại.";
+            showPlannedError(msg);
+            UI.toast("error", "Thời gian ở quá khứ", msg);
+            return null;
+        }
+        showPlannedError("");
+        return v;
     }
 
     function validateRequiredFields() {
@@ -658,6 +618,10 @@
         }
 
         if (!validateRequiredFields()) return;
+        const plannedParsed = validatePlannedTime();
+        if (!plannedParsed) return;
+        let historyText = "";
+        const userNow = (window.Auth && Auth.getUser()) || { fullName: "Nhân viên" };
 
         // Nếu đang sửa bài đã APPROVED -> Hiển thị hộp thoại cảnh báo xác nhận chuyển về PENDING_APPROVAL (FR-05 Step 4a)
         if (currentPostStatus === "APPROVED") {
@@ -673,96 +637,78 @@
             const badgeEl = document.getElementById("postStatusBadge");
             badgeEl.textContent = "Chờ phê duyệt (Pending Approval)";
             badgeEl.className = "fr04-status-pill is-pending";
-            prependHistoryEntry("Chỉnh sửa bài Approved → Tự động chuyển về Pending Approval");
+            historyText = "Chỉnh sửa bài Approved → Tự động chuyển về Pending Approval"; prependHistoryEntry(historyText);
         } else if (targetAction === "SUBMIT") {
             currentPostStatus = "PENDING_APPROVAL";
             const badgeEl = document.getElementById("postStatusBadge");
             badgeEl.textContent = "Chờ phê duyệt (Pending Approval)";
             badgeEl.className = "fr04-status-pill is-pending";
-            prependHistoryEntry("Trần Ngọc Mai gửi duyệt bài viết");
+            historyText = userNow.fullName + " gửi duyệt bài viết"; prependHistoryEntry(historyText);
         } else {
-            prependHistoryEntry("Đã lưu thay đổi bản nháp");
+            historyText = "Đã lưu thay đổi bản nháp"; prependHistoryEntry(historyText);
         }
 
         const payload = collectFormPayload();
 
-        // Đồng bộ trực tiếp với danh sách bài viết FR-06/07 (blossom_posts_fr06_07_v1)
-        try {
-            const list = getSharedPostList();
-            const platLabel = payload.platforms.length >= 2
-                ? payload.platforms.slice(0, 2).join(" & ")
-                : (payload.platforms[0] || "Facebook");
-            const dateMatch = (payload.planned_time || "").match(/(\d{2})\/(\d{2})\/(\d{4})/);
-            const plannedLabel = dateMatch ? (dateMatch[1] + "/" + dateMatch[2] + "/" + dateMatch[3]) : "15/11/2026";
-            const plannedIso = dateMatch ? (dateMatch[3] + "-" + dateMatch[2] + "-" + dateMatch[1]) : "2026-11-15";
-            const todayLabel = new Date().toLocaleDateString("vi-VN");
-            const userObj = (window.Auth && typeof window.Auth.getUser === "function") ? window.Auth.getUser() : null;
-            const authorName = (userObj && userObj.fullName) ? userObj.fullName : "Trần Ngọc Mai";
+        // Lưu vào danh sách bài viết dùng chung (Tổng quan, Danh sách, Lịch đều đọc từ đây)
+        const platLabel = payload.platforms.length >= 2
+            ? payload.platforms.slice(0, 2).join(" & ")
+            : (payload.platforms[0] || "Facebook");
+        const authorName = userNow.fullName;
+        const ownerUsername = userNow.username;
+        const nowIso = new Date().toISOString();
 
-            const targetStatus = isEditMode
-                ? currentPostStatus
-                : (targetAction === "SUBMIT" ? "PENDING_APPROVAL" : "DRAFT");
-
-            if (isEditMode && currentPostId) {
-                const idx = list.findIndex(function (item) { return Number(item.post_id) === Number(currentPostId); });
-                if (idx !== -1) {
-                    list[idx].title = payload.title;
-                    list[idx].platforms = payload.platforms;
-                    list[idx].platform_label = platLabel;
-                    list[idx].status = targetStatus;
-                    list[idx].planned_date = plannedIso;
-                    list[idx].planned_label = plannedLabel;
-                    list[idx].updated_label = todayLabel;
-                    list[idx].caption = payload.caption;
-                    if (currentMedia && (currentMedia.url || currentMedia.serverUrl)) {
-                        list[idx].mediaUrl = currentMedia.url || currentMedia.serverUrl;
-                    }
-                } else {
-                    list.unshift({
-                        post_id: currentPostId,
-                        code: "BL-0" + currentPostId,
-                        title: payload.title,
-                        platforms: payload.platforms,
-                        platform_label: platLabel,
-                        author: authorName,
-                        status: targetStatus,
-                        planned_date: plannedIso,
-                        planned_label: plannedLabel,
-                        updated_label: todayLabel,
-                        caption: payload.caption,
-                        mediaUrl: currentMedia ? (currentMedia.url || currentMedia.serverUrl) : null,
-                        deleted_at: null
-                    });
-                }
-            } else {
-                const maxId = list.reduce(function (m, it) { return Math.max(m, Number(it.post_id) || 120); }, 128);
-                const newId = maxId + 1;
-                currentPostId = newId;
-                list.unshift({
-                    post_id: newId,
-                    code: "BL-0" + newId,
-                    title: payload.title,
-                    platforms: payload.platforms,
-                    platform_label: platLabel,
-                    author: authorName,
-                    status: targetStatus,
-                    planned_date: plannedIso,
-                    planned_label: plannedLabel,
-                    updated_label: todayLabel,
-                    caption: payload.caption,
-                    mediaUrl: currentMedia ? (currentMedia.url || currentMedia.serverUrl) : null,
-                    deleted_at: null
-                });
-            }
-            localStorage.setItem(POSTS_STORAGE_KEY, JSON.stringify(list));
-            window.dispatchEvent(new Event("blossom_posts_updated"));
-        } catch (e) {
-            /* ignore */
+        const list = getSharedPostList();
+        let post = currentPostId ? list.find(function (it) { return Number(it.post_id) === Number(currentPostId); }) : null;
+        const isNew = !post;
+        if (isNew) {
+            const maxId = list.reduce(function (m, it) { return Math.max(m, Number(it.post_id) || 0); }, 132);
+            post = { post_id: maxId + 1, code: "BL-0" + (maxId + 1), author: authorName, owner_username: ownerUsername, deleted_at: null, history: [] };
+            list.unshift(post);
+            currentPostId = post.post_id;
         }
+
+        post.title = payload.title;
+        post.category = payload.category;
+        post.campaign = payload.campaign || post.campaign;
+        post.headline = payload.headline;
+        post.caption = payload.caption;
+        post.hashtags = payload.hashtags;
+        post.platforms = payload.platforms;
+        post.platform_label = platLabel;
+        post.approver = payload.approver;
+        post.status = currentPostStatus;
+        post.planned_date = plannedParsed.date;
+        post.planned_time = plannedParsed.time;
+        post.planned_label = Scope.viDate(plannedParsed.date) + " " + plannedParsed.time;
+        post.updated_label = new Date().toLocaleDateString("vi-VN");
+        post.updated_at = nowIso;
+        post.history = post.history || [];
+        post.history.unshift(formatTimeNow() + " · " + (historyText || (isNew ? "Tạo bài viết mới" : "Cập nhật bài viết")));
+        if (isNew && !historyText) post.history[0] = formatTimeNow() + " · Tạo bài viết mới";
+
+        // Ảnh/video: lưu cùng bài để mở lại vẫn thấy đủ
+        let mediaSaved = true;
+        if (!currentMedia) {
+            Scope.savePostMedia(post.post_id, null);
+        } else {
+            mediaSaved = Scope.savePostMedia(post.post_id, {
+                name: currentMedia.name, meta: currentMedia.meta, type: currentMedia.type,
+                url: currentMedia.persistable === false ? "" : currentMedia.url, sizeBytes: currentMedia.sizeBytes
+            });
+            if (currentMedia.persistable === false) {
+                UI.toast("warning", "Video chưa lưu được bản xem trước", "Video lớn hơn 2,5 MB chỉ lưu tên tệp (cần backend để lưu file thật).");
+            }
+        }
+        if (!mediaSaved) UI.toast("warning", "Bộ nhớ trình duyệt đầy", "Không lưu được ảnh đính kèm. Hãy chọn ảnh nhỏ hơn.");
+
+        Scope.savePosts(list);
+        Scope.upsertEventForPost(post);   // lịch đăng + Tổng quan cập nhật ngay theo bài vừa lưu
+        originalPlanned = plannedParsed.text;
 
         // Gọi API Backend nếu đang chạy
         try {
-            if (isEditMode && currentPostId) {
+            if (!isNew) {
                 await BlossomAPI.request("/posts/" + currentPostId, {
                     method: "PUT",
                     body: JSON.stringify({
@@ -770,9 +716,9 @@
                         caption: payload.headline + "\n\n" + payload.caption,
                         hashtags: payload.hashtags,
                         platforms: payload.platforms,
-                        media_type: currentMedia.type,
-                        media_files: [currentMedia.serverUrl || currentMedia.url],
-                        total_media_size_bytes: currentMedia.sizeBytes
+                        media_type: (currentMedia || {}).type || "NONE",
+                        media_files: currentMedia ? [currentMedia.serverUrl || currentMedia.url] : [],
+                        total_media_size_bytes: (currentMedia || {}).sizeBytes || 0
                     })
                 });
             } else {
@@ -783,9 +729,9 @@
                         caption: payload.headline + "\n\n" + payload.caption,
                         hashtags: payload.hashtags,
                         platforms: payload.platforms,
-                        media_type: currentMedia.type,
-                        media_files: [currentMedia.serverUrl || currentMedia.url],
-                        total_media_size_bytes: currentMedia.sizeBytes
+                        media_type: (currentMedia || {}).type || "NONE",
+                        media_files: currentMedia ? [currentMedia.serverUrl || currentMedia.url] : [],
+                        total_media_size_bytes: (currentMedia || {}).sizeBytes || 0
                     })
                 });
             }
@@ -793,18 +739,49 @@
             /* offline fallback */
         }
 
+        const sub = document.getElementById("editorSubTitle");
+        if (sub) sub.textContent = post.code + " · " + post.title + " · Đã lưu lúc " + formatTimeNow();
         await performAutoSave(false);
 
         if (currentPostStatus === "PENDING_APPROVAL") {
             if (window.NotificationsStore) {
-                window.NotificationsStore.addNotification({
-                    type: "submitted",
-                    postId: currentPostId,
-                    title: "Nhân viên vừa gửi bài viết mới cần duyệt 📋",
-                    message: "Nhân viên " + authorName + " vừa gửi duyệt bài '" + payload.title + "'.",
-                    author: authorName,
-                    recipientRole: "MANAGER"
-                });
+                if (userNow.role === "MANAGER") {
+                    // Quản lý tạo/sửa bài viết thì KHÔNG gửi thông báo cho chính mình!
+                    // Nếu giao bài cho nhân viên khác thì gửi thông báo cho nhân viên đó
+                    if (post.owner_username && post.owner_username !== userNow.username) {
+                        window.NotificationsStore.addNotification({
+                            type: "assigned",
+                            postId: currentPostId,
+                            title: "Bạn được giao bài viết mới",
+                            message: "Quản lý đã giao cho bạn phụ trách bài viết '" + payload.title + "'.",
+                            author: userNow.fullName,
+                            recipientRole: "STAFF",
+                            recipientUser: post.owner_username
+                        });
+                    }
+                } else {
+                    // Nhân viên gửi duyệt bài viết
+                    const wasRevision = (post.status === "REVISION_REQUESTED" || post.revision_note || post.revision_notes || post.manager_comment);
+                    if (wasRevision) {
+                        window.NotificationsStore.addNotification({
+                            type: "submitted",
+                            postId: currentPostId,
+                            title: "Nhân viên đã gửi lại bài viết",
+                            message: "Nhân viên " + authorName + " đã chỉnh sửa và gửi duyệt lại bài '" + payload.title + "'.",
+                            author: authorName,
+                            recipientRole: "MANAGER"
+                        });
+                    } else {
+                        window.NotificationsStore.addNotification({
+                            type: "submitted",
+                            postId: currentPostId,
+                            title: "Có bài viết mới chờ duyệt",
+                            message: "Nhân viên " + authorName + " vừa gửi bài viết '" + payload.title + "' lên phê duyệt.",
+                            author: authorName,
+                            recipientRole: "MANAGER"
+                        });
+                    }
+                }
             }
             UI.toast("success", "Đã gửi duyệt bài viết", "Bài viết '" + payload.title + "' đã được gửi tới Quản lý phê duyệt.");
             setTimeout(function () {
@@ -863,13 +840,7 @@
 
         document.getElementById("btnRemoveMedia").addEventListener("click", function () {
             if (currentPostStatus === "PUBLISHED") return;
-            currentMedia = {
-                name: "Chưa có tệp đính kèm",
-                meta: "0 MB · Vui lòng chọn tệp JPG, PNG, WEBP, MP4 hoặc MOV",
-                type: "IMAGE",
-                url: "",
-                sizeBytes: 0
-            };
+            currentMedia = null;
             renderMediaAttachment();
             UI.toast("warning", "Đã xóa tệp đính kèm", "Hãy tải lên hình ảnh hoặc video trước khi gửi duyệt.");
         });
@@ -914,9 +885,9 @@
         const cancelBtn = document.getElementById("btnCancelEdit");
         if (cancelBtn) {
             cancelBtn.addEventListener("click", function () {
-                const stateSel = document.getElementById("demoPostStateSelect");
-                applyPostState(stateSel ? stateSel.value : "DRAFT");
-                UI.toast("info", "Đã khôi phục dữ liệu", "Mọi thay đổi chưa lưu đã được hoàn tác.");
+                if (isEditMode) { location.reload(); return; }
+                resetFormForCreate();
+                UI.toast("info", "Đã xóa nội dung", "Biểu mẫu đã được làm trống.");
             });
         }
 
@@ -925,58 +896,52 @@
             backLink.href = getPostListHref();
         }
 
-        const stateSelect = document.getElementById("demoPostStateSelect");
-        if (stateSelect) {
-            // Hỗ trợ truyền ?id=...&state=... từ trang Danh sách bài viết (FR-07)
-            const params = new URLSearchParams(location.search);
-            const urlId = Number(params.get("id") || 0);
-            const urlState = (params.get("state") || "").toUpperCase();
-            if (urlState && DEMO_POSTS[urlState]) {
-                stateSelect.value = urlState;
-            }
-            applyPostState(stateSelect.value);
+        const urlId = Number(new URLSearchParams(location.search).get("id") || 0);
+        setupDatePicker();
 
-            // Nếu đi từ dòng bài viết cụ thể trong FR-07 (?id=...), nạp đúng bài viết đó vào form
-            if (urlId) {
-                const sharedList = getSharedPostList();
-                const found = sharedList.find(function (p) { return Number(p.post_id) === urlId; });
-                if (found) {
-                    currentPostId = found.post_id;
-                    currentPostStatus = found.status;
-                    document.getElementById("editorCrumb").textContent = "Blossom / Bài viết / " + found.code + " / Chỉnh sửa";
-                    document.getElementById("editorSubTitle").textContent = found.code + " · " + found.title + " · Đã lưu lúc " + formatTimeNow();
-                    document.getElementById("postTitle").value = found.title;
-                    if (found.caption) document.getElementById("postCaption").value = found.caption;
-                    if (Array.isArray(found.platforms)) setSelectedPlatforms(found.platforms);
-                    if (found.planned_label) {
-                        document.getElementById("plannedPublishInput").value = found.planned_label + "         08:00";
-                    }
-                    const badgeEl = document.getElementById("postStatusBadge");
-                    if (badgeEl) {
-                        const statusLabelMap = {
-                            DRAFT: "Bản nháp",
-                            PENDING_APPROVAL: "Chờ duyệt",
-                            APPROVED: "Đã phê duyệt (Approved)",
-                            PUBLISHED: "Đã xuất bản (Published)",
-                            REVISION_REQUESTED: "Cần chỉnh sửa",
-                            SCHEDULED: "Đã lên lịch",
-                            REJECTED: "Bị từ chối"
-                        };
-                        badgeEl.textContent = statusLabelMap[found.status] || found.status;
-                        badgeEl.className = "fr04-status-pill";
-                        if (found.status === "APPROVED" || found.status === "SCHEDULED") badgeEl.classList.add("is-approved");
-                        else if (found.status === "PUBLISHED") badgeEl.classList.add("is-published");
-                        else if (found.status === "PENDING_APPROVAL") badgeEl.classList.add("is-pending");
-                        else if (found.status === "REVISION_REQUESTED" || found.status === "REJECTED") badgeEl.classList.add("is-revision");
-                    }
-                    updateWordAndCharStats();
-                    updateLivePreview();
-                }
+        if (isEditMode) {
+            // Phân quyền + nạp đúng bài viết đã lưu (không còn dữ liệu mẫu)
+            const target = urlId ? Scope.getPostById(urlId) : null;
+            const curUser = (global.Auth && typeof Auth.getUser === "function") ? Auth.getUser() : null;
+            const isMgr = curUser && curUser.role === "MANAGER";
+            const isOwner = target && curUser && Scope.isOwner(target, curUser);
+
+            if (!target) {
+                Auth.setFlash({
+                    type: "error",
+                    title: "Không tìm thấy bài viết",
+                    message: "Bài viết không tồn tại hoặc đã bị xóa."
+                });
+                location.replace(getPostListHref());
+                return;
             }
 
-            stateSelect.addEventListener("change", function (e) {
-                applyPostState(e.target.value);
-            });
+            // Quản lý xem chi tiết không được chỉnh sửa bài viết của nhân viên
+            if (isMgr && !isOwner) {
+                Auth.setFlash({
+                    type: "error",
+                    title: "Không có quyền chỉnh sửa",
+                    message: "Quản lý chỉ có quyền xem chi tiết và kiểm duyệt bài viết, không được chỉnh sửa bài viết của nhân viên."
+                });
+                location.replace(isMgr ? "../admin/approvals.html" : getPostListHref());
+                return;
+            }
+
+            // Nhân viên chỉ được sửa bài do chính mình phụ trách
+            if (!isMgr && !isOwner) {
+                Auth.setFlash({
+                    type: "error",
+                    title: "Không có quyền truy cập",
+                    message: "Bạn chỉ được chỉnh sửa bài viết do chính mình phụ trách."
+                });
+                location.replace(getPostListHref());
+                return;
+            }
+
+            loadRealPost(target);
+            currentPostId = target.post_id;
+        } else {
+            resetFormForCreate();
         }
     }
 

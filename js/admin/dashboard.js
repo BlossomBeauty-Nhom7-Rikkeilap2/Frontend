@@ -1,703 +1,296 @@
 /* =========================================================
-   MANAGER – Trang Tiến độ bài viết (logic riêng của trang)
+   MANAGER – Tổng quan: Tiến độ bài viết + Theo dõi nhân viên
    Sidebar / Header / dropdown / đăng xuất: js/layout.js
    Component: js/components.js (UI.*)
-   Đồng bộ dữ liệu thời gian thực với blossom_posts_fr06_07_v1
+   Dữ liệu: js/data-scope.js (Scope) – cùng nguồn với trang Bài viết,
+   nên mọi con số ở đây là số liệu THẬT từ danh sách bài viết.
+
+   Quy ước nhóm trạng thái (Scope.GROUPS):
+     Đã đăng         = PUBLISHED
+     Chờ duyệt       = PENDING_APPROVAL
+     Cần chỉnh sửa   = REVISION_REQUESTED
+     Đang xử lý      = DRAFT, REJECTED, APPROVED, SCHEDULED
+   => 4 nhóm cộng lại luôn bằng tổng số bài viết.
+   Bấm vào thẻ thống kê => mở Danh sách bài viết với đúng bộ lọc tương ứng.
    ========================================================= */
 
 (function () {
     "use strict";
 
-    const STORAGE_KEY = "blossom_posts_fr06_07_v1";
+    const G = Scope.GROUPS;
+    const DONUT_COLORS = { PUBLISHED: "#6cc08b", IN_PROGRESS: "#f6c56d", PENDING: "#f48fb1", REVISION: "#a897d8" };
 
-    const DEFAULT_POSTS = [
-        {
-            post_id: 129,
-            code: "BL-0129",
-            title: "Kem dưỡng trắng da Blossom",
-            platforms: ["Instagram"],
-            platform_label: "Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "PENDING_APPROVAL",
-            planned_date: "2026-11-05",
-            planned_label: "05/11/2026",
-            updated_label: "05/11/2026",
-            caption: "Kem dưỡng trắng da Blossom chứa chiết xuất hoa anh đào giúp nâng tông nhẹ nhàng và cấp ẩm sâu.",
-            deleted_at: null
-        },
-        {
-            post_id: 128,
-            code: "BL-0128",
-            title: "5 bước dưỡng da cho buổi sáng rạng rỡ",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "PUBLISHED",
-            planned_date: "2026-11-04",
-            planned_label: "04/11/2026",
-            updated_label: "04/11/2026",
-            caption: "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng Blossom.",
-            deleted_at: null
-        },
-        {
-            post_id: 127,
-            code: "BL-0127",
-            title: "Bí quyết chăm da mùa hanh khô",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "DRAFT",
-            planned_date: "2026-11-07",
-            planned_label: "07/11/2026",
-            updated_label: "07/11/2026",
-            caption: "Cấp ẩm chuyên sâu bảo vệ hàng rào tự nhiên của làn da trong tiết trời thu đông.",
-            deleted_at: null
-        },
-        {
-            post_id: 126,
-            code: "BL-0126",
-            title: "Một chút yêu thương cho làn da",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "REVISION_REQUESTED",
-            planned_date: "2026-11-06",
-            planned_label: "06/11/2026",
-            updated_label: "06/11/2026",
-            caption: "Dành 10 phút mỗi tối để thư giãn và phục hồi làn da với mặt nạ hoa hồng.",
-            deleted_at: null
-        },
-        {
-            post_id: 125,
-            code: "BL-0125",
-            title: "Chọn serum phù hợp với làn da của bạn",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Phạm Thùy Dương",
-            status: "DRAFT",
-            planned_date: "2026-11-07",
-            planned_label: "07/11/2026",
-            updated_label: "04/11/2026",
-            caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png",
-            deleted_at: null
-        },
-        {
-            post_id: 124,
-            code: "BL-0124",
-            title: "Chống nắng mỗi ngày, nâng niu làn da",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Phạm Thùy Dương",
-            status: "SCHEDULED",
-            planned_date: "2026-11-08",
-            planned_label: "08/11/2026",
-            updated_label: "06/11/2026",
-            caption: "Kem chống nắng thuần chay mỏng nhẹ, không để lại vệt trắng.",
-            mediaUrl: "../../assets/poster.png",
-            deleted_at: null
-        },
-        {
-            post_id: 123,
-            code: "BL-0123",
-            title: "Routine tối giản cho ngày bận rộn",
-            platforms: ["Facebook", "Instagram", "Threads"],
-            platform_label: "Facebook & Instagram",
-            author: "Trần Ngọc Mai",
-            status: "REJECTED",
-            planned_date: "2026-11-03",
-            planned_label: "03/11/2026",
-            updated_label: "03/11/2026",
-            caption: "3 bước gọn nhẹ cho cô nàng công sở bận rộn.",
-            deleted_at: null
-        },
-        {
-            post_id: 122,
-            code: "BL-0122",
-            title: "Review Son Dưỡng Thuần Chay Hương Đào Blossom",
-            platforms: ["Threads"],
-            platform_label: "Threads",
-            author: "Trần Ngọc Mai",
-            status: "DRAFT",
-            planned_date: "2026-11-10",
-            planned_label: "10/11/2026",
-            updated_label: "09/11/2026",
-            caption: "Video ngắn unbox và swatch bảng màu son dưỡng thu đông.",
-            deleted_at: null
-        },
-        {
-            post_id: 121,
-            code: "BL-0121",
-            title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
-            platforms: ["Instagram"],
-            platform_label: "Instagram",
-            author: "Nhân viên Marketing",
-            status: "APPROVED",
-            planned_date: "2026-11-12",
-            planned_label: "12/11/2026",
-            updated_label: "10/11/2026",
-            caption: "Làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png",
-            deleted_at: null
-        },
-        {
-            post_id: 120,
-            code: "BL-0120",
-            title: "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ",
-            platforms: ["Facebook"],
-            platform_label: "Facebook",
-            author: "Nhân viên Marketing",
-            status: "PUBLISHED",
-            planned_date: "2026-11-01",
-            planned_label: "01/11/2026",
-            updated_label: "01/11/2026",
-            caption: "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11.",
-            mediaUrl: "../../assets/poster.png",
-            deleted_at: null
-        }
-    ];
-
-    function loadAllPosts() {
-        try {
-            const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
-            if (Array.isArray(raw) && raw.length) return raw;
-        } catch (e) {
-            /* ignore */
-        }
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(DEFAULT_POSTS));
-        } catch (e) {}
-        return DEFAULT_POSTS.slice();
-    }
-
-    let allPosts = loadAllPosts();
-    let currentAuthorFilter = "ALL";
-    let currentCampaignFilter = "ALL";
-    let currentTimePeriodFilter = "ALL";
-    let currentStatusFilter = "ALL";
+    let allPosts = [];
     let currentTab = "board"; // "board" | "members"
+    const filters = { author: "ALL", campaign: "ALL", range: "ALL" };
 
-    const STATUS_MAP = {
-        PUBLISHED:          { label: "Đã xuất bản",    cls: "st-published" },
-        PENDING_APPROVAL:   { label: "Chờ duyệt",      cls: "st-pending"   },
-        REVISION_REQUESTED: { label: "Cần chỉnh sửa",  cls: "st-revision"  },
-        DRAFT:              { label: "Bản nháp",       cls: "st-draft"     },
-        SCHEDULED:          { label: "Đã lên lịch",    cls: "st-scheduled" },
-        APPROVED:           { label: "Đã phê duyệt",   cls: "st-approved"  },
-        REJECTED:           { label: "Bị từ chối",     cls: "st-rejected"  }
-    };
-
-    const STATUS_FILTER_NAMES = {
-        ALL: "Tất cả bài viết",
-        PUBLISHED: "Đã xuất bản (PUBLISHED)",
-        PROCESSING: "Đang xử lý (Nháp / Lên lịch)",
-        PENDING_APPROVAL: "Chờ duyệt (PENDING_APPROVAL)",
-        REVISION_REQUESTED: "Cần chỉnh sửa (REVISION_REQUESTED)"
-    };
-
-    function matchesStatusFilter(post, filter) {
-        if (!filter || filter === "ALL") return true;
-        if (filter === "PUBLISHED") return post.status === "PUBLISHED";
-        if (filter === "PROCESSING") return post.status === "DRAFT" || post.status === "SCHEDULED" || post.status === "APPROVED";
-        if (filter === "PENDING_APPROVAL") return post.status === "PENDING_APPROVAL";
-        if (filter === "REVISION_REQUESTED") return post.status === "REVISION_REQUESTED" || post.status === "REJECTED";
-        return post.status === filter;
+    function loadAll() {
+        allPosts = Scope.loadPosts().filter(function (p) { return !p.deleted_at; });
     }
 
-    function getActiveFilteredPosts(ignoreStatus) {
+    /* ---------- Bộ lọc: nhân viên + chiến dịch + thời gian ---------- */
+    function filteredPosts() {
         return allPosts.filter(function (p) {
-            if (p.deleted_at) return false;
-            if (currentAuthorFilter !== "ALL" && p.author !== currentAuthorFilter) {
-                return false;
-            }
-            if (currentCampaignFilter !== "ALL") {
-                const hay = (p.title + " " + (p.caption || "")).toLowerCase();
-                const needle = currentCampaignFilter.toLowerCase();
-                if (!hay.includes(needle)) return false;
-            }
-            if (currentTimePeriodFilter !== "ALL") {
-                const date = p.planned_date || "";
-                if (currentTimePeriodFilter === "2026-11" && !date.startsWith("2026-11")) return false;
-                if (currentTimePeriodFilter === "2026-10" && !date.startsWith("2026-10")) return false;
-                if (currentTimePeriodFilter === "2026-Q4") {
-                    const m = date.slice(0, 7);
-                    if (m !== "2026-10" && m !== "2026-11" && m !== "2026-12") return false;
-                }
-            }
-            if (!ignoreStatus && currentStatusFilter !== "ALL") {
-                if (!matchesStatusFilter(p, currentStatusFilter)) return false;
-            }
+            if (filters.author !== "ALL" && Scope.ownerKey(p) !== filters.author) return false;
+            if (filters.campaign !== "ALL" && p.campaign !== filters.campaign) return false;
+            if (!Scope.inRange(p, filters.range)) return false;
             return true;
         });
     }
 
-    // ==============================
-    // STATISTICS (TASK 03 & FIGMA IMAGE 5)
-    // ==============================
-    function renderStats(activePosts) {
+    // Link sang danh sách bài viết, giữ nguyên bộ lọc đang chọn ở Tổng quan
+    function listUrl(statuses, label) {
+        return Scope.postsUrl("posts.html", {
+            statuses: statuses,
+            label: label,
+            author: filters.author,
+            campaign: filters.campaign,
+            range: filters.range
+        });
+    }
+
+    /* ---------- Danh sách nhân viên ---------- */
+    function memberKeys() {
+        const keys = [];
+        Scope.STAFF.forEach(function (s) { keys.push(s.username); });
+        allPosts.forEach(function (p) {
+            const k = Scope.ownerKey(p);
+            if (keys.indexOf(k) === -1 && Scope.MANAGER_USERNAMES.indexOf(k) === -1) keys.push(k);
+        });
+        return keys;
+    }
+
+    function initials(name) {
+        const parts = String(name || "?").trim().split(/\s+/);
+        if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+        return (parts[parts.length - 2][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function avatarHtml(name) {
+        const palette = ["#f48fb1", "#a897d8", "#6cc08b", "#f6c56d", "#7fb3e6"];
+        let h = 0;
+        for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) % 997;
+        return '<span class="dash-avatar" style="background:' + palette[h % palette.length] + '">' + UI.esc(initials(name)) + '</span>';
+    }
+
+    function relTime(p) {
+        const d = Scope.activityDate(p);
+        if (!d) return "—";
+        const min = Math.round((Date.now() - d.getTime()) / 60000);
+        if (min < 1) return "Vừa xong";
+        if (min < 60) return min + " phút trước";
+        if (min < 60 * 24) return Math.round(min / 60) + " giờ trước";
+        if (min < 60 * 24 * 7) return Math.round(min / 1440) + " ngày trước";
+        return d.toLocaleDateString("vi-VN");
+    }
+
+    function pct(part, total) { return total ? Math.round((part / total) * 100) : 0; }
+
+    /* =========================================================
+       1. THẺ THỐNG KÊ (số liệu thật, bấm vào để lọc danh sách)
+       ========================================================= */
+    function renderStats(posts) {
         const statsEl = document.getElementById("stats");
         if (!statsEl) return;
+        const c = Scope.countByGroup(posts);
 
-        const totalActive = activePosts.length;
-        const publishedCount = activePosts.filter(function (p) { return p.status === "PUBLISHED"; }).length;
-        const readyCount = activePosts.filter(function (p) { return p.status === "SCHEDULED" || p.status === "APPROVED"; }).length;
-        const reviewCount = activePosts.filter(function (p) { return p.status === "PENDING_APPROVAL"; }).length;
-        const editCount = activePosts.filter(function (p) { return p.status === "REVISION_REQUESTED" || p.status === "REJECTED"; }).length;
-
-        // Tính toán chỉ số khớp chính xác với Design Figma (Image 5)
-        const completionRate = totalActive > 0 ? Math.round((publishedCount / totalActive) * 100) : 22;
-        const readyRate = totalActive > 0 ? Math.round((readyCount / totalActive) * 100) : 56;
-        const urgentCount = reviewCount + editCount;
-
-        const statItems = [
-            {
-                key: "PUBLISHED",
-                icon: "doc",
-                tone: "pink",
-                label: "Hoàn thành kế hoạch",
-                value: completionRate + "%",
-                note: publishedCount + " / " + totalActive + " bài đã xuất bản"
-            },
-            {
-                key: "SCHEDULED",
-                icon: "check",
-                tone: "green",
-                label: "Đúng tiến độ",
-                value: (readyRate > 0 ? readyRate : 56) + "%",
-                note: readyCount + " bài sẵn sàng phát hành",
-                noteTone: "green"
-            },
-            {
-                key: "URGENT",
-                icon: "clock",
-                tone: "orange",
-                label: "Cần xử lý hôm nay",
-                value: UI.pad(urgentCount),
-                note: reviewCount + " bài duyệt · " + editCount + " chỉnh sửa",
-                noteTone: "orange"
-            },
-            {
-                key: "OVERDUE",
-                icon: "alert",
-                tone: "pink",
-                label: "Quá hạn",
-                value: "07",
-                note: "Cần ưu tiên xử lý ngay",
-                noteTone: "pink"
-            }
+        const items = [
+            { icon: "doc", tone: "pink", label: "Tổng số bài viết", value: UI.pad(c.TOTAL),
+              note: pct(c.PUBLISHED, c.TOTAL) + "% hoàn thành kế hoạch", href: listUrl([], "") },
+            { icon: "check", tone: "green", label: "Đã đăng", value: UI.pad(c.PUBLISHED),
+              note: "Trạng thái PUBLISHED", noteTone: "green", href: listUrl(G.PUBLISHED.statuses, "Đã đăng") },
+            { icon: "clock", tone: "orange", label: "Đang xử lý", value: UI.pad(c.IN_PROGRESS),
+              note: "Nháp · Đã duyệt · Đã lên lịch", href: listUrl(G.IN_PROGRESS.statuses, "Đang xử lý") },
+            { icon: "clipboard", tone: "purple", label: "Chờ duyệt", value: UI.pad(c.PENDING),
+              note: c.PENDING ? "Cần Manager phê duyệt" : "Không có bài chờ duyệt", noteTone: c.PENDING ? "pink" : "green",
+              href: listUrl(G.PENDING.statuses, "Chờ duyệt") },
+            { icon: "edit", tone: "pink", label: "Cần chỉnh sửa", value: UI.pad(c.REVISION),
+              note: c.REVISION ? "Đang chờ nhân viên sửa" : "Không có bài cần sửa", noteTone: c.REVISION ? "pink" : "green",
+              href: listUrl(G.REVISION.statuses, "Cần chỉnh sửa") }
         ];
 
-        statsEl.innerHTML = statItems.map(function (item) {
-            const isActive = currentStatusFilter === item.key;
-            const cardHtml = UI.statCard(item);
-            return '<div class="stat-card-wrap' + (isActive ? ' is-active' : '') + '" data-status-filter="' + item.key + '">' +
-                cardHtml.replace('class="stat-card"', 'class="stat-card is-clickable' + (isActive ? ' is-active' : '') + '"') +
-            '</div>';
+        statsEl.classList.add("stats--5");
+        statsEl.innerHTML = items.map(function (it) {
+            return '<a class="stat-link" href="' + UI.esc(it.href) + '" title="Xem danh sách: ' + UI.esc(it.label) + '">' + UI.statCard(it) + '</a>';
         }).join("");
-
-        // Gắn sự kiện click vào từng thẻ thống kê để lọc danh sách
-        statsEl.querySelectorAll("[data-status-filter]").forEach(function (el) {
-            el.addEventListener("click", function () {
-                const targetKey = el.dataset.statusFilter;
-                if (currentStatusFilter === targetKey && targetKey !== "ALL") {
-                    currentStatusFilter = "ALL";
-                } else {
-                    currentStatusFilter = targetKey;
-                }
-                refreshUI();
-            });
-        });
-
-        updateFilterBadge();
     }
 
-    function updateFilterBadge() {
-        const wrap = document.getElementById("activeFilterBadgeWrap");
-        if (!wrap) return;
-        if (currentStatusFilter === "ALL") {
-            wrap.style.display = "none";
-            wrap.innerHTML = "";
-            return;
-        }
-        const filteredPosts = getActiveFilteredPosts(false);
-        const name = STATUS_FILTER_NAMES[currentStatusFilter] || currentStatusFilter;
-        wrap.style.display = "block";
-        wrap.innerHTML = '<div class="active-filter-pill-bar">' +
-            '<span>🔍 Đang lọc: <b>' + UI.esc(name) + '</b> (' + filteredPosts.length + ' bài viết)</span>' +
-            '<button type="button" id="btnResetStatusFilter">✕ Bỏ lọc (Hiển thị tất cả)</button>' +
+    /* =========================================================
+       2. BẢNG TIẾN ĐỘ (kanban)
+       ========================================================= */
+    function postCard(post, showAuthor) {
+        const plat = post.platform_label || (Array.isArray(post.platforms) ? post.platforms.join(" & ") : "Mạng xã hội");
+        return '<div class="post" data-post-id="' + post.post_id + '" role="button" tabindex="0" title="Nhấn để xem chi tiết bài viết">' +
+            '<b>' + UI.esc(post.title) + '</b>' +
+            '<small>' + (showAuthor ? UI.esc(post.author) + ' · ' : '') + UI.esc(plat) + '</small>' +
         '</div>';
-        const resetBtn = document.getElementById("btnResetStatusFilter");
-        if (resetBtn) {
-            resetBtn.addEventListener("click", function () {
-                currentStatusFilter = "ALL";
-                refreshUI();
-            });
-        }
     }
 
-    // ==============================
-    // KANBAN BOARD & MEMBERS DASHBOARD (TASK 03 & 04)
-    // ==============================
-    function renderBoard(activePosts) {
+    function renderBoard(posts) {
         const boardEl = document.getElementById("board");
         if (!boardEl) return;
 
         if (currentTab === "members") {
-            renderMembersView(activePosts, boardEl);
+            renderMembersView(posts, boardEl);
             return;
         }
 
-        boardEl.className = "board";
-
-        // Nếu người dùng lọc bài Đã xuất bản (PUBLISHED)
-        if (currentStatusFilter === "PUBLISHED") {
-            const pubPosts = activePosts.filter(function (p) { return p.status === "PUBLISHED"; });
-            boardEl.innerHTML = '<div class="kb-col ready" style="grid-column: 1 / -1; max-width: 680px; margin: 0 auto; width: 100%; min-height: 380px;">' +
-                '<div class="kb-head">' +
-                    '<h3>Đã xuất bản (PUBLISHED)</h3>' +
-                    '<span class="count">' + UI.pad(pubPosts.length) + '</span>' +
-                '</div>' +
-                '<div class="cards">' + (pubPosts.length ? pubPosts.map(function (post) {
-                    const plat = post.platform_label || (Array.isArray(post.platforms) ? post.platforms.join(" & ") : "Mạng xã hội");
-                    return '<div class="post" data-post-id="' + post.post_id + '" role="button" tabindex="0" title="Nhấn để xem chi tiết bài viết">' +
-                        '<b>' + UI.esc(post.title) + '</b>' +
-                        '<small>' + UI.esc(post.author) + ' · ' + UI.esc(plat) + ' · Ngày: ' + UI.esc(post.planned_label || post.planned_date) + '</small>' +
-                    '</div>';
-                }).join("") : UI.emptyState({ text: "Chưa có bài viết nào ở trạng thái Đã xuất bản." })) + '</div>' +
-                '<a href="posts.html?status=PUBLISHED" class="see-all">Xem tất cả ' + pubPosts.length + ' bài đã xuất bản trong danh sách →</a>' +
-            '</div>';
-            return;
-        }
-
-        const draftPosts = activePosts.filter(function (p) { return p.status === "DRAFT"; });
-        const reviewPosts = activePosts.filter(function (p) { return p.status === "PENDING_APPROVAL"; });
-        const editPosts = activePosts.filter(function (p) { return p.status === "REVISION_REQUESTED" || p.status === "REJECTED"; });
-        const readyPosts = activePosts.filter(function (p) { return p.status === "SCHEDULED" || p.status === "APPROVED"; });
-
+        const by = function (statuses) { return posts.filter(function (p) { return statuses.indexOf(p.status) !== -1; }); };
         const columns = [
-            {
-                cls: "draft",
-                title: "Bản nháp",
-                empty: "Không có bản nháp",
-                posts: draftPosts,
-                seeAllHref: "posts.html?status=DRAFT"
-            },
-            {
-                cls: "review",
-                title: "Chờ duyệt",
-                empty: "Không có bài chờ duyệt",
-                posts: reviewPosts,
-                seeAllHref: "approvals.html"
-            },
-            {
-                cls: "edit",
-                title: "Đang chỉnh sửa",
-                empty: "Không có bài cần sửa",
-                posts: editPosts,
-                seeAllHref: "posts.html?status=REVISION_REQUESTED"
-            },
-            {
-                cls: "ready",
-                title: "Sẵn sàng đăng",
-                empty: "Không có bài đã lên lịch",
-                posts: readyPosts,
-                seeAllHref: "calendar.html"
-            }
+            { cls: "draft", title: "Bản nháp / Bị từ chối", empty: "Không có bản nháp", statuses: ["DRAFT", "REJECTED"] },
+            { cls: "review", title: "Chờ duyệt", empty: "Không có bài chờ duyệt", statuses: ["PENDING_APPROVAL"] },
+            { cls: "edit", title: "Cần chỉnh sửa", empty: "Không có bài cần sửa", statuses: ["REVISION_REQUESTED"] },
+            { cls: "ready", title: "Sẵn sàng đăng", empty: "Không có bài đã lên lịch", statuses: ["APPROVED", "SCHEDULED"] }
         ];
 
-        boardEl.innerHTML = columns.map(function (column) {
-            const cardsHtml = column.posts.length
-                ? column.posts.map(function (post) {
-                    const plat = post.platform_label || (Array.isArray(post.platforms) ? post.platforms.join(" & ") : "Mạng xã hội");
-                    return '<div class="post" data-post-id="' + post.post_id + '" role="button" tabindex="0" title="Nhấn để xem chi tiết bài viết">' +
-                        '<b>' + UI.esc(post.title) + '</b>' +
-                        '<small>' + UI.esc(post.author) + ' · ' + UI.esc(plat) + '</small>' +
-                    '</div>';
-                }).join("")
-                : UI.emptyState({ text: column.empty });
-
-            return '<div class="kb-col ' + column.cls + '">' +
-                '<div class="kb-head">' +
-                    '<h3>' + UI.esc(column.title) + '</h3>' +
-                    '<span class="count">' + UI.pad(column.posts.length) + '</span>' +
-                '</div>' +
-                '<div class="cards">' + cardsHtml + '</div>' +
-                '<a href="' + column.seeAllHref + '" class="see-all">Xem tất cả ' + column.posts.length + ' bài viết →</a>' +
+        boardEl.classList.remove("board--members");
+        boardEl.innerHTML = columns.map(function (col) {
+            const list = by(col.statuses);
+            const cards = list.length ? list.map(function (p) { return postCard(p, true); }).join("") : UI.emptyState({ text: col.empty });
+            return '<div class="kb-col ' + col.cls + '">' +
+                '<div class="kb-head"><h3>' + UI.esc(col.title) + '</h3><span class="count">' + UI.pad(list.length) + '</span></div>' +
+                '<div class="cards">' + cards + '</div>' +
+                '<a href="' + UI.esc(listUrl(col.statuses, col.title)) + '" class="see-all">Xem tất cả ' + list.length + ' bài viết →</a>' +
             '</div>';
         }).join("");
     }
 
-    // ==============================
-    // TASK 04 – DASHBOARD THEO DÕI NHÂN VIÊN (FIGMA IMAGE 5)
-    // ==============================
-    function renderMembersView(activePosts, boardEl) {
-        boardEl.className = "members-split-layout";
+    /* =========================================================
+       3. THEO DÕI NHÂN VIÊN (Task 04)
+       ========================================================= */
+    function memberRows(posts) {
+        let keys = memberKeys();
+        if (filters.author !== "ALL") keys = keys.filter(function (k) { return k === filters.author; });
 
-        // Danh sách nhân viên chuẩn theo Figma Image 5
-        const defaultMembers = [
-            {
-                name: "Trần Ngọc Mai",
-                role: "Staff",
-                avatar: "../../assets/avatars/mai.png",
-                completed: 5,
-                total: 8,
-                pct: "62.5%",
-                pctNum: 62.5,
-                published: 5,
-                processing: 2,
-                pending: 1
-            },
-            {
-                name: "Doãn Thị Minh Anh",
-                role: "Staff",
-                avatar: "../../assets/avatars/minhanh.png",
-                completed: 4,
-                total: 6,
-                pct: "66.7%",
-                pctNum: 66.7,
-                published: 4,
-                processing: 1,
-                pending: 1
-            },
-            {
-                name: "Lê Thu Hương",
-                role: "Staff",
-                avatar: "../../assets/avatars/huong.png",
-                completed: 3,
-                total: 7,
-                pct: "42.9%",
-                pctNum: 42.9,
-                published: 3,
-                processing: 3,
-                pending: 1
-            },
-            {
-                name: "Phạm Khánh Linh",
-                role: "Staff",
-                avatar: "../../assets/avatars/linh.png",
-                completed: 4,
-                total: 5,
-                pct: "80%",
-                pctNum: 80,
-                published: 4,
-                processing: 1,
-                pending: 0
-            }
-        ];
-
-        // Lọc theo tác giả nếu người dùng chọn bộ lọc
-        const membersToShow = currentAuthorFilter !== "ALL"
-            ? defaultMembers.filter(function (m) { return m.name === currentAuthorFilter; })
-            : defaultMembers;
-
-        // Cột trái: Tiến độ theo thành viên
-        const memberRowsHtml = membersToShow.map(function (m) {
-            return '<div class="member-row-item" data-author="' + UI.esc(m.name) + '" role="button" tabindex="0" title="Xem bài viết của ' + UI.esc(m.name) + '">' +
-                '<div class="member-avatar-wrap">' +
-                    '<img class="member-avatar-img" src="' + m.avatar + '" alt="' + UI.esc(m.name) + '">' +
-                '</div>' +
-                '<div class="member-meta-block">' +
-                    '<div class="member-row-name">' + UI.esc(m.name) + '</div>' +
-                    '<div class="member-row-role">' + UI.esc(m.role) + '</div>' +
-                '</div>' +
-                '<div class="member-progress-content">' +
-                    '<div class="member-stat-top-line">' +
-                        '<span>' + m.completed + ' / ' + m.total + ' bài hoàn thành</span>' +
-                        '<span class="member-completion-pct">' + m.pct + '</span>' +
-                    '</div>' +
-                    '<div class="member-bar-track">' +
-                        '<div class="member-bar-fill" style="width: ' + m.pctNum + '%;"></div>' +
-                    '</div>' +
-                    '<div class="member-dots-row">' +
-                        '<span class="prog-dot dot-green">● Đã đăng: ' + m.published + '</span>' +
-                        '<span class="prog-dot dot-orange">● Đang xử lý: ' + m.processing + '</span>' +
-                        '<span class="prog-dot dot-pink">● Chờ duyệt: ' + m.pending + '</span>' +
-                    '</div>' +
-                '</div>' +
-                '<span class="member-row-arrow">&rsaquo;</span>' +
-            '</div>';
-        }).join("");
-
-        const leftColHtml = '<div class="member-progress-card">' +
-            '<div class="member-card-title-row">' +
-                '<div class="member-card-heading">' +
-                    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                        '<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>' +
-                    '</svg>' +
-                    '<span>Tiến độ theo thành viên</span>' +
-                '</div>' +
-                '<span class="member-badge-count">' + membersToShow.length + ' nhân viên</span>' +
-            '</div>' +
-            '<div class="member-rows-list">' +
-                memberRowsHtml +
-            '</div>' +
-        '</div>';
-
-        // Cột phải: Thống kê tiến độ đội ngũ (Biểu đồ Donut) + Bài đăng gần đây
-        const rightColHtml = '<div class="team-stats-stack">' +
-            // Thẻ 1: Thống kê tiến độ đội ngũ
-            '<div class="team-stats-card">' +
-                '<div class="member-card-title-row">' +
-                    '<div class="member-card-heading">' +
-                        '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                            '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M8 16h8M8 8h4"/>' +
-                        '</svg>' +
-                        '<span>Thống kê tiến độ đội ngũ</span>' +
-                    '</div>' +
-                    '<div class="team-time-pills">' +
-                        '<button type="button" class="team-time-pill is-active" data-team-period="7">7 ngày</button>' +
-                        '<button type="button" class="team-time-pill" data-team-period="30">30 ngày</button>' +
-                        '<button type="button" class="team-time-pill" data-team-period="month">Tháng này</button>' +
-                    '</div>' +
-                '</div>' +
-                '<div class="donut-layout-wrap">' +
-                    '<div class="donut-chart-box">' +
-                        '<svg class="donut-svg" viewBox="0 0 160 160">' +
-                            '<circle cx="80" cy="80" r="58" fill="transparent" stroke="#10b981" stroke-width="18" stroke-dasharray="204 365" stroke-dashoffset="0"></circle>' +
-                            '<circle cx="80" cy="80" r="58" fill="transparent" stroke="#f59e0b" stroke-width="18" stroke-dasharray="95 365" stroke-dashoffset="-204"></circle>' +
-                            '<circle cx="80" cy="80" r="58" fill="transparent" stroke="#ec4899" stroke-width="18" stroke-dasharray="66 365" stroke-dashoffset="-299"></circle>' +
-                        '</svg>' +
-                        '<div class="donut-center-info">' +
-                            '<span class="donut-pct">56%</span>' +
-                            '<span class="donut-sub">Hoàn thành</span>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="donut-legend-col">' +
-                        '<div class="donut-legend-item">' +
-                            '<div class="donut-legend-left"><span class="legend-indicator" style="background:#10b981"></span><span>Đã đăng</span></div>' +
-                            '<b>15 (56%)</b>' +
-                        '</div>' +
-                        '<div class="donut-legend-item">' +
-                            '<div class="donut-legend-left"><span class="legend-indicator" style="background:#f59e0b"></span><span>Đang xử lý</span></div>' +
-                            '<b>7 (26%)</b>' +
-                        '</div>' +
-                        '<div class="donut-legend-item">' +
-                            '<div class="donut-legend-left"><span class="legend-indicator" style="background:#ec4899"></span><span>Chờ duyệt</span></div>' +
-                            '<b>5 (18%)</b>' +
-                        '</div>' +
-                    '</div>' +
-                '</div>' +
-            '</div>' +
-
-            // Thẻ 2: Bài đăng gần đây
-            '<div class="recent-posts-card">' +
-                '<div class="member-card-title-row">' +
-                    '<div class="member-card-heading">' +
-                        '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-                            '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>' +
-                        '</svg>' +
-                        '<span>Bài đăng gần đây</span>' +
-                    '</div>' +
-                '</div>' +
-                '<table class="recent-tbl">' +
-                    '<thead>' +
-                        '<tr>' +
-                            '<th>Nhân viên</th>' +
-                            '<th>Nền tảng</th>' +
-                            '<th>Trạng thái</th>' +
-                            '<th>Thời gian</th>' +
-                        '</tr>' +
-                    '</thead>' +
-                    '<tbody>' +
-                        '<tr>' +
-                            '<td>' +
-                                '<div class="recent-user-flex">' +
-                                    '<img class="recent-user-avatar" src="../../assets/avatars/mai.png" alt="">' +
-                                    '<span>Trần Ngọc Mai</span>' +
-                                '</div>' +
-                            '</td>' +
-                            '<td>' +
-                                '<div class="platform-icon-wrap">' +
-                                    '<svg viewBox="0 0 24 24" width="20" height="20" fill="#1877F2"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>' +
-                                '</div>' +
-                            '</td>' +
-                            '<td><span class="badge-published">Đã đăng</span></td>' +
-                            '<td style="color:#6b7280;font-size:13px;">2 giờ trước</td>' +
-                        '</tr>' +
-                        '<tr>' +
-                            '<td>' +
-                                '<div class="recent-user-flex">' +
-                                    '<img class="recent-user-avatar" src="../../assets/avatars/huong.png" alt="">' +
-                                    '<span>Lê Thu Hương</span>' +
-                                '</div>' +
-                            '</td>' +
-                            '<td>' +
-                                '<div class="platform-icon-wrap">' +
-                                    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none"><rect width="20" height="20" rx="5" fill="url(#igGrad2)"/><circle cx="10" cy="10" r="4.5" stroke="#fff" stroke-width="1.8"/><circle cx="15.5" cy="4.5" r="1.2" fill="#fff"/><defs><linearGradient id="igGrad2" x1="2" y1="2" x2="18" y2="18" gradientUnits="userSpaceOnUse"><stop stop-color="#f58529"/><stop offset=".5" stop-color="#dd2a7b"/><stop offset="1" stop-color="#8134af"/></linearGradient></defs></svg>' +
-                                '</div>' +
-                            '</td>' +
-                            '<td><span class="badge-pending">Chờ duyệt</span></td>' +
-                            '<td style="color:#6b7280;font-size:13px;">3 giờ trước</td>' +
-                        '</tr>' +
-                        '<tr>' +
-                            '<td>' +
-                                '<div class="recent-user-flex">' +
-                                    '<img class="recent-user-avatar" src="../../assets/avatars/linh.png" alt="">' +
-                                    '<span>Phạm Khánh Linh</span>' +
-                                '</div>' +
-                            '</td>' +
-                            '<td>' +
-                                '<div class="platform-icon-wrap">' +
-                                    '<svg viewBox="0 0 24 24" width="20" height="20" fill="#111111"><path d="M19.589 6.686a4.793 4.793 0 0 1-3.77-4.245V2h-3.445v13.672a2.896 2.896 0 0 1-5.201 1.743 2.895 2.895 0 0 1 3.12-4.63v-3.56A6.335 6.335 0 0 0 5 15.672a6.34 6.34 0 0 0 10.82 4.482 6.297 6.297 0 0 0 1.854-4.482V8.718a8.163 8.163 0 0 0 4.315 1.54V6.812a4.797 4.797 0 0 1-2.4-.126z"/></svg>' +
-                                '</div>' +
-                            '</td>' +
-                            '<td><span class="badge-processing">Đang xử lý</span></td>' +
-                            '<td style="color:#6b7280;font-size:13px;">4 giờ trước</td>' +
-                        '</tr>' +
-                    '</tbody>' +
-                '</table>' +
-            '</div>' +
-        '</div>';
-
-        boardEl.innerHTML = leftColHtml + rightColHtml;
-
-        // Bấm vào dòng thành viên -> mở danh sách bài viết của nhân viên đó
-        boardEl.querySelectorAll(".member-row-item").forEach(function (row) {
-            row.addEventListener("click", function () {
-                const author = row.getAttribute("data-author");
-                if (author) {
-                    location.href = "posts.html?author=" + encodeURIComponent(author);
-                }
-            });
-        });
-
-        // Chuyển kỳ thời gian 7 ngày / 30 ngày / Tháng này
-        boardEl.querySelectorAll(".team-time-pill").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                boardEl.querySelectorAll(".team-time-pill").forEach(function (b) { b.classList.remove("is-active"); });
-                btn.classList.add("is-active");
-                const p = btn.getAttribute("data-team-period");
-                const pctEl = boardEl.querySelector(".donut-pct");
-                if (pctEl) {
-                    if (p === "7") pctEl.textContent = "56%";
-                    else if (p === "30") pctEl.textContent = "72%";
-                    else pctEl.textContent = "68%";
-                }
-            });
+        return keys.map(function (key) {
+            const mine = posts.filter(function (p) { return Scope.ownerKey(p) === key; });
+            const c = Scope.countByGroup(mine);
+            return { key: key, name: Scope.ownerName(key, allPosts), total: c.TOTAL, c: c, percent: pct(c.PUBLISHED, c.TOTAL) };
         });
     }
 
-    // ==============================
-    // PRIORITY BANNER
-    // ==============================
-    function updatePriorityBanner(activePosts) {
+    function memberUrl(key, statuses, label) {
+        return Scope.postsUrl("posts.html", { statuses: statuses, label: label, author: key, campaign: filters.campaign, range: filters.range });
+    }
+
+    function renderMemberCard(m) {
+        const barTone = m.percent >= 60 ? "ok" : (m.percent >= 40 ? "mid" : "low");
+        const stat = function (cls, label, n, statuses) {
+            return '<a class="mem-stat ' + cls + '" href="' + UI.esc(memberUrl(m.key, statuses, label + " · " + m.name)) + '"><i></i>' + label + ': <b>' + n + '</b></a>';
+        };
+        return '<div class="mem-row">' +
+            avatarHtml(m.name) +
+            '<div class="mem-id"><b>' + UI.esc(m.name) + '</b><small>Staff · Được giao ' + m.total + ' bài</small></div>' +
+            '<div class="mem-progress">' +
+                '<span>' + m.c.PUBLISHED + ' / ' + m.total + ' bài hoàn thành</span>' +
+                '<strong>' + m.percent + '%</strong>' +
+                '<div class="mem-bar"><div class="mem-bar__fill ' + barTone + '" style="width:' + m.percent + '%"></div></div>' +
+            '</div>' +
+            '<div class="mem-stats">' +
+                stat("green", "Đã đăng", m.c.PUBLISHED, G.PUBLISHED.statuses) +
+                stat("orange", "Đang xử lý", m.c.IN_PROGRESS, G.IN_PROGRESS.statuses) +
+                stat("pink", "Chờ duyệt", m.c.PENDING, G.PENDING.statuses) +
+                stat("purple", "Cần chỉnh sửa", m.c.REVISION, G.REVISION.statuses) +
+            '</div>' +
+            '<a class="mem-go" href="' + UI.esc(memberUrl(m.key, [], "")) + '" title="Xem tất cả bài của ' + UI.esc(m.name) + '" aria-label="Xem bài của ' + UI.esc(m.name) + '">›</a>' +
+        '</div>';
+    }
+
+    function donutSvg(c) {
+        const R = 70, C = 2 * Math.PI * R;
+        const order = ["PUBLISHED", "IN_PROGRESS", "PENDING", "REVISION"];
+        let offset = 0;
+        const rings = c.TOTAL === 0
+            ? '<circle cx="90" cy="90" r="' + R + '" fill="none" stroke="#f3e6ec" stroke-width="26"/>'
+            : order.map(function (k) {
+                const len = (c[k] / c.TOTAL) * C;
+                if (!len) return "";
+                const ring = '<circle cx="90" cy="90" r="' + R + '" fill="none" stroke="' + DONUT_COLORS[k] + '" stroke-width="26" ' +
+                    'stroke-dasharray="' + len + ' ' + (C - len) + '" stroke-dashoffset="' + (-offset) + '" transform="rotate(-90 90 90)"/>';
+                offset += len;
+                return ring;
+            }).join("");
+        return '<svg viewBox="0 0 180 180" class="donut-svg" role="img" aria-label="Biểu đồ tiến độ đội ngũ">' + rings + '</svg>' +
+            '<div class="donut-center"><b>' + pct(c.PUBLISHED, c.TOTAL) + '%</b><small>Hoàn thành</small></div>';
+    }
+
+    function renderTeamPanel(teamPosts) {
+        const c = Scope.countByGroup(teamPosts);
+        const rangeBtn = function (val, label) {
+            return '<button type="button" class="range-pill' + (filters.range === val ? " active" : "") + '" data-range="' + val + '">' + label + '</button>';
+        };
+        const legend = ["PUBLISHED", "IN_PROGRESS", "PENDING", "REVISION"].map(function (k) {
+            return '<a class="legend-row" href="' + UI.esc(listUrl(G[k].statuses, G[k].label)) + '">' +
+                '<span class="legend-dot" style="background:' + DONUT_COLORS[k] + '"></span>' +
+                '<span class="legend-name">' + G[k].label + '</span>' +
+                '<span class="legend-val">' + c[k] + ' (' + pct(c[k], c.TOTAL) + '%)</span></a>';
+        }).join("");
+
+        const recent = teamPosts.slice().sort(function (a, b) {
+            return (Scope.activityDate(b) || 0) - (Scope.activityDate(a) || 0);
+        }).slice(0, 5);
+
+        const recentRows = recent.length ? recent.map(function (p) {
+            const st = Scope.STATUS_LABEL[p.status] || p.status;
+            const plat = p.platform_label || (Array.isArray(p.platforms) ? p.platforms.join(" & ") : "—");
+            return '<div class="recent-row" data-post-id="' + p.post_id + '" role="button" tabindex="0">' +
+                '<span class="recent-who">' + avatarHtml(p.author || "?") + UI.esc(p.author) + '</span>' +
+                '<span class="recent-plat">' + UI.esc(plat) + '</span>' +
+                '<span><em class="dash-pill pill-' + Scope.groupOfStatus(p.status).toLowerCase() + '">' + UI.esc(st) + '</em></span>' +
+                '<span class="recent-time">' + UI.esc(relTime(p)) + '</span></div>';
+        }).join("") : '<p class="empty-message">Chưa có bài đăng nào trong khoảng thời gian này.</p>';
+
+        return '<div class="team-panel">' +
+            '<section class="dash-card">' +
+                '<div class="dash-card__head"><h3>Thống kê tiến độ đội ngũ</h3><div class="range-pills">' +
+                    rangeBtn("7D", "7 ngày") + rangeBtn("30D", "30 ngày") + rangeBtn("MONTH", "Tháng này") + rangeBtn("ALL", "Tất cả") +
+                '</div></div>' +
+                '<div class="donut-wrap"><div class="donut">' + donutSvg(c) + '</div><div class="legend">' + legend + '</div></div>' +
+            '</section>' +
+            '<section class="dash-card">' +
+                '<div class="dash-card__head"><h3>Bài đăng gần đây</h3></div>' +
+                '<div class="recent-head"><span>Nhân viên</span><span>Nền tảng</span><span>Trạng thái</span><span>Thời gian</span></div>' +
+                recentRows +
+            '</section>' +
+        '</div>';
+    }
+
+    function renderMembersView(posts, boardEl) {
+        const rows = memberRows(posts);
+        boardEl.classList.add("board--members");
+
+        const list = rows.length
+            ? rows.map(renderMemberCard).join("")
+            : '<p class="empty-message">Chưa có nhân viên nào.</p>';
+
+        boardEl.innerHTML = '<div class="members-layout">' +
+            '<section class="dash-card members-card">' +
+                '<div class="dash-card__head"><h3>Tiến độ theo thành viên</h3><span class="chip">' + rows.length + ' nhân viên</span></div>' +
+                list +
+            '</section>' +
+            renderTeamPanel(posts) +
+        '</div>';
+    }
+
+    /* =========================================================
+       4. BANNER ƯU TIÊN
+       ========================================================= */
+    function updatePriorityBanner(posts) {
         const titleEl = document.getElementById("priorityTitle");
         const descEl = document.getElementById("priorityDesc");
         const linkEl = document.getElementById("priorityLink");
         if (!titleEl || !descEl || !linkEl) return;
 
-        const todayIso = new Date().toISOString().split("T")[0];
-        const overdue = activePosts.filter(function (p) {
+        const todayIso = Scope.isoDate(new Date());
+        const overdue = posts.filter(function (p) {
             return p.status !== "PUBLISHED" && p.planned_date && p.planned_date < todayIso;
         });
-        const pending = activePosts.filter(function (p) {
-            return p.status === "PENDING_APPROVAL";
-        });
+        const pending = posts.filter(function (p) { return p.status === "PENDING_APPROVAL"; });
 
         if (overdue.length > 0) {
             titleEl.textContent = "Ưu tiên hôm nay: Có " + overdue.length + " bài viết quá hạn";
-            descEl.textContent = "Có " + overdue.length + " bài viết đã quá hạn lịch đăng ban đầu. Quản lý cần kiểm tra và phân công lên lại lịch phát hành.";
-            linkEl.textContent = "Kiểm tra ngay";
+            descEl.textContent = "Có " + overdue.length + " bài viết đã quá ngày đăng dự kiến nhưng chưa xuất bản. Kiểm tra và sắp xếp lại lịch phát hành.";
+            linkEl.textContent = "Kiểm tra lịch";
             linkEl.href = "calendar.html";
         } else if (pending.length > 0) {
             titleEl.textContent = "Cần phê duyệt: " + pending.length + " bài viết chờ duyệt";
@@ -712,91 +305,52 @@
         }
     }
 
-    // ==============================
-    // POPULATE FILTERS
-    // ==============================
-    function populateAuthorFilter() {
-        const sel = document.getElementById("filterAuthor");
-        if (!sel) return;
-
-        const authors = [];
-        allPosts.forEach(function (p) {
-            if (p.author && !authors.includes(p.author)) authors.push(p.author);
-        });
-
-        sel.innerHTML = '<option value="ALL">Tất cả tác giả</option>' +
-            authors.map(function (a) {
-                return '<option value="' + UI.esc(a) + '">' + UI.esc(a) + '</option>';
-            }).join("");
-    }
-
-    // ==============================
-    // OPEN DETAIL MODAL / EDIT
-    // ==============================
-    function handlePostClick(postOrId) {
-        let postObj = null;
-        if (typeof postOrId === "object" && postOrId !== null) {
-            postObj = postOrId;
-        } else {
-            const pid = String(postOrId);
-            postObj = allPosts.find(function (p) {
-                return String(p.post_id) === pid || p.code === pid;
-            });
-        }
-        if (window.PostDetailModal && typeof window.PostDetailModal.open === "function") {
-            window.PostDetailModal.open(postObj || postOrId);
-            return;
-        }
-        if (typeof window.openPostDetailModal === "function") {
-            window.openPostDetailModal(postObj || postOrId);
-            return;
-        }
-        // Fallback: điều hướng xem chi tiết tại posts.html
-        location.href = "posts.html?view=" + encodeURIComponent(postObj ? postObj.post_id : postOrId);
-    }
-
-    // ==============================
-    // EVENT BINDINGS
-    // ==============================
-    function bindEvents() {
-        // Author Filter
+    /* =========================================================
+       5. BỘ LỌC + SỰ KIỆN
+       ========================================================= */
+    function populateFilters() {
         const authorSel = document.getElementById("filterAuthor");
         if (authorSel) {
-            authorSel.addEventListener("change", function () {
-                currentAuthorFilter = authorSel.value;
-                refreshUI();
-            });
+            authorSel.innerHTML = '<option value="ALL">Tất cả nhân viên</option>' + memberKeys().map(function (k) {
+                return '<option value="' + UI.esc(k) + '">' + UI.esc(Scope.ownerName(k, allPosts)) + '</option>';
+            }).join("");
+            authorSel.value = filters.author;
         }
 
-        // Campaign Filter
         const campSel = document.getElementById("filterCampaign");
         if (campSel) {
-            campSel.addEventListener("change", function () {
-                currentCampaignFilter = campSel.value;
-                refreshUI();
-            });
+            const names = Scope.CAMPAIGNS.slice();
+            allPosts.forEach(function (p) { if (p.campaign && names.indexOf(p.campaign) === -1) names.push(p.campaign); });
+            campSel.innerHTML = '<option value="ALL">Tất cả chiến dịch</option>' + names.map(function (n) {
+                return '<option value="' + UI.esc(n) + '">' + UI.esc(n) + '</option>';
+            }).join("");
+            campSel.value = filters.campaign;
         }
 
-        // Time Period Filter (TASK 04)
-        const timeSel = document.getElementById("filterTimePeriod");
-        if (timeSel) {
-            timeSel.addEventListener("change", function () {
-                currentTimePeriodFilter = timeSel.value;
-                refreshUI();
-            });
-        }
+        const rangeSel = document.getElementById("filterRange");
+        if (rangeSel) rangeSel.value = filters.range;
+    }
 
-        // Tabs (Bảng tiến độ vs Theo thành viên)
+    function openDetail(postId) {
+        if (window.PostDetailModal && typeof window.PostDetailModal.open === "function") {
+            window.PostDetailModal.open(postId);
+        } else {
+            location.href = "posts.html?view=" + encodeURIComponent(postId);
+        }
+    }
+
+    function bindEvents() {
+        const bind = function (id, key) {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener("change", function () { filters[key] = el.value; refreshUI(); });
+        };
+        bind("filterAuthor", "author");
+        bind("filterCampaign", "campaign");
+        bind("filterRange", "range");
+
         const tabProgress = document.getElementById("tabProgress");
         const tabMembers = document.getElementById("tabMembers");
         if (tabProgress && tabMembers) {
-            const urlParams = new URLSearchParams(location.search);
-            if (urlParams.get("tab") === "members" || location.hash === "#members") {
-                currentTab = "members";
-                tabMembers.classList.add("active");
-                tabProgress.classList.remove("active");
-            }
-
             tabProgress.addEventListener("click", function () {
                 currentTab = "board";
                 tabProgress.classList.add("active");
@@ -811,57 +365,42 @@
             });
         }
 
-        // Board Card Click & Member Recent Item Click
         const boardEl = document.getElementById("board");
         if (boardEl) {
             boardEl.addEventListener("click", function (e) {
-                const card = e.target.closest(".post[data-post-id], .member-recent-item[data-post-id]");
-                if (card) {
-                    const pid = card.dataset.postId;
-                    const found = allPosts.find(function (p) {
-                        return String(p.post_id) === String(pid) || p.code === String(pid);
-                    });
-                    handlePostClick(found || Number(pid));
+                const pill = e.target.closest("[data-range]");
+                if (pill) {
+                    filters.range = pill.dataset.range;
+                    const rangeSel = document.getElementById("filterRange");
+                    if (rangeSel) rangeSel.value = filters.range;
+                    refreshUI();
+                    return;
                 }
+                const card = e.target.closest("[data-post-id]");
+                if (card) openDetail(Number(card.dataset.postId));
             });
             boardEl.addEventListener("keydown", function (e) {
-                if (e.key === "Enter" || e.key === " ") {
-                    const card = e.target.closest(".post[data-post-id], .member-recent-item[data-post-id]");
-                    if (card) {
-                        e.preventDefault();
-                        const pid = card.dataset.postId;
-                        const found = allPosts.find(function (p) {
-                            return String(p.post_id) === String(pid) || p.code === String(pid);
-                        });
-                        handlePostClick(found || Number(pid));
-                    }
-                }
+                if (e.key !== "Enter" && e.key !== " ") return;
+                const card = e.target.closest("[data-post-id]");
+                if (card) { e.preventDefault(); openDetail(Number(card.dataset.postId)); }
             });
         }
 
-        // Realtime Storage Sync
-        window.addEventListener("blossom_posts_updated", function () {
-            allPosts = loadAllPosts();
-            refreshUI();
-        });
+        window.addEventListener("blossom_posts_updated", function () { loadAll(); refreshUI(); });
         window.addEventListener("storage", function (e) {
-            if (e.key === STORAGE_KEY) {
-                allPosts = loadAllPosts();
-                refreshUI();
-            }
+            if (e.key === Scope.POSTS_KEY) { loadAll(); refreshUI(); }
         });
     }
 
     function refreshUI() {
-        const allContextPosts = getActiveFilteredPosts(true);
-        renderStats(allContextPosts);
-        const filtered = getActiveFilteredPosts(false);
-        renderBoard(filtered);
-        updatePriorityBanner(allContextPosts);
+        const posts = filteredPosts();
+        renderStats(posts);
+        renderBoard(posts);
+        updatePriorityBanner(allPosts);
     }
 
-    // Initialize
-    populateAuthorFilter();
+    loadAll();
+    populateFilters();
     refreshUI();
     bindEvents();
 })();

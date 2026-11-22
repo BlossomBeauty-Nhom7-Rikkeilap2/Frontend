@@ -30,21 +30,13 @@
             email: "admin@blossom.vn",
             password: "Blossom@123",
             role: "MANAGER",
-            fullName: "Quản trị Hệ thống",
-            position: "Marketing Manager"
-        },
-        {
-            username: "manager",
-            email: "manager@blossom.vn",
-            password: "Blossom@123",
-            role: "MANAGER",
-            fullName: "Quản lý Blossom",
+            fullName: "Đoàn Thị Minh Anh",
             position: "Marketing Manager"
         },
         {
             username: "minhanh",
             email: "minhanh@blossom.vn",
-            password: "Blossom@123",
+            password: "Staff@123",
             role: "STAFF",
             fullName: "Doãn Thị Minh Anh",
             position: "Marketing Staff"
@@ -52,9 +44,9 @@
         {
             username: "thuyduong",
             email: "thuyduong@blossom.vn",
-            password: "Blossom@123",
+            password: "Staff@123",
             role: "STAFF",
-            fullName: "Phạm Thùy Dương",
+            fullName: "Nguyễn Thùy Dương",
             position: "Marketing Staff"
         },
         {
@@ -62,7 +54,7 @@
             email: "manh@blossom.vn",
             password: "Manh@2026",
             role: "STAFF",
-            fullName: "Trần Quốc Mạnh",
+            fullName: "Doãn Thị Minh Anh",
             position: "Marketing Staff"
         }
     ];
@@ -139,7 +131,7 @@
     function authenticate(identifier, password) {
         const key = identifier.trim().toLowerCase();
 
-        // 1. Tìm trong AccountStore (chứa 8 tài khoản mẫu + tài khoản do Admin tạo mới)
+        // 1. Tìm tài khoản trong AccountStore (chứa 8 tài khoản + tài khoản do Admin tạo mới)
         let accounts = [];
         if (window.AccountStore && typeof AccountStore.load === "function") {
             try { accounts = AccountStore.load(); } catch (_) { accounts = []; }
@@ -148,17 +140,15 @@
         let matched = accounts.find((a) => {
             const em = (a.email || "").trim().toLowerCase();
             const un = (a.username || (a.email ? a.email.split("@")[0] : "")).trim().toLowerCase();
-            const fn = (a.fullName || "").trim().toLowerCase();
-            return em === key || un === key || fn === key || fn.includes(key) || key.includes(fn);
+            return em === key || un === key;
         });
 
-        // 2. Tìm dự phòng trong USERS hardcoded
+        // 2. Dự phòng trong USERS
         if (!matched) {
             matched = USERS.find((u) => {
                 const em = (u.email || "").trim().toLowerCase();
                 const un = (u.username || "").trim().toLowerCase();
-                const fn = (u.fullName || "").trim().toLowerCase();
-                return em === key || un === key || fn === key || fn.includes(key) || key.includes(fn);
+                return em === key || un === key;
             });
         }
 
@@ -169,24 +159,19 @@
             };
         }
 
-        // 3. Kiểm tra xem tài khoản có bị khóa không (status === 'locked')
-        if (matched.status === "locked" || (window.AccountStore && AccountStore.isLocked(matched.email))) {
+        // 3. Tài khoản đã bị khóa -> chặn đăng nhập
+        if (matched.status === "locked" || (window.AccountStore && AccountStore.isLocked(key))) {
             return {
                 ok: false,
                 reason: "locked"
             };
         }
 
-        // 4. Kiểm tra mật khẩu (hỗ trợ mật khẩu đã lưu, mật khẩu hệ thống Blossom@123, hoặc <Tên>@2026)
-        const uname = matched.username || (matched.email ? matched.email.split("@")[0] : "");
-        const validPasswords = [
-            matched.password,
-            "Blossom@123",
-            uname ? (uname.charAt(0).toUpperCase() + uname.slice(1) + "@2026") : null,
-            "123456"
-        ].filter(Boolean);
+        // 4. Kiểm tra mật khẩu (chỉ chấp nhận mật khẩu hiện tại, nếu đổi mật khẩu rồi thì mật khẩu cũ không dùng được nữa)
+        const uname = matched.username || (matched.email ? matched.email.split("@")[0].toLowerCase() : "");
+        const activePwd = localStorage.getItem("blossom_pwd_" + uname) || matched.password || (matched.role === "MANAGER" ? "Blossom@123" : "Staff@123");
 
-        if (!validPasswords.includes(password)) {
+        if (password !== activePwd) {
             return {
                 ok: false,
                 reason: "password"
@@ -198,10 +183,9 @@
             user: {
                 username: uname,
                 email: matched.email,
-                role: matched.role || "STAFF",
-                fullName: matched.fullName || uname,
-                position: matched.position || (matched.role === "MANAGER" ? "Marketing Manager" : "Marketing Staff"),
-                avatar: matched.avatar || localStorage.getItem("blossom_avatar_" + uname) || ""
+                role: matched.role,
+                fullName: matched.fullName,
+                position: matched.position || (matched.role === "MANAGER" ? "Marketing Manager" : "Marketing Staff")
             }
         };
     }
@@ -328,8 +312,7 @@
                     email: user.email,
                     role: user.role,
                     fullName: user.fullName,
-                    position: user.position,
-                    avatar: user.avatar || ""
+                    position: user.position
                 })
             );
 

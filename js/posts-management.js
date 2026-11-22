@@ -10,7 +10,6 @@
 (function () {
     "use strict";
 
-    const POST_LIST_KEY = "blossom_posts_fr06_07_v1";
     const PAGE_SIZE = 6;
 
     const STATUS_MAP = {
@@ -23,227 +22,110 @@
         REJECTED:           { label: "Bị từ chối",     cls: "st-rejected"  }
     };
 
-    const INITIAL_POSTS = [
-        {
-            post_id: 129,
-            code: "BL-0129",
-            title: "Kem dưỡng trắng da Blossom",
-            platforms: ["Instagram"],
-            platform_label: "Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "PENDING_APPROVAL",
-            planned_date: "2026-11-05",
-            planned_label: "05/11/2026",
-            updated_label: "05/11/2026",
-            caption: "Kem dưỡng trắng da Blossom chứa chiết xuất hoa anh đào giúp nâng tông nhẹ nhàng và cấp ẩm sâu.",
-            deleted_at: null
-        },
-        {
-            post_id: 128,
-            code: "BL-0128",
-            title: "5 bước dưỡng da cho buổi sáng rạng rỡ",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "PUBLISHED",
-            planned_date: "2026-11-04",
-            planned_label: "04/11/2026",
-            updated_label: "04/11/2026",
-            caption: "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng Blossom.",
-            deleted_at: null
-        },
-        {
-            post_id: 127,
-            code: "BL-0127",
-            title: "Bí quyết chăm da mùa hanh khô",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "DRAFT",
-            planned_date: "2026-11-07",
-            planned_label: "07/11/2026",
-            updated_label: "07/11/2026",
-            caption: "Cấp ẩm chuyên sâu bảo vệ hàng rào tự nhiên của làn da trong tiết trời thu đông.",
-            deleted_at: null
-        },
-        {
-            post_id: 126,
-            code: "BL-0126",
-            title: "Một chút yêu thương cho làn da",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "REVISION_REQUESTED",
-            planned_date: "2026-11-06",
-            planned_label: "06/11/2026",
-            updated_label: "06/11/2026",
-            caption: "Dành 10 phút mỗi tối để thư giãn và phục hồi làn da với mặt nạ hoa hồng.",
-            deleted_at: null
-        },
-        {
-            post_id: 125,
-            code: "BL-0125",
-            title: "Chọn serum phù hợp với làn da của bạn",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Phạm Thùy Dương",
-            status: "DRAFT",
-            planned_date: "2026-11-07",
-            planned_label: "07/11/2026",
-            updated_label: "04/11/2026",
-            caption: "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png",
-            deleted_at: null
-        },
-        {
-            post_id: 124,
-            code: "BL-0124",
-            title: "Chống nắng mỗi ngày, nâng niu làn da",
-            platforms: ["Facebook", "Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Phạm Thùy Dương",
-            status: "SCHEDULED",
-            planned_date: "2026-11-08",
-            planned_label: "08/11/2026",
-            updated_label: "06/11/2026",
-            caption: "Kem chống nắng thuần chay mỏng nhẹ, không để lại vệt trắng.",
-            mediaUrl: "../../assets/poster.png",
-            deleted_at: null
-        },
-        {
-            post_id: 123,
-            code: "BL-0123",
-            title: "Routine tối giản cho ngày bận rộn",
-            platforms: ["Facebook", "Instagram", "Threads"],
-            platform_label: "Facebook & Instagram",
-            author: "Trần Ngọc Mai",
-            status: "REJECTED",
-            planned_date: "2026-11-03",
-            planned_label: "03/11/2026",
-            updated_label: "03/11/2026",
-            caption: "3 bước gọn nhẹ cho cô nàng công sở bận rộn.",
-            deleted_at: null
-        },
-        {
-            post_id: 122,
-            code: "BL-0122",
-            title: "Review Son Dưỡng Thuần Chay Hương Đào Blossom",
-            platforms: ["Threads"],
-            platform_label: "Threads",
-            author: "Trần Ngọc Mai",
-            status: "DRAFT",
-            planned_date: "2026-11-10",
-            planned_label: "10/11/2026",
-            updated_label: "09/11/2026",
-            caption: "Video ngắn unbox và swatch bảng màu son dưỡng thu đông.",
-            deleted_at: null
-        },
-        {
-            post_id: 121,
-            code: "BL-0121",
-            title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
-            platforms: ["Instagram"],
-            platform_label: "Instagram",
-            author: "Nhân viên Marketing",
-            status: "APPROVED",
-            planned_date: "2026-11-12",
-            planned_label: "12/11/2026",
-            updated_label: "10/11/2026",
-            caption: "Làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png",
-            deleted_at: null
-        },
-        {
-            post_id: 120,
-            code: "BL-0120",
-            title: "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ",
-            platforms: ["Facebook"],
-            platform_label: "Facebook",
-            author: "Nhân viên Marketing",
-            status: "PUBLISHED",
-            planned_date: "2026-11-01",
-            planned_label: "01/11/2026",
-            updated_label: "01/11/2026",
-            caption: "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11.",
-            mediaUrl: "../../assets/poster.png",
-            deleted_at: null
-        }
-    ];
-
     const currentUser = (window.Auth && typeof window.Auth.getUser === "function") ? window.Auth.getUser() : null;
     const isStaffPage = location.pathname.indexOf("/pages/staff/") !== -1;
-    const isStaff = isStaffPage || (currentUser && currentUser.role === "STAFF");
+    // Phân quyền theo VAI TRÒ (không theo thư mục trang): Staff luôn bị giới hạn bài của mình
+    const isStaffRole = !!currentUser && currentUser.role === "STAFF";
+
+    // ---- Bộ lọc nhận từ URL (dashboard -> danh sách): ?statuses=A,B&author=&campaign=&range=&label= ----
+    const urlParams = new URLSearchParams(location.search);
+    let urlFilter = {
+        statuses: (urlParams.get("statuses") || urlParams.get("status") || "").split(",").map(function (x) { return x.trim().toUpperCase(); }).filter(Boolean),
+        author: urlParams.get("author") || "",
+        campaign: urlParams.get("campaign") || "",
+        range: (urlParams.get("range") || "").toUpperCase(),
+        label: urlParams.get("label") || ""
+    };
 
     // Staff mặc định tab "Bài viết của tôi", Admin mặc định "Tất cả bài viết"
-    let activeTab = isStaffPage ? "MINE" : "ALL";
+    let activeTab = isStaffRole ? "MINE" : "ALL";
     let posts = loadPosts();
     let currentPage = 1;
     let pendingDeletePost = null;
 
     function isMyPost(p, u) {
-        if (!p || !p.author) return false;
-        if (!u) return false;
-        const myFull = (u.fullName || u.name || "").toLowerCase().trim();
-        const myShort = (window.Auth && typeof window.Auth.shortName === "function" ? window.Auth.shortName(u) : "").toLowerCase().trim();
-        const myUser = (u.username || "").toLowerCase().trim();
-        const author = p.author.toLowerCase().trim();
-
-        if (myFull && (author === myFull || author.includes(myFull) || myFull.includes(author))) return true;
-        if (myShort && (author === myShort || author.includes(myShort) || myShort.includes(author))) return true;
-        if (myUser && (author === myUser || author.includes(myUser))) return true;
-
-        return false;
+        return Scope.isMine(p, u);
     }
 
+    // Chỉ lấy những bài người đang đăng nhập được phép thấy (Staff: bài của mình; Manager: tất cả)
     function loadPosts() {
-        try {
-            const raw = JSON.parse(localStorage.getItem(POST_LIST_KEY));
-            if (Array.isArray(raw) && raw.length) {
-                // Đảm bảo có bài mẫu cho cả Minh Anh và Thùy Dương trong dữ liệu lưu trữ
-                const hasThuyDuong = raw.some(function (p) { return (p.author || "").includes("Thùy Dương"); });
-                if (!hasThuyDuong) {
-                    INITIAL_POSTS.filter(function (p) { return (p.author || "").includes("Thùy Dương"); })
-                                 .forEach(function (p) { raw.push(p); });
-                    localStorage.setItem(POST_LIST_KEY, JSON.stringify(raw));
-                }
-                const hasMinhAnh = raw.some(function (p) { return (p.author || "").includes("Minh Anh"); });
-                if (!hasMinhAnh) {
-                    INITIAL_POSTS.filter(function (p) { return (p.author || "").includes("Minh Anh"); })
-                                 .forEach(function (p) { raw.unshift(p); });
-                    localStorage.setItem(POST_LIST_KEY, JSON.stringify(raw));
-                }
-                return raw;
-            }
-        } catch (e) {
-            /* ignore */
-        }
-        localStorage.setItem(POST_LIST_KEY, JSON.stringify(INITIAL_POSTS));
-        return INITIAL_POSTS.slice();
+        return Scope.loadPosts().filter(function (p) { return Scope.canViewPost(p, currentUser); });
     }
 
+    // Ghi lại: chỉ thay các bài mà người dùng được phép thấy, giữ nguyên bài của người khác
     function savePosts() {
-        localStorage.setItem(POST_LIST_KEY, JSON.stringify(posts));
-        window.dispatchEvent(new Event("blossom_posts_updated"));
+        const all = Scope.loadPosts();
+        const mine = {};
+        posts.forEach(function (p) { mine[p.post_id] = p; });
+        const merged = all.map(function (p) { return mine[p.post_id] || p; });
+        Scope.savePosts(merged);
+    }
+
+    function clearUrlFilter() {
+        urlFilter = { statuses: [], author: "", campaign: "", range: "", label: "" };
+        try { history.replaceState(null, "", location.pathname); } catch (e) { /* bỏ qua */ }
+        renderFilterBanner();
+    }
+
+    function hasUrlFilter() {
+        return !!(urlFilter.statuses.length || urlFilter.author || urlFilter.campaign || urlFilter.range);
+    }
+
+    function renderFilterBanner() {
+        const body = document.getElementById("postTableBody");
+        if (!body) return;
+        let banner = document.getElementById("postUrlFilterBanner");
+        if (!hasUrlFilter()) {
+            if (banner) banner.remove();
+            return;
+        }
+        if (!banner) {
+            banner = document.createElement("div");
+            banner.id = "postUrlFilterBanner";
+            banner.className = "fr07-url-filter";
+            body.parentElement.insertBefore(banner, body);
+        }
+        const parts = [];
+        if (urlFilter.statuses.length) {
+            parts.push(urlFilter.label || urlFilter.statuses.map(function (st) { return (STATUS_MAP[st] && STATUS_MAP[st].label) || st; }).join(" · "));
+        }
+        if (urlFilter.author) {
+            const name = (Scope.STAFF.find(function (x) { return x.username === urlFilter.author; }) || {}).fullName || urlFilter.author;
+            parts.push("Nhân viên: " + name);
+        }
+        if (urlFilter.campaign) parts.push("Chiến dịch: " + urlFilter.campaign);
+        if (urlFilter.range) parts.push({ "7D": "7 ngày qua", "30D": "30 ngày qua", "MONTH": "Tháng này" }[urlFilter.range] || urlFilter.range);
+        banner.innerHTML = '<span>Đang lọc từ Tổng quan: <b>' + UI.esc(parts.join(" · ")) + '</b></span>' +
+            '<button type="button" id="btnClearUrlFilter">Xóa bộ lọc ✕</button>';
+        document.getElementById("btnClearUrlFilter").addEventListener("click", function () {
+            clearUrlFilter();
+            currentPage = 1;
+            renderMetrics();
+            renderTable();
+        });
     }
 
     function getFilteredPosts() {
         const keyword = (document.getElementById("postSearchInput").value || "").trim().toLowerCase();
         const platformVal = document.getElementById("filterPlatformSelect").value;
         const statusVal = document.getElementById("filterStatusSelect").value;
-        const authorEl = document.getElementById("filterAuthorSelect");
-        const authorVal = authorEl ? authorEl.value : "ALL";
+        const authorVal = document.getElementById("filterAuthorSelect").value;
         const dateVal = document.getElementById("filterDateInput").value;
 
         return posts.filter(function (p) {
-            // QUY TẮC CỐT LÕI: Ở trang Staff, nhân viên TUYỆT ĐỐI chỉ xem bài viết của chính mình!
-            if (isStaffPage && !isMyPost(p, currentUser)) {
-                return false;
-            }
+            // 0. Bảo vệ quyền xem (dù đang ở tab nào, Staff cũng không bao giờ thấy bài của người khác)
+            if (!Scope.canViewPost(p, currentUser)) return false;
+
+            // 0b. Bộ lọc đến từ thẻ thống kê ở Tổng quan
+            if (urlFilter.statuses.length && urlFilter.statuses.indexOf(p.status) === -1) return false;
+            if (urlFilter.author && !isStaffRole && Scope.ownerKey(p) !== urlFilter.author) return false;
+            if (urlFilter.campaign && p.campaign !== urlFilter.campaign) return false;
+            if (urlFilter.range && !Scope.inRange(p, urlFilter.range)) return false;
 
             // 1. Lọc theo Tab (Xóa mềm hoặc bài viết cá nhân / toàn công ty)
             if (activeTab === "DELETED") {
                 if (!p.deleted_at) return false;
-                if (isStaffPage && !isMyPost(p, currentUser)) return false;
+                if (isStaffRole && !isMyPost(p, currentUser)) return false;
             } else {
                 if (p.deleted_at) return false;
                 if (activeTab === "MINE" && !isMyPost(p, currentUser)) {
@@ -282,35 +164,18 @@
     }
 
     function renderMetrics() {
-        const activeList = posts.filter(function (p) { return !p.deleted_at; });
+        // Số liệu luôn tính từ dữ liệu thật mà người dùng được phép thấy
+        const activeList = posts.filter(function (p) { return !p.deleted_at && Scope.canViewPost(p, currentUser); });
+        const count = function (st) { return activeList.filter(function (p) { return p.status === st; }).length; };
 
-        const mTotal = document.getElementById("metricPostTotal");
-        const mDraft = document.getElementById("metricPostDraft");
-        const mPending = document.getElementById("metricPostPending");
-        const mPub = document.getElementById("metricPostPublished");
-
-        if (isStaffPage) {
-            // Đối với Nhân viên: số liệu phản ánh chính xác kết quả của riêng nhân viên
-            const myActive = activeList.filter(function (p) { return isMyPost(p, currentUser); });
-            const myDraft = myActive.filter(function (p) { return p.status === "DRAFT"; }).length;
-            const myPending = myActive.filter(function (p) { return p.status === "PENDING_APPROVAL"; }).length;
-            const myPub = myActive.filter(function (p) { return p.status === "PUBLISHED"; }).length;
-
-            if (mTotal) mTotal.textContent = String(myActive.length);
-            if (mDraft) mDraft.textContent = String(myDraft);
-            if (mPending) mPending.textContent = String(myPending);
-            if (mPub) mPub.textContent = String(myPub);
-        } else {
-            // Đối với Quản lý (Admin): số liệu toàn công ty từ dữ liệu bài viết thực tế
-            const draftCount = activeList.filter(function (p) { return p.status === "DRAFT"; }).length;
-            const pendingCount = activeList.filter(function (p) { return p.status === "PENDING_APPROVAL"; }).length;
-            const pubCount = activeList.filter(function (p) { return p.status === "PUBLISHED"; }).length;
-
-            if (mTotal) mTotal.textContent = String(activeList.length);
-            if (mDraft) mDraft.textContent = String(draftCount);
-            if (mPending) mPending.textContent = String(pendingCount);
-            if (mPub) mPub.textContent = String(pubCount);
-        }
+        const set = function (id, value) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = String(value);
+        };
+        set("metricPostTotal", activeList.length);
+        set("metricPostDraft", count("DRAFT"));
+        set("metricPostPending", count("PENDING_APPROVAL"));
+        set("metricPostPublished", count("PUBLISHED"));
     }
 
     function renderTable() {
@@ -341,7 +206,7 @@
                 // Quyền chỉnh sửa & xóa mềm theo vai trò
                 let actionsHtml = "";
 
-                if (isStaffPage) {
+                if (isStaffRole) {
                     if (!isMine) {
                         // Xem bài đồng nghiệp ở tab Tất cả: chỉ đọc
                         actionsHtml = '<button type="button" class="fr07-icon-btn" data-view-id="' + p.post_id + '" title="Xem chi tiết bài viết (Chỉ đọc)">' +
@@ -429,7 +294,7 @@
         if (!post) return;
 
         // Nếu là Staff, kiểm tra quyền sở hữu
-        if (isStaffPage && !isMyPost(post, currentUser)) {
+        if (isStaffRole && !isMyPost(post, currentUser)) {
             UI.toast("error", "Không có quyền", "Bạn chỉ được phép xóa bài viết do chính mình tạo.");
             return;
         }
@@ -504,7 +369,10 @@
         }
 
         const post = posts.find(function (p) { return p.post_id === postId; });
-        if (!post) return;
+        if (!post || !Scope.canViewPost(post, currentUser)) {
+            UI.toast("error", "Không có quyền", "Bạn chỉ được xem bài viết do chính mình phụ trách.");
+            return;
+        }
         const st = STATUS_MAP[post.status] || { label: post.status };
 
         const bodyHtml =
@@ -524,7 +392,7 @@
             "?id=" + encodeURIComponent(post.post_id) + "&state=" + encodeURIComponent(post.status);
 
         const actions = [{ label: "Đóng", variant: "ghost", value: false }];
-        if (!isStaffPage || isMyPost(post, currentUser)) {
+        if (!isStaffRole || isMyPost(post, currentUser)) {
             actions.push({ label: "Chỉnh sửa bài viết", variant: "primary", value: "EDIT" });
         }
 
@@ -542,13 +410,57 @@
     function updateAuthorFilterUI() {
         const authorSel = document.getElementById("filterAuthorSelect");
         if (!authorSel) return;
-        if (isStaffPage && activeTab === "MINE") {
+        const field = authorSel.closest(".fr07-filter-field");
+
+        if (isStaffRole) {
+            // Staff chỉ có bài của mình => ẩn hẳn bộ lọc tác giả
             authorSel.value = "ALL";
-            authorSel.disabled = true;
-            authorSel.title = "Đang hiển thị bài viết của riêng bạn";
-        } else {
-            authorSel.disabled = false;
-            authorSel.title = "";
+            if (field) field.hidden = true;
+            return;
+        }
+        if (field) field.hidden = false;
+        authorSel.disabled = false;
+        authorSel.title = "";
+    }
+
+    // Danh sách tác giả lấy từ dữ liệu thật (Manager); Staff không dùng
+    function populateAuthorFilter() {
+        const authorSel = document.getElementById("filterAuthorSelect");
+        if (!authorSel || isStaffRole) return;
+        const names = [];
+        posts.forEach(function (p) { if (p.author && names.indexOf(p.author) === -1) names.push(p.author); });
+        Scope.STAFF.forEach(function (s) { if (names.indexOf(s.fullName) === -1) names.push(s.fullName); });
+        names.sort(function (a, b) { return a.localeCompare(b, "vi"); });
+        authorSel.innerHTML = '<option value="ALL">Tất cả tác giả</option>' +
+            names.map(function (n) { return '<option value="' + UI.esc(n) + '">' + UI.esc(n) + '</option>'; }).join("");
+    }
+
+    // Staff: bỏ tab "Tất cả bài viết"; đồng bộ nút tab đang chọn
+    function prepareTabs() {
+        if (isStaffRole) {
+            const allBtn = document.querySelector('[data-post-tab="ALL"]');
+            if (allBtn) allBtn.remove();
+        }
+        document.querySelectorAll("[data-post-tab]").forEach(function (b) {
+            b.classList.toggle("is-active", b.dataset.postTab === activeTab);
+        });
+    }
+
+    // Nếu URL chỉ có 1 trạng thái thì đồng bộ vào ô chọn Trạng thái (người dùng đổi tiếp được)
+    function syncUrlFilterToControls() {
+        const statusSel = document.getElementById("filterStatusSelect");
+        if (statusSel && urlFilter.statuses.length === 1 && statusSel.querySelector('option[value="' + urlFilter.statuses[0] + '"]')) {
+            statusSel.value = urlFilter.statuses[0];
+            urlFilter.statuses = [];
+            urlFilter.label = "";
+        }
+        if (urlFilter.author && !isStaffRole) {
+            const person = Scope.STAFF.find(function (x) { return x.username === urlFilter.author; });
+            const authorSel = document.getElementById("filterAuthorSelect");
+            if (person && authorSel && authorSel.querySelector('option[value="' + person.fullName + '"]')) {
+                authorSel.value = person.fullName;
+                urlFilter.author = "";
+            }
         }
     }
 
@@ -566,37 +478,17 @@
             });
         });
 
-        // Metric cards click to filter status (TASK 03)
-        const metricStatusMap = {
-            metricPostTotal: "ALL",
-            metricPostDraft: "DRAFT",
-            metricPostPending: "PENDING_APPROVAL",
-            metricPostPublished: "PUBLISHED"
-        };
-        Object.keys(metricStatusMap).forEach(function (id) {
-            const cardEl = document.getElementById(id);
-            if (!cardEl) return;
-            const parentCard = cardEl.closest(".fr07-metric-card");
-            if (parentCard) {
-                parentCard.style.cursor = "pointer";
-                parentCard.setAttribute("title", "Nhấn để lọc bài viết theo trạng thái này");
-                parentCard.addEventListener("click", function () {
-                    const stSelect = document.getElementById("filterStatusSelect");
-                    if (stSelect) {
-                        stSelect.value = metricStatusMap[id];
-                        currentPage = 1;
-                        renderTable();
-                    }
-                });
-            }
-        });
-
         // Filters
         ["postSearchInput", "filterPlatformSelect", "filterStatusSelect", "filterAuthorSelect", "filterDateInput"].forEach(function (id) {
             const el = document.getElementById(id);
             if (!el) return;
             const evt = el.tagName === "INPUT" && el.type === "text" ? "input" : "change";
             el.addEventListener(evt, function () {
+                if (id === "filterStatusSelect" && urlFilter.statuses.length) {
+                    urlFilter.statuses = [];
+                    urlFilter.label = "";
+                    renderFilterBanner();
+                }
                 currentPage = 1;
                 renderTable();
             });
@@ -674,7 +566,7 @@
             renderTable();
         });
         window.addEventListener("storage", function (e) {
-            if (e.key === POST_LIST_KEY) {
+            if (e.key === Scope.POSTS_KEY) {
                 posts = loadPosts();
                 renderMetrics();
                 renderTable();
@@ -682,8 +574,17 @@
         });
     }
 
+    posts = loadPosts();
+    prepareTabs();
     updateAuthorFilterUI();
+    populateAuthorFilter();
+    syncUrlFilterToControls();
+    renderFilterBanner();
     renderMetrics();
     renderTable();
     bindEvents();
+
+    // Mở chi tiết khi có ?view=ID (đã kiểm tra quyền trong openPostDetailModal)
+    const viewId = Number(urlParams.get("view") || 0);
+    if (viewId) setTimeout(function () { openPostDetailModal(viewId); }, 200);
 })();

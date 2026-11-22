@@ -96,14 +96,29 @@
     }
 
     function changePasswordRemote(current, next) {
-        // TODO(API): gửi { current, next } lên server – server băm và kiểm tra, không lưu ở trình duyệt.
-        return delay(600).then(function () {
-            if (current !== DEMO_PASSWORD[user.role]) {
+        return delay(400).then(function () {
+            let acc = findStoreAccount();
+            const storedPwd = localStorage.getItem("blossom_pwd_" + user.username);
+            const activePwd = storedPwd || (acc && acc.password) || (user.role === "MANAGER" ? "Blossom@123" : "Staff@123");
+
+            if (current !== activePwd) {
                 const err = new Error("Mật khẩu hiện tại không chính xác.");
                 err.field = "current";
                 throw err;
             }
-            write(KEY.pwdAt, new Date().toISOString());   // chỉ ghi thời điểm đổi
+
+            // Lưu mật khẩu mới vào localStorage riêng và cập nhật AccountStore
+            localStorage.setItem("blossom_pwd_" + user.username, next);
+            write(KEY.pwdAt, new Date().toISOString());
+
+            if (acc && window.AccountStore) {
+                const list = AccountStore.load();
+                const rec = list.find(function (a) { return a.id === acc.id; });
+                if (rec) {
+                    rec.password = next;
+                    AccountStore.save(list);
+                }
+            }
         });
     }
 
@@ -184,38 +199,97 @@
 
     function currentUser() { return Auth.getUser() || user; }
 
-    function getAvatarSrc(u) {
-        if (!u) return "";
-        let src = "";
-        try {
-            src = localStorage.getItem("blossom_avatar_" + (u.username || u.email || "")) || "";
-        } catch (_) {}
-        if (!src && u.avatar) src = u.avatar;
-        if (!src) {
-            const acc = findStoreAccount();
-            if (acc && acc.avatar) src = acc.avatar;
-        }
-        return src;
+    /* ---------- Ảnh đại diện (tải từ máy tính, lưu theo tài khoản) ---------- */
+    const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+    const AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp"];
+    const AVATAR_SIZE = 256;
+
+    function avatarKey() { return "blossom_avatar_" + (currentUser().username || ""); }
+
+    function getAvatar() {
+        try { return localStorage.getItem(avatarKey()) || ""; } catch (e) { return ""; }
+    }
+
+    function avatarImg(src) {
+        return '<img src="' + UI.esc(src) + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block">';
+    }
+
+    // Cắt vuông giữa ảnh + thu nhỏ để vừa bộ nhớ trình duyệt
+    function resizeToDataUrl(file) {
+        return new Promise(function (resolve, reject) {
+            const reader = new FileReader();
+            reader.onerror = function () { reject(new Error("Không đọc được tệp ảnh.")); };
+            reader.onload = function () {
+                const img = new Image();
+                img.onerror = function () { reject(new Error("Tệp không phải ảnh hợp lệ.")); };
+                img.onload = function () {
+                    const side = Math.min(img.width, img.height);
+                    const canvas = document.createElement("canvas");
+                    canvas.width = canvas.height = AVATAR_SIZE;
+                    canvas.getContext("2d").drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+                    resolve(canvas.toDataURL("image/jpeg", 0.88));
+                };
+                img.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderAvatar() {
+        const src = getAvatar();
+        const u = currentUser();
+        const big = $("sumAvatar");
+        if (big) { if (src) big.innerHTML = avatarImg(src); else big.textContent = Auth.initials(u); }
+        const top = document.querySelector("#topbar .avatar");
+        if (top) { if (src) top.innerHTML = avatarImg(src); else top.textContent = Auth.initials(u); }
+        const rm = $("avatarRemove");
+        if (rm) rm.hidden = !src;
+    }
+
+    function bindAvatar() {
+        const file = $("avatarFile");
+        if (!file) return;
+        const pick = function () { file.click(); };
+        if ($("avatarPick")) $("avatarPick").addEventListener("click", pick);
+        if ($("avatarEdit")) $("avatarEdit").addEventListener("click", pick);
+
+        file.addEventListener("change", function () {
+            const f = file.files && file.files[0];
+            file.value = "";
+            if (!f) return;
+            if (AVATAR_TYPES.indexOf(f.type) === -1) {
+                UI.toast("error", "Định dạng không hợp lệ", "Chỉ chấp nhận ảnh JPG, PNG hoặc WebP.");
+                return;
+            }
+            if (f.size > AVATAR_MAX_BYTES) {
+                UI.toast("error", "Ảnh quá lớn", "Dung lượng tối đa là 5 MB.");
+                return;
+            }
+            resizeToDataUrl(f).then(function (dataUrl) {
+                try {
+                    localStorage.setItem(avatarKey(), dataUrl);
+                } catch (e) {
+                    UI.toast("error", "Không thể lưu ảnh", "Bộ nhớ trình duyệt đã đầy.");
+                    return;
+                }
+                renderAvatar();
+                UI.toast("success", "Đã cập nhật ảnh đại diện", "Ảnh mới đã hiển thị ở hồ sơ và thanh trên cùng.");
+            }).catch(function (err) {
+                UI.toast("error", "Không thể tải ảnh", err.message);
+            });
+        });
+
+        const rm = $("avatarRemove");
+        if (rm) rm.addEventListener("click", function () {
+            try { localStorage.removeItem(avatarKey()); } catch (e) { /* bỏ qua */ }
+            renderAvatar();
+            UI.toast("info", "Đã xóa ảnh đại diện", "Hệ thống dùng lại chữ cái viết tắt.");
+        });
     }
 
     function renderSummary() {
         const u = currentUser();
-        const avatarSrc = getAvatarSrc(u);
-        const sumAvatar = $("sumAvatar");
-        const avatarRemove = $("avatarRemove");
-
-        if (sumAvatar) {
-            if (avatarSrc) {
-                sumAvatar.innerHTML = '<img src="' + esc(avatarSrc) + '" alt="Ảnh đại diện" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
-            } else {
-                sumAvatar.textContent = Auth.initials(u);
-            }
-        }
-
-        if (avatarRemove) {
-            avatarRemove.hidden = !avatarSrc;
-        }
-
+        renderAvatar();
         $("sumName").textContent = u.fullName || u.username;
         $("sumPos").textContent = positionText;
         $("sumRole").innerHTML = UI.badge(Auth.ROLE_LABEL[u.role], roleTone);
@@ -239,108 +313,9 @@
         const avatar = document.querySelector("#topbar .avatar");
         const short = document.querySelector("#topbar .user-info b");
         const full = document.querySelector("#topbar .menu .who b");
-        const avatarSrc = getAvatarSrc(u);
-
-        if (avatar) {
-            if (avatarSrc) {
-                avatar.innerHTML = '<img src="' + esc(avatarSrc) + '" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;">';
-            } else {
-                avatar.textContent = Auth.initials(u);
-            }
-        }
+        renderAvatar();
         if (short) short.textContent = Auth.shortName(u);
         if (full) full.textContent = u.fullName || u.username;
-    }
-
-    function setupAvatarHandlers() {
-        const fileInput = $("avatarFile");
-        const pickBtn = $("avatarPick");
-        const editBtn = $("avatarEdit");
-        const removeBtn = $("avatarRemove");
-
-        function openFilePicker() {
-            if (fileInput) fileInput.click();
-        }
-
-        if (pickBtn) pickBtn.addEventListener("click", openFilePicker);
-        if (editBtn) editBtn.addEventListener("click", openFilePicker);
-
-        if (fileInput) {
-            fileInput.addEventListener("change", function () {
-                const file = fileInput.files && fileInput.files[0];
-                if (!file) return;
-
-                if (!/^image\/(png|jpe?g|webp)$/i.test(file.type)) {
-                    UI.toast("error", "Định dạng không hợp lệ", "Vui lòng chọn ảnh JPG, PNG hoặc WebP.");
-                    fileInput.value = "";
-                    return;
-                }
-
-                if (file.size > 5 * 1024 * 1024) {
-                    UI.toast("error", "Ảnh quá lớn", "Dung lượng ảnh tối đa cho phép là 5 MB.");
-                    fileInput.value = "";
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    const dataUrl = e.target.result;
-                    const u = currentUser();
-                    const key = "blossom_avatar_" + (u.username || u.email || "user");
-
-                    try { localStorage.setItem(key, dataUrl); } catch (_) {}
-                    u.avatar = dataUrl;
-                    try { localStorage.setItem(Auth.USER_KEY, JSON.stringify(u)); } catch (_) {}
-
-                    try {
-                        if (window.AccountStore && typeof AccountStore.load === "function") {
-                            const list = AccountStore.load();
-                            const acc = list.find(function (a) {
-                                return AccountStore.normEmail(a.email) === AccountStore.normEmail(u.email);
-                            });
-                            if (acc) {
-                                acc.avatar = dataUrl;
-                                AccountStore.save(list);
-                            }
-                        }
-                    } catch (_) {}
-
-                    renderSummary();
-                    refreshHeader();
-                    UI.toast("success", "Đã cập nhật ảnh đại diện", "Ảnh đại diện mới đã được áp dụng thành công.");
-                };
-                reader.readAsDataURL(file);
-            });
-        }
-
-        if (removeBtn) {
-            removeBtn.addEventListener("click", function () {
-                const u = currentUser();
-                const key = "blossom_avatar_" + (u.username || u.email || "user");
-
-                try { localStorage.removeItem(key); } catch (_) {}
-                delete u.avatar;
-                try { localStorage.setItem(Auth.USER_KEY, JSON.stringify(u)); } catch (_) {}
-
-                try {
-                    if (window.AccountStore && typeof AccountStore.load === "function") {
-                        const list = AccountStore.load();
-                        const acc = list.find(function (a) {
-                            return AccountStore.normEmail(a.email) === AccountStore.normEmail(u.email);
-                        });
-                        if (acc) {
-                            delete acc.avatar;
-                            AccountStore.save(list);
-                        }
-                    }
-                } catch (_) {}
-
-                if (fileInput) fileInput.value = "";
-                renderSummary();
-                refreshHeader();
-                UI.toast("info", "Đã xóa ảnh đại diện", "Ảnh đại diện đã được gỡ bỏ, quay lại hiển thị chữ cái viết tắt.");
-            });
-        }
     }
 
     function renderPermissions() {
@@ -670,7 +645,7 @@
 
     /* ---------- 9. KHỞI TẠO ---------- */
     renderSummary();
-    setupAvatarHandlers();
+    bindAvatar();
     renderPermissions();
     fillProfile();
     updateStrength();
