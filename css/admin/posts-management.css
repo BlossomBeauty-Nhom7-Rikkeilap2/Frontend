@@ -671,3 +671,27 @@
         justify-content: center;
     }
 }
+
+/* ---------- Thanh báo "Đang lọc từ Tổng quan" ---------- */
+.fr07-url-filter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--pink-border);
+    border-radius: 10px;
+    background: var(--pink-soft);
+    color: var(--text-2);
+    font-size: 14px;
+}
+.fr07-url-filter button {
+    border: 0;
+    background: #fff;
+    color: var(--pink);
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-weight: 600;
+    cursor: pointer;
+}

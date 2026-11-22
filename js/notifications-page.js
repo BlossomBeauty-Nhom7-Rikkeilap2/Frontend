@@ -26,18 +26,16 @@
 
     function getFilteredList() {
         if (!window.NotificationsStore) return [];
-        const all = window.NotificationsStore.getNotifications();
-        const role = (window.Auth && window.Auth.getRole()) || "MANAGER";
+        const all = window.NotificationsStore.getVisibleNotifications();
 
         return all.filter(function (n) {
-            // Role filter
-            if (n.recipientRole && n.recipientRole !== role && n.recipientRole !== "ALL") {
-                return false;
-            }
-
             if (activeTab === "UNREAD") return !n.is_read;
-            if (activeTab === "APPROVAL") return n.type === "approved" || n.type === "rejected" || n.type === "revision" || n.type === "submitted";
-            if (activeTab === "SYSTEM") return n.type === "system" || n.type === "reminder" || n.type === "published";
+            if (activeTab === "APPROVAL") {
+                return n.type === "approved" || n.type === "rejected" || n.type === "revision" || n.type === "submitted" || n.type === "assigned";
+            }
+            if (activeTab === "SYSTEM") {
+                return n.type === "system" || n.type === "reminder" || n.type === "published" || n.type === "deadline" || n.type === "overdue" || n.type === "conflict";
+            }
             return true;
         });
     }
@@ -67,13 +65,13 @@
             } else if (n.type === "revision") {
                 iconBoxClass = "revision";
                 iconSvg = UI.icon("edit");
-            } else if (n.type === "rejected") {
+            } else if (n.type === "rejected" || n.type === "overdue" || n.type === "conflict") {
                 iconBoxClass = "rejected";
                 iconSvg = UI.icon("close");
-            } else if (n.type === "reminder") {
+            } else if (n.type === "reminder" || n.type === "deadline") {
                 iconBoxClass = "reminder";
                 iconSvg = UI.icon("clock");
-            } else if (n.type === "submitted") {
+            } else if (n.type === "submitted" || n.type === "assigned") {
                 iconBoxClass = "submitted";
                 iconSvg = UI.icon("clipboard");
             }

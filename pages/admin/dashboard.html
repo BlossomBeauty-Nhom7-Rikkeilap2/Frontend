@@ -20,6 +20,7 @@
     <!-- Kiểm tra đăng nhập + phân quyền (chạy trước khi hiển thị trang) -->
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
+    <script src="../../js/data-scope.js"></script>
 </head>
 
 <body data-search="Tìm kiếm bài viết..." data-active="dashboard.html">
@@ -51,15 +52,19 @@
                 </div>
 
                 <div class="filters">
-                    <select class="select" id="filterAuthor" aria-label="Lọc theo tác giả">
-                        <option value="ALL">Tất cả tác giả</option>
+                    <select class="select" id="filterAuthor" aria-label="Lọc theo nhân viên">
+                        <option value="ALL">Tất cả nhân viên</option>
                     </select>
 
                     <select class="select" id="filterCampaign" aria-label="Lọc theo chiến dịch">
                         <option value="ALL">Tất cả chiến dịch</option>
-                        <option value="Chăm sóc da thu đông">Chăm sóc da thu đông</option>
-                        <option value="Tuần lễ hoa anh đào">Tuần lễ hoa anh đào</option>
-                        <option value="Bộ sưu tập son thuần chay">Bộ sưu tập son thuần chay</option>
+                    </select>
+
+                    <select class="select" id="filterRange" aria-label="Lọc theo thời gian">
+                        <option value="ALL">Tất cả thời gian</option>
+                        <option value="7D">7 ngày qua</option>
+                        <option value="30D">30 ngày qua</option>
+                        <option value="MONTH">Tháng này</option>
                     </select>
                 </div>
             </div>

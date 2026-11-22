@@ -17,6 +17,7 @@
     <script src="../../js/api.js"></script>
     <script src="../../js/auth.js"></script>
     <script src="../../js/permissions.js"></script>
+    <script src="../../js/data-scope.js"></script>
 </head>
 <body data-search="Tìm kiếm bài viết..." data-active="calendar.html">
 
@@ -61,20 +62,30 @@
                 </div>
 
                 <div class="fr11-view-controls" data-node-id="3:45321">
+                    <select class="fr11-channel-select" id="staffFilterSelect" aria-label="Lọc theo nhân viên"></select>
+                    <select class="fr11-channel-select" id="statusFilterSelect" aria-label="Lọc theo trạng thái">
+                        <option value="ALL">Tất cả trạng thái</option>
+                        <option value="PENDING">Chờ xác nhận</option>
+                        <option value="SCHEDULED">Đã xác nhận</option>
+                        <option value="EDITING">Cần điều chỉnh</option>
+                    </select>
                     <select class="fr11-channel-select" id="channelFilterSelect" aria-label="Lọc theo kênh" data-node-id="3:45322">
                         <option value="ALL">Tất cả kênh ⌄</option>
                         <option value="Facebook">Facebook</option>
                         <option value="Instagram">Instagram</option>
-                        <option value="TikTok">TikTok</option>
+                        <option value="Threads">Threads</option>
                     </select>
 
                     <div class="fr11-mode-group" role="tablist" aria-label="Chế độ xem lịch">
                         <button type="button" class="fr11-mode-btn is-active" data-cal-mode="MONTH" data-node-id="3:45324">Tháng</button>
                         <button type="button" class="fr11-mode-btn" data-cal-mode="WEEK" data-node-id="3:45326">Tuần</button>
                         <button type="button" class="fr11-mode-btn" data-cal-mode="DAY">Ngày</button>
+                        <button type="button" class="fr11-mode-btn" data-cal-mode="LIST">Danh sách</button>
                     </div>
                 </div>
             </section>
+
+            <section class="fr11-kpis" id="calendarKpis"></section>
 
             <!-- 3. CONFLICT WARNING BANNER (ERR-03 / BR-12) -->
             <section class="fr11-conflict-banner" id="conflictBanner" hidden>
@@ -96,14 +107,14 @@
             <!-- 5. SCHEDULE LEGEND & PLATFORM COLORS (Figma 3:45563) -->
             <section class="fr11-legend-bar" data-node-id="3:45563">
                 <div class="fr11-legend-items">
-                    <span class="fr11-legend-pill scheduled" data-node-id="3:45564">Đã lên lịch / Đã đăng</span>
-                    <span class="fr11-legend-pill pending" data-node-id="3:45566">Chờ duyệt</span>
-                    <span class="fr11-legend-pill editing" data-node-id="3:45568">Đang chỉnh sửa</span>
+                    <span class="fr11-legend-pill scheduled" data-node-id="3:45564">Đã xác nhận (lịch chính thức) / Đã đăng</span>
+                    <span class="fr11-legend-pill pending" data-node-id="3:45566">Chờ xác nhận (đề xuất)</span>
+                    <span class="fr11-legend-pill editing" data-node-id="3:45568">Cần điều chỉnh</span>
 
                     <div class="fr11-platform-badges">
                         <span class="fr11-plat-chip"><span class="fr11-platform-dot" style="background:#1877F2"></span> Facebook</span>
                         <span class="fr11-plat-chip"><span class="fr11-platform-dot" style="background:#E1306C"></span> Instagram</span>
-                        <span class="fr11-plat-chip"><span class="fr11-platform-dot" style="background:#111111"></span> TikTok</span>
+                        <span class="fr11-plat-chip"><span class="fr11-platform-dot" style="background:#111111"></span> Threads</span>
                     </div>
                 </div>
 
@@ -128,10 +139,11 @@
 
             <form id="fr11ScheduleForm">
                 <input type="hidden" id="fr11FormId">
+                <div class="fr11-status-banner" id="fr11StatusBanner" hidden></div>
 
                 <div class="fr11-form-group" style="margin-bottom:12px">
                     <label class="fr11-form-label" for="fr11FormTitle">Bài viết</label>
-                    <input type="text" class="fr11-form-input" id="fr11FormTitle" required>
+                    <input type="text" class="fr11-form-input" id="fr11FormTitle" placeholder="Tiêu đề bài viết cần đăng" required>
                 </div>
 
                 <div class="fr11-form-row" style="margin-bottom:12px">
@@ -141,16 +153,12 @@
                             <option value="FB & IG">FB &amp; IG</option>
                             <option value="Facebook">Facebook</option>
                             <option value="Instagram">Instagram</option>
-                            <option value="TikTok">TikTok</option>
+                            <option value="Threads">Threads</option>
                         </select>
                     </div>
-                    <div class="fr11-form-group">
-                        <label class="fr11-form-label" for="fr11FormStatus">Trạng thái</label>
-                        <select class="fr11-form-select" id="fr11FormStatus">
-                            <option value="SCHEDULED">Đã lên lịch / Đã đăng</option>
-                            <option value="PENDING">Chờ duyệt</option>
-                            <option value="EDITING">Đang chỉnh sửa</option>
-                        </select>
+                    <div class="fr11-form-group" id="fr11OwnerGroup" hidden>
+                        <label class="fr11-form-label" for="fr11FormOwner">Nhân viên phụ trách</label>
+                        <select class="fr11-form-select" id="fr11FormOwner"></select>
                     </div>
                 </div>
 
@@ -165,13 +173,22 @@
                     </div>
                 </div>
 
+                <div class="fr11-conflict-box" id="fr11ConflictBox" hidden></div>
+
+                <div class="fr11-form-group" id="fr11ReasonGroup" style="margin-bottom:12px" hidden>
+                    <label class="fr11-form-label" for="fr11FormReason">Lý do yêu cầu thay đổi</label>
+                    <textarea class="fr11-form-input" id="fr11FormReason" rows="3" placeholder="Nhân viên cần điều chỉnh gì? (giờ đăng, nền tảng...)"></textarea>
+                </div>
+
                 <div class="fr11-modal-error" id="fr11ModalError" hidden></div>
 
                 <div class="fr11-modal-foot">
-                    <a href="../staff/edit-post.html" class="fr11-btn-outline" id="btnOpenPostEditorFromCal" style="display:inline-flex;align-items:center;text-decoration:none;">Chỉnh sửa bài viết →</a>
+                    <a href="../staff/edit-post.html" class="fr11-btn-outline" id="btnOpenPostEditorFromCal" style="display:inline-flex;align-items:center;text-decoration:none;" hidden>Chỉnh sửa bài viết →</a>
                     <div class="fr11-modal-foot-right">
-                        <button type="button" class="fr11-btn-outline" id="btnCancelScheduleModal">Hủy bỏ</button>
-                        <button type="submit" class="fr11-btn-primary">Lưu lịch đăng</button>
+                        <button type="button" class="fr11-btn-outline" id="btnCancelScheduleModal">Đóng</button>
+                        <button type="button" class="fr11-btn-outline" id="btnRequestChange" hidden>Yêu cầu thay đổi</button>
+                        <button type="button" class="fr11-btn-outline" id="btnConfirmSchedule" hidden>Xác nhận lịch</button>
+                        <button type="submit" class="fr11-btn-primary" id="btnSaveSchedule">Lưu lịch đăng</button>
                     </div>
                 </div>
             </form>
