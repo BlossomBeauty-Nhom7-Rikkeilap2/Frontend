@@ -659,8 +659,10 @@
                     });
 
                     if (bp.media_files && Array.isArray(bp.media_files) && bp.media_files.length) {
+                        const mUrl = (global.BlossomAPI && global.BlossomAPI.resolveMediaUrl) ? global.BlossomAPI.resolveMediaUrl(bp.media_files[0]) : bp.media_files[0];
+                        item.mediaUrl = mUrl;
                         savePostMedia(bp.post_id, {
-                            url: bp.media_files[0],
+                            url: mUrl,
                             serverUrl: bp.media_files[0],
                             type: bp.media_type || "IMAGE"
                         });
@@ -682,17 +684,19 @@
 
                     cal.forEach(function (cev) {
                         const plat = cev.platform_name || "Facebook";
-                        const dateStr = cev.publish_time ? cev.publish_time.slice(0, 10) : "";
-                        const timeStr = cev.publish_time ? cev.publish_time.slice(11, 16) : "09:00";
+                        const pubTime = cev.scheduled_time || cev.publish_time || "";
+                        const dateStr = pubTime ? pubTime.slice(0, 10) : "";
+                        const timeStr = pubTime ? pubTime.slice(11, 16) : "09:00";
                         const evId = "ev_be_" + cev.schedule_id;
                         evMap[evId] = {
                             event_id: evId,
+                            schedule_id: cev.schedule_id,
                             post_id: cev.post_id,
-                            title: cev.post_title,
+                            title: cev.title || cev.post_title || "",
                             platform: plat,
                             date: dateStr,
                             time: timeStr,
-                            status: cev.status || "SCHEDULED",
+                            status: cev.schedule_status || cev.status || "SCHEDULED",
                             author: cev.author_name || ""
                         };
                     });
