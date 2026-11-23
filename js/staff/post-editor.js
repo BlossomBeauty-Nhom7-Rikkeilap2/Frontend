@@ -516,7 +516,15 @@
         const dt = new Date(y, mo - 1, d, h, mi, 0);
         if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d || h > 23 || mi > 59) return null;
         const pad = function (n) { return String(n).padStart(2, "0"); };
-        return { date: y + "-" + pad(mo) + "-" + pad(d), time: pad(h) + ":" + pad(mi), dt: dt, text: pad(d) + "/" + pad(mo) + "/" + y + " " + pad(h) + ":" + pad(mi) };
+        const isoDateStr = y + "-" + pad(mo) + "-" + pad(d);
+        const timeStr = pad(h) + ":" + pad(mi);
+        return {
+            date: isoDateStr,
+            time: timeStr,
+            isoString: isoDateStr + "T" + timeStr + ":00",
+            dt: dt,
+            text: pad(d) + "/" + pad(mo) + "/" + y + " " + timeStr
+        };
     }
 
     function showPlannedError(msg) {
