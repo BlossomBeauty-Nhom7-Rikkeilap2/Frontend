@@ -360,16 +360,29 @@
                     const map = {};
                     current.forEach(function (n) { map[n.id] = n; });
 
+                    const currentRole = (global.Auth && global.Auth.getRole()) || "MANAGER";
+                    const currentUser = (global.Auth && global.Auth.getUser()) || null;
+                    const typeMap = {
+                        APPROVAL_REQUEST: "submitted",
+                        POST_APPROVED: "approved",
+                        POST_REJECTED: "rejected",
+                        SCHEDULE_REMINDER: "reminder",
+                        OVERDUE_ALERT: "overdue"
+                    };
+
                     list.forEach(function (beN) {
+                        const rawType = (beN.notification_type || beN.type || "").toUpperCase();
                         map[beN.notification_id] = {
                             id: beN.notification_id,
-                            type: beN.type ? beN.type.toLowerCase() : "submitted",
+                            type: typeMap[rawType] || (rawType ? rawType.toLowerCase() : "submitted"),
                             title: beN.title,
-                            message: beN.content || beN.message || "",
+                            message: beN.message || beN.content || "",
                             time: beN.created_at,
                             time_relative: "Gần đây",
                             is_read: beN.is_read,
-                            postId: beN.post_id
+                            postId: beN.post_id,
+                            recipientRole: currentRole,
+                            recipientUser: currentUser ? currentUser.username : undefined
                         };
                     });
                     this.saveNotifications(Object.values(map));
@@ -396,12 +409,24 @@
                     try {
                         const data = JSON.parse(event.data);
                         if (data && data.title) {
+                            const currentRole = (global.Auth && global.Auth.getRole()) || "MANAGER";
+                            const currentUser = (global.Auth && global.Auth.getUser()) || null;
+                            const wsTypeMap = {
+                                APPROVAL_REQUEST: "submitted",
+                                POST_APPROVED: "approved",
+                                POST_REJECTED: "rejected",
+                                SCHEDULE_REMINDER: "reminder",
+                                OVERDUE_ALERT: "overdue"
+                            };
+                            const rawWsType = String(data.type || "").toUpperCase();
                             NotificationsStore.addNotification({
                                 title: data.title,
                                 message: data.message || "",
-                                type: data.type || "submitted",
+                                type: wsTypeMap[rawWsType] || "submitted",
                                 postId: data.post_id || null,
-                                author: data.author || "Hệ thống Blossom"
+                                author: data.author || "Hệ thống Blossom",
+                                recipientRole: currentRole,
+                                recipientUser: currentUser ? currentUser.username : undefined
                             });
                             if (global.UI && typeof global.UI.toast === "function") {
                                 global.UI.toast("info", data.title, data.message || "");

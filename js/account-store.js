@@ -113,6 +113,8 @@
 
     async function syncFromBackend() {
         if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
+        const role = global.Auth && typeof global.Auth.getRole === "function" ? global.Auth.getRole() : null;
+        if (role && role !== "MANAGER") return;
         try {
             const users = await global.BlossomAPI.request("/users");
             if (Array.isArray(users) && users.length) {

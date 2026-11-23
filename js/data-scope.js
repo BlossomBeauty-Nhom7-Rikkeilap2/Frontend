@@ -650,7 +650,10 @@
                         hashtags: bp.hashtags || "",
                         platforms: [plat],
                         platform_label: plat,
+                        author: bp.author_name || (listMap[bp.post_id] && listMap[bp.post_id].author) || "",
+                        owner_username: bp.author_username || (listMap[bp.post_id] && listMap[bp.post_id].owner_username) || undefined,
                         status: bp.status,
+                        published_url: bp.published_url || (listMap[bp.post_id] && listMap[bp.post_id].published_url) || "",
                         planned_date: plannedDate,
                         planned_time: plannedTime,
                         planned_label: plannedDate ? viDate(plannedDate) + " " + plannedTime : "",
@@ -696,8 +699,9 @@
                             platform: plat,
                             date: dateStr,
                             time: timeStr,
-                            status: cev.schedule_status || cev.status || "SCHEDULED",
-                            author: cev.author_name || ""
+                            status: cev.schedule_status === "ACTIVE" ? "SCHEDULED" : (cev.schedule_status || cev.status || "SCHEDULED"),
+                            author: cev.author_name || "",
+                            owner_username: cev.author_username || undefined
                         };
                     });
                     saveEvents(Object.values(evMap), false);
