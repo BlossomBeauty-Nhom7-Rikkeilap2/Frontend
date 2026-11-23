@@ -129,11 +129,56 @@
         staff: "ALL"         // ALL | Doãn Thị Minh Anh | Nguyễn Hà Linh | Trần Ngọc Mai | Lê Thu Hương
     };
 
+    let backendRankingPosts = null;
+
+    function mapBackendRow(r) {
+        const pubIso = r.published_at || "";
+        const period = pubIso.length >= 7 ? pubIso.slice(0, 7) : "2026-11";
+        const month = pubIso.length >= 7 ? (parseInt(pubIso.slice(5, 7), 10) || 11) : 11;
+        const reach = Number(r.reach) || 0;
+        const engagement = (Number(r.likes) || 0) + (Number(r.comments) || 0) + (Number(r.shares) || 0);
+        const rate = reach > 0 ? Number(((engagement / reach) * 100).toFixed(2)) : 0;
+
+        let channel = "Facebook";
+        const pLower = String(r.platform || "").toLowerCase();
+        if (pLower.indexOf("insta") !== -1) channel = "Instagram";
+        else if (pLower.indexOf("thread") !== -1) channel = "Threads";
+
+        return {
+            id: Number(r.post_id),
+            code: "BL-0" + r.post_id,
+            title: r.title || "",
+            author: r.author || "Chưa rõ",
+            period: period,
+            month: month,
+            reach: reach,
+            engagement: engagement,
+            rate: rate,
+            channel: channel
+        };
+    }
+
+    async function loadBackendAnalytics() {
+        if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
+        try {
+            const rows = await global.BlossomAPI.request("/analytics/export");
+            if (Array.isArray(rows) && rows.length > 0) {
+                backendRankingPosts = rows.map(mapBackendRow);
+                renderDashboard();
+            }
+        } catch (err) {
+            console.warn("[Reports] Backend analytics load fallback:", err.message);
+        }
+    }
+
     function formatNumber(n) {
         return Number(n || 0).toLocaleString("vi-VN");
     }
 
     function getAllRankingPosts() {
+        if (Array.isArray(backendRankingPosts) && backendRankingPosts.length > 0) {
+            return backendRankingPosts.slice();
+        }
         const list = TOP_POSTS_DATA.slice();
         try {
             const shared = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
@@ -416,24 +461,7 @@
         if (menu) menu.hidden = true;
 
         const filtered = getFilteredData();
-        const dateStamp = "20261120";
-
-        try {
-            const token = window.BlossomAPI ? BlossomAPI.getToken() : localStorage.getItem("blossom_access_token");
-            const headers = token ? { "Authorization": "Bearer " + token } : {};
-            const resp = await fetch(
-                (global.BlossomAPI ? global.BlossomAPI.API_BASE : "http://localhost:8000/api") +
-                "/analytics/export?format=" + encodeURIComponent(format),
-                { headers: headers, credentials: "include" }
-            );
-            if (resp.ok) {
-                const blob = await resp.blob();
-                const ext = format === "excel" ? "xlsx" : format;
-                triggerDownload(blob, "Bao_Cao_Blossom_" + dateStamp + "." + ext);
-                UI.toast("success", "Xuất báo cáo thành công", "Đã tải xuống tệp báo cáo.");
-                return;
-            }
-        } catch (_) {}
+        const dateStamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 
         if (format === "pdf") {
             window.print();
@@ -573,10 +601,12 @@
             initFromUrl();
             bindEvents();
             renderDashboard();
+            loadBackendAnalytics();
         });
     } else {
         initFromUrl();
         bindEvents();
         renderDashboard();
+        loadBackendAnalytics();
     }
 })(window);
