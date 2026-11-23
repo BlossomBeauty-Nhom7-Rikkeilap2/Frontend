@@ -291,9 +291,9 @@
 
         try {
             if (window.BlossomAPI && typeof window.BlossomAPI.request === "function") {
-                const platformCodeMap = { facebook: 1, instagram: 2, threads: 3 };
-                const platKey = (payload.platforms && payload.platforms[0]) || "facebook";
-                const platId = platformCodeMap[platKey] || 1;
+                const platKey = (payload.platforms && payload.platforms[0]) || "Facebook";
+                const kLower = String(platKey).toLowerCase();
+                const platId = kLower.indexOf("insta") !== -1 ? 2 : (kLower.indexOf("thread") !== -1 ? 3 : 1);
                 const mType = currentMedia && currentMedia.type === "VIDEO" ? "VIDEO" : "IMAGE";
 
                 await BlossomAPI.request("/posts/autosave", {
@@ -727,49 +727,77 @@
         Scope.upsertEventForPost(post);   // lịch đăng + Tổng quan cập nhật ngay theo bài vừa lưu
         originalPlanned = plannedParsed.text;
 
-        // Gọi API Backend (chi dung du lieu thuc)
+        // Gọi API Backend (tạo/cập nhật bài viết cho TẤT CẢ các nền tảng đã chọn)
         try {
             if (window.BlossomAPI && typeof window.BlossomAPI.request === "function") {
-                const platformCodeMap = { facebook: 1, instagram: 2, threads: 3 };
-                const platKey = (payload.platforms && payload.platforms[0]) || "facebook";
-                const platId = platformCodeMap[platKey] || 1;
+                const resolvePlatId = function (name) {
+                    const k = String(name || "").trim().toLowerCase();
+                    if (k.indexOf("insta") !== -1) return 2;
+                    if (k.indexOf("thread") !== -1) return 3;
+                    return 1;
+                };
+                const selectedPlats = (payload.platforms && payload.platforms.length) ? payload.platforms : ["Facebook"];
                 const mType = currentMedia && currentMedia.type === "VIDEO" ? "VIDEO" : "IMAGE";
                 const rawMediaUrl = currentMedia ? (currentMedia.serverUrl || (String(currentMedia.url || "").startsWith("http") ? currentMedia.url : "")) : "";
                 const mediaUrls = rawMediaUrl ? [rawMediaUrl] : [];
 
-                const backendBody = {
-                    title: payload.title,
-                    caption: (payload.headline ? payload.headline + "\n\n" : "") + (payload.caption || ""),
-                    hashtags: payload.hashtags || null,
-                    platform_id: platId,
-                    media_type: mType,
-                    media_files: mediaUrls,
-                    total_media_size_bytes: (currentMedia || {}).sizeBytes || 0,
-                    planned_publish_time: plannedParsed && plannedParsed.isoString ? plannedParsed.isoString : null
+                const buildBody = function (platName) {
+                    return {
+                        title: payload.title,
+                        caption: (payload.headline ? payload.headline + "\n\n" : "") + (payload.caption || ""),
+                        hashtags: payload.hashtags || null,
+                        platform_id: resolvePlatId(platName),
+                        media_type: mType,
+                        media_files: mediaUrls,
+                        total_media_size_bytes: (currentMedia || {}).sizeBytes || 0,
+                        planned_publish_time: plannedParsed && plannedParsed.isoString ? plannedParsed.isoString : null
+                    };
                 };
 
-                let savedBackendPost = null;
+                const createdOrUpdatedIds = [];
                 const isNumericId = currentPostId && !isNaN(Number(currentPostId)) && !String(currentPostId).startsWith("demo_");
 
+                // 1. Nền tảng đầu tiên: cập nhật nếu đang sửa, hoặc tạo mới
+                const primaryBody = buildBody(selectedPlats[0]);
                 if (!isNew && isNumericId) {
-                    savedBackendPost = await BlossomAPI.request("/posts/" + currentPostId, {
+                    const updatedPrimary = await BlossomAPI.request("/posts/" + currentPostId, {
                         method: "PUT",
-                        body: backendBody
+                        body: primaryBody
                     });
+                    createdOrUpdatedIds.push((updatedPrimary && updatedPrimary.post_id) || Number(currentPostId));
                 } else {
-                    savedBackendPost = await BlossomAPI.request("/posts", {
+                    const createdPrimary = await BlossomAPI.request("/posts", {
                         method: "POST",
-                        body: backendBody
+                        body: primaryBody
                     });
-                    if (savedBackendPost && savedBackendPost.post_id) {
-                        post.post_id = savedBackendPost.post_id;
-                        currentPostId = savedBackendPost.post_id;
+                    if (createdPrimary && createdPrimary.post_id) {
+                        post.post_id = createdPrimary.post_id;
+                        post.code = "BL-0" + createdPrimary.post_id;
+                        currentPostId = createdPrimary.post_id;
+                        createdOrUpdatedIds.push(createdPrimary.post_id);
                     }
                 }
 
-                // Nếu người dùng chọn Gửi duyệt (SUBMIT):
-                if (targetAction === "SUBMIT" && currentPostId) {
-                    await BlossomAPI.request("/posts/" + currentPostId + "/submit", { method: "POST" });
+                // 2. Các nền tảng bổ sung (nếu chọn 2-3 nền tảng cùng lúc): tạo bài viết riêng cho từng kênh
+                for (let idx = 1; idx < selectedPlats.length; idx++) {
+                    const extraCreated = await BlossomAPI.request("/posts", {
+                        method: "POST",
+                        body: buildBody(selectedPlats[idx])
+                    });
+                    if (extraCreated && extraCreated.post_id) {
+                        createdOrUpdatedIds.push(extraCreated.post_id);
+                    }
+                }
+
+                // 3. Nếu người dùng chọn Gửi duyệt (SUBMIT): gửi duyệt toàn bộ các bài đã tạo/cập nhật
+                if (targetAction === "SUBMIT") {
+                    for (let i = 0; i < createdOrUpdatedIds.length; i++) {
+                        await BlossomAPI.request("/posts/" + createdOrUpdatedIds[i] + "/submit", { method: "POST" });
+                    }
+                }
+
+                if (window.Scope && typeof window.Scope.syncFromBackend === "function") {
+                    await window.Scope.syncFromBackend();
                 }
             }
         } catch (e) {
