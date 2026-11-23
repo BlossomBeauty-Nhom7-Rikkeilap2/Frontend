@@ -6,117 +6,6 @@
 (function (global) {
     "use strict";
 
-    const TOP_POSTS_DATA = [
-        {
-            id: 128,
-            code: "BL-0128",
-            title: "5 bước dưỡng da cho buổi sáng rạng rỡ",
-            author: "Nguyễn Hà Linh",
-            period: "2026-11",
-            month: 11,
-            reach: 12840,
-            engagement: 1148,
-            rate: 8.94,
-            channel: "Facebook"
-        },
-        {
-            id: 129,
-            code: "BL-0129",
-            title: "Kem dưỡng trắng da Blossom",
-            author: "Doãn Thị Minh Anh",
-            period: "2026-11",
-            month: 11,
-            reach: 11500,
-            engagement: 1080,
-            rate: 9.39,
-            channel: "Instagram"
-        },
-        {
-            id: 123,
-            code: "BL-0123",
-            title: "Routine tối giản cho ngày bận rộn",
-            author: "Trần Ngọc Mai",
-            period: "2026-11",
-            month: 11,
-            reach: 10260,
-            engagement: 986,
-            rate: 9.61,
-            channel: "Facebook"
-        },
-        {
-            id: 118,
-            code: "BL-0118",
-            title: "Dịu dàng với làn da, dịu dàng với chính mình",
-            author: "Lê Thu Hương",
-            period: "2026-11",
-            month: 11,
-            reach: 9480,
-            engagement: 824,
-            rate: 8.69,
-            channel: "Facebook"
-        },
-        {
-            id: 121,
-            code: "BL-0121",
-            title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
-            author: "Lê Thu Hương",
-            period: "2026-11",
-            month: 11,
-            reach: 8650,
-            engagement: 910,
-            rate: 10.52,
-            channel: "Instagram"
-        },
-        {
-            id: 122,
-            code: "BL-0122",
-            title: "Review Son Dưỡng Thuần Chay Hương Đào Blossom",
-            author: "Trần Ngọc Mai",
-            period: "2026-11",
-            month: 11,
-            reach: 7920,
-            engagement: 895,
-            rate: 11.30,
-            channel: "Threads"
-        },
-        {
-            id: 115,
-            code: "BL-0115",
-            title: "Bí quyết khóa ẩm ban đêm với Mặt nạ Hoa Anh Đào",
-            author: "Nguyễn Hà Linh",
-            period: "2026-10",
-            month: 10,
-            reach: 11200,
-            engagement: 1040,
-            rate: 9.29,
-            channel: "Instagram"
-        },
-        {
-            id: 114,
-            code: "BL-0114",
-            title: "Chăm da đón gió thu cùng Serum Hoa Hồng",
-            author: "Trần Ngọc Mai",
-            period: "2026-10",
-            month: 10,
-            reach: 9850,
-            engagement: 920,
-            rate: 9.34,
-            channel: "Facebook"
-        },
-        {
-            id: 113,
-            code: "BL-0113",
-            title: "3 tips đánh son mịn môi không lộ vân",
-            author: "Lê Thu Hương",
-            period: "2026-10",
-            month: 10,
-            reach: 8400,
-            engagement: 860,
-            rate: 10.24,
-            channel: "Threads"
-        }
-    ];
-
     const CHANNEL_META = [
         { name: "Facebook",  color: "#cc618a" },
         { name: "Instagram", color: "#f4b8ce" },
@@ -176,42 +65,7 @@
     }
 
     function getAllRankingPosts() {
-        if (Array.isArray(backendRankingPosts) && backendRankingPosts.length > 0) {
-            return backendRankingPosts.slice();
-        }
-        const list = TOP_POSTS_DATA.slice();
-        try {
-            const shared = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
-            if (Array.isArray(shared)) {
-                shared.forEach(function (p) {
-                    if (p.deleted_at) return;
-                    const exists = list.some(function (x) { return x.code === p.code || Number(x.id) === Number(p.post_id); });
-                    if (!exists && Number(p.post_id) > 129) {
-                        const m = p.planned_date ? parseInt(p.planned_date.split("-")[1], 10) : 11;
-                        let ch = "Facebook";
-                        if (Array.isArray(p.platforms) && p.platforms.length > 0) {
-                            const p0 = String(p.platforms[0]).toLowerCase();
-                            if (p0.indexOf("thread") !== -1) ch = "Threads";
-                            else if (p0.indexOf("insta") !== -1) ch = "Instagram";
-                            else ch = "Facebook";
-                        }
-                        list.unshift({
-                            id: Number(p.post_id),
-                            code: p.code || ("BL-0" + p.post_id),
-                            title: p.title,
-                            author: p.author || "Doãn Thị Minh Anh",
-                            period: "2026-" + String(m || 11).padStart(2, "0"),
-                            month: m || 11,
-                            reach: 6420,
-                            engagement: 685,
-                            rate: 10.67,
-                            channel: ch
-                        });
-                    }
-                });
-            }
-        } catch (_) {}
-        return list;
+        return Array.isArray(backendRankingPosts) ? backendRankingPosts.slice() : [];
     }
 
     function getFilteredData() {
@@ -232,19 +86,11 @@
         const bigTotalEl = document.getElementById("trendTotalPosts");
         if (!plotEl) return;
 
-        // Tính số liệu bài viết theo 12 tháng từ bộ lọc
-        const scaleFactor = Math.max(0.2, filtered.length / 5);
-        const baseHistory = [1, 2, 1, 3, 3, 4, 3, 4, 5, 0, 0, 0];
-        const monthlyCounts = baseHistory.map(function (v, idx) {
-            const monthNum = idx + 1;
-            const actualInMonth = filtered.filter(function (x) { return x.month === monthNum; }).length;
-            if (monthNum === 10 || monthNum === 11) {
-                return actualInMonth;
-            }
-            if (state.period === "2026-11" || state.period === "2026-10") {
-                return Math.max(0, Math.round(v * Math.min(1, scaleFactor)));
-            }
-            return Math.max(0, Math.round(v * Math.min(1.2, scaleFactor)));
+        // Tính số liệu bài viết thực tế theo 12 tháng từ dữ liệu Backend
+        const monthlyCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        filtered.forEach(function (x) {
+            const idx = (Number(x.month) || 1) - 1;
+            if (idx >= 0 && idx < 12) monthlyCounts[idx] += 1;
         });
 
         const totalYearPosts = monthlyCounts.reduce(function (s, n) { return s + n; }, 0);

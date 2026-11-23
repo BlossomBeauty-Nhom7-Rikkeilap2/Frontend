@@ -215,7 +215,6 @@
                                 '<span style="font-size:12px;font-weight:700;color:#2f7d4e;text-transform:uppercase;">Hiệu quả bài đăng & Đồng bộ</span>' +
                                 '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
                                     '<button type="button" class="btn btn--primary btn--sm" id="btnModalSyncSocial">Đồng bộ MXH</button>' +
-                                    '<button type="button" class="btn btn--secondary btn--sm" id="btnModalSyncMock">Đồng bộ nhanh (Demo)</button>' +
                                     '<button type="button" class="btn btn--ghost btn--sm" id="btnModalManualStats">Nhập số liệu</button>' +
                                 '</div>' +
                             '</div>' +
@@ -402,26 +401,10 @@
                         renderStatsBox(stat);
                         UI.toast("success", "Đồng bộ thành công", "Đã cập nhật số liệu mới nhất từ mạng xã hội.");
                     } catch (err) {
-                        UI.toast("error", "Không thể đồng bộ trực tiếp", err.message || "Vui lòng thử Đồng bộ nhanh (Demo) hoặc Nhập số liệu.");
+                        UI.toast("error", "Không thể đồng bộ trực tiếp", err.message || "Vui lòng kiểm tra Token/ID bài đăng hoặc dùng Nhập số liệu.");
                     } finally {
                         btnSyncSocial.disabled = false;
                         btnSyncSocial.textContent = "Đồng bộ MXH";
-                    }
-                });
-            }
-
-            const btnSyncMock = document.getElementById("btnModalSyncMock");
-            if (btnSyncMock) {
-                btnSyncMock.addEventListener("click", async function () {
-                    btnSyncMock.disabled = true;
-                    try {
-                        const stat = await BlossomAPI.request("/posts/" + post.post_id + "/statistics/sync-mock", { method: "POST" });
-                        renderStatsBox(stat);
-                        UI.toast("success", "Đồng bộ thành công", "Đã cập nhật số liệu thống kê.");
-                    } catch (err) {
-                        UI.toast("error", "Lỗi đồng bộ", err.message);
-                    } finally {
-                        btnSyncMock.disabled = false;
                     }
                 });
             }

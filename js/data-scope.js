@@ -25,19 +25,13 @@
     const CAL_KEY = "blossom_fr11_calendar_events_v2";
     const CAL_KEY_V1 = "blossom_fr11_calendar_events_v1";
     const SEED_FLAG_KEY = "blossom_scope_seed_flags_v1";
+    const REAL_DATA_FLAG = "blossom_real_data_only_v1";
 
-    /* ---------- Danh bạ nhân viên (dùng cho dashboard + gán chủ sở hữu) ---------- */
-    const STAFF = [
-        { username: "minhanh",   fullName: "Doãn Thị Minh Anh" },
-        { username: "ngocmai",   fullName: "Trần Ngọc Mai" },
-        { username: "thuhuong",  fullName: "Lê Thu Hương" },
-        { username: "khanhlinh", fullName: "Phạm Khánh Linh" },
-        { username: "thuyduong", fullName: "Nguyễn Thùy Dương" },
-        { username: "halinh",    fullName: "Nguyễn Hà Linh" }
-    ];
+    /* ---------- Danh bạ nhân viên (tổng hợp động từ dữ liệu thật) ---------- */
+    const STAFF = [];
 
     // Tài khoản Manager (không được tính là "nhân viên" trong thống kê)
-    const MANAGER_USERNAMES = ["admin"];
+    const MANAGER_USERNAMES = ["admin", "manager"];
 
     const CAMPAIGNS = [
         "Chăm sóc da thu đông", "Tuần lễ hoa anh đào", "Bộ sưu tập son thuần chay",
@@ -167,34 +161,17 @@
     /* =========================================================
        BÀI VIẾT
        ========================================================= */
-    function hoursAgoIso(h) { return new Date(Date.now() - h * 3600 * 1000).toISOString(); }
-
-    function seedPosts() {
-        const P = function (id, title, plats, platLabel, author, owner, status, planned, caption, campaign, hoursAgo) {
-            return {
-                post_id: id, code: "BL-0" + id, title: title, platforms: plats, platform_label: platLabel,
-                author: author, owner_username: owner, status: status,
-                planned_date: planned, planned_label: viDate(planned), updated_label: viDate(planned),
-                updated_at: hoursAgoIso(hoursAgo), caption: caption, campaign: campaign, deleted_at: null
-            };
-        };
-        const FBIG = ["Facebook", "Instagram"];
-        return [
-            P(132, "Bộ quà tặng mùa lễ hội Blossom", ["Facebook"], "Facebook", "Nguyễn Thùy Dương", "thuyduong", "PUBLISHED", "2026-11-02", "Gợi ý quà tặng chăm sóc da dành cho người thân dịp cuối năm.", "Tuần lễ hoa anh đào", 20),
-            P(131, "Makeup tông cam đào cho ngày se lạnh", ["Threads"], "Threads", "Nguyễn Thùy Dương", "thuyduong", "DRAFT", "2026-11-14", "Video 30 giây hướng dẫn makeup tông cam đào nhẹ nhàng.", "Bộ sưu tập son thuần chay", 9),
-            P(130, "Serum hoa anh đào – bí quyết căng bóng", FBIG, "Facebook & Instagram", "Nguyễn Thùy Dương", "thuyduong", "PENDING_APPROVAL", "2026-11-16", "Serum chiết xuất hoa anh đào giúp da căng bóng, đều màu sau 2 tuần.", "Tuần lễ hoa anh đào", 3),
-            P(129, "Kem dưỡng trắng da Blossom", ["Instagram"], "Instagram", "Doãn Thị Minh Anh", "minhanh", "PENDING_APPROVAL", "2026-11-05", "Kem dưỡng trắng da Blossom chứa chiết xuất hoa anh đào giúp nâng tông nhẹ nhàng và cấp ẩm sâu.", "Tuần lễ hoa anh đào", 2),
-            P(128, "5 bước dưỡng da cho buổi sáng rạng rỡ", FBIG, "Facebook & Instagram", "Doãn Thị Minh Anh", "minhanh", "PUBLISHED", "2026-11-04", "Routine 5 bước buổi sáng giúp làn da căng mướt tự nhiên cùng Blossom.", "Chăm sóc da thu đông", 30),
-            P(127, "Bí quyết chăm da mùa hanh khô", FBIG, "Facebook & Instagram", "Doãn Thị Minh Anh", "minhanh", "DRAFT", "2026-11-07", "Cấp ẩm chuyên sâu bảo vệ hàng rào tự nhiên của làn da trong tiết trời thu đông.", "Chăm sóc da thu đông", 6),
-            P(126, "Một chút yêu thương cho làn da", FBIG, "Facebook & Instagram", "Doãn Thị Minh Anh", "minhanh", "REVISION_REQUESTED", "2026-11-06", "Dành 10 phút mỗi tối để thư giãn và phục hồi làn da với mặt nạ hoa hồng.", "Chăm sóc da thu đông", 5),
-            P(125, "Chọn serum phù hợp với làn da của bạn", FBIG, "Facebook & Instagram", "Nguyễn Hà Linh", "halinh", "DRAFT", "2026-11-07", "Hướng dẫn phân biệt các hoạt chất Hyaluronic Acid, Niacinamide và Vitamin C.", "Chăm sóc da thu đông", 40),
-            P(124, "Chống nắng mỗi ngày, nâng niu làn da", FBIG, "Facebook & Instagram", "Phạm Khánh Linh", "khanhlinh", "SCHEDULED", "2026-11-08", "Kem chống nắng thuần chay mỏng nhẹ, không để lại vệt trắng.", "Chăm sóc da thu đông", 25),
-            P(123, "Routine tối giản cho ngày bận rộn", ["Facebook", "Instagram", "Threads"], "Facebook & Instagram", "Trần Ngọc Mai", "ngocmai", "REJECTED", "2026-11-03", "3 bước gọn nhẹ cho cô nàng công sở bận rộn.", "Chăm sóc da thu đông", 60),
-            P(122, "Review Son Dưỡng Thuần Chay Hương Đào Blossom", ["Threads"], "Threads", "Trần Ngọc Mai", "ngocmai", "DRAFT", "2026-11-10", "Video ngắn unbox và swatch bảng màu son dưỡng thu đông.", "Bộ sưu tập son thuần chay", 12),
-            P(121, "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn", ["Instagram"], "Instagram", "Lê Thu Hương", "thuhuong", "APPROVED", "2026-11-12", "Làm sạch kép (Double Cleansing) dịu nhẹ không gây khô căng.", "Chăm sóc da thu đông", 15),
-            P(120, "Ưu đãi Tuần Lễ Hoa Anh Đào - Tặng Kèm Mặt Nạ Ngủ", ["Facebook"], "Facebook", "Phạm Khánh Linh", "khanhlinh", "PUBLISHED", "2026-11-01", "Quà tặng giới hạn dành cho 200 đơn hàng đầu tiên trong tháng 11.", "Tuần lễ hoa anh đào", 48)
-        ];
+    function ensureRealDataMode() {
+        try {
+            if (!localStorage.getItem(REAL_DATA_FLAG)) {
+                localStorage.removeItem(POSTS_KEY);
+                localStorage.removeItem(CAL_KEY);
+                localStorage.removeItem(CAL_KEY_V1);
+                localStorage.setItem(REAL_DATA_FLAG, "1");
+            }
+        } catch (e) {}
     }
+    ensureRealDataMode();
 
     function readJson(key) {
         try { return JSON.parse(localStorage.getItem(key)); } catch (e) { return null; }
@@ -207,50 +184,9 @@
     function readFlags() { return readJson(SEED_FLAG_KEY) || {}; }
     function setFlag(name) { const f = readFlags(); f[name] = true; writeJson(SEED_FLAG_KEY, f); }
 
-    const SEED_CAMPAIGN = {};
-    const SEED_OWNER = {};
-    seedPosts().forEach(function (p) { SEED_CAMPAIGN[p.post_id] = p.campaign; SEED_OWNER[p.post_id] = p.owner_username; });
-
-    // Bổ sung owner_username / campaign cho dữ liệu cũ; thêm bài mẫu cho Thùy Dương (1 lần)
-    function migratePosts(list) {
-        let changed = false;
-        list.forEach(function (p) {
-            // Đổi kênh TikTok cũ -> Threads
-            if (Array.isArray(p.platforms) && p.platforms.indexOf("TikTok") !== -1) {
-                p.platforms = p.platforms.map(function (x) { return x === "TikTok" ? "Threads" : x; });
-                changed = true;
-            }
-            if (p.platform_label && p.platform_label.indexOf("TikTok") !== -1) {
-                p.platform_label = p.platform_label.replace(/TikTok/g, "Threads");
-                changed = true;
-            }
-            if (!p.owner_username) {
-                const s = staffByName(p.author);
-                if (s) { p.owner_username = s.username; changed = true; }
-            }
-            if (!p.campaign && SEED_CAMPAIGN[p.post_id]) { p.campaign = SEED_CAMPAIGN[p.post_id]; changed = true; }
-        });
-
-        if (!readFlags().duong_posts_v1) {
-            seedPosts().filter(function (p) { return p.owner_username === "thuyduong"; }).forEach(function (seed) {
-                const exists = list.some(function (p) { return Number(p.post_id) === seed.post_id; });
-                if (!exists) { list.push(seed); changed = true; }
-            });
-            setFlag("duong_posts_v1");
-        }
-        return changed;
-    }
-
     function loadPosts() {
-        let list = readJson(POSTS_KEY);
-        if (!Array.isArray(list) || !list.length) {
-            list = seedPosts();
-            setFlag("duong_posts_v1");
-            writeJson(POSTS_KEY, list);
-            return list;
-        }
-        if (migratePosts(list)) writeJson(POSTS_KEY, list);
-        return list;
+        const list = readJson(POSTS_KEY);
+        return Array.isArray(list) ? list : [];
     }
 
     function savePosts(list, silent) {
@@ -366,43 +302,6 @@
          SCHEDULED = Đã xác nhận  (lịch chính thức)
          EDITING   = Cần điều chỉnh (Manager yêu cầu, kèm change_reason)
        ========================================================= */
-    const INITIAL_EVENTS = [
-        { id: 101, code: "BL-0128", title: "5 bước dưỡng da buổi sáng", date: "2026-11-04", time: "08:00", platform: "FB & IG", status: "SCHEDULED", author: "Nguyễn Hà Linh" },
-        { id: 102, code: "BL-0127", title: "Bí quyết chăm da mùa hanh khô", date: "2026-11-05", time: "08:00", platform: "FB & IG", status: "PENDING", author: "Trần Ngọc Mai" },
-        { id: 103, code: "BL-0126", title: "Một chút yêu thương cho làn da", date: "2026-11-06", time: "10:00", platform: "FB & IG", status: "EDITING", author: "Lê Thu Hương", change_reason: "Vui lòng đổi sang khung giờ 19:00 để tránh trùng giờ cao điểm." },
-        { id: 104, code: "BL-0125", title: "Chống nắng mỗi ngày", date: "2026-11-08", time: "08:00", platform: "FB & IG", status: "SCHEDULED", author: "Nguyễn Hà Linh" },
-        { id: 105, code: "BL-0124", title: "Serum cho làn da của bạn", date: "2026-11-10", time: "19:00", platform: "FB & IG", status: "SCHEDULED", author: "Trần Ngọc Mai" },
-        { id: 106, code: "BL-0123", title: "Nâng niu làn da nhạy cảm", date: "2026-11-12", time: "08:00", platform: "FB & IG", status: "SCHEDULED", author: "Lê Thu Hương" },
-        { id: 107, code: "BL-0122", title: "Cuối tuần chăm sóc bản thân", date: "2026-11-15", time: "09:00", platform: "FB & IG", status: "SCHEDULED", author: "Nguyễn Hà Linh" },
-        { id: 108, code: "BL-0121", title: "Routine tối giản", date: "2026-11-18", time: "08:00", platform: "FB & IG", status: "PENDING", author: "Trần Ngọc Mai" },
-        { id: 109, code: "BL-0120", title: "Vẻ đẹp của sự dịu dàng", date: "2026-11-20", time: "19:00", platform: "FB & IG", status: "SCHEDULED", author: "Lê Thu Hương" },
-        { id: 110, code: "BL-0119", title: "Cấp ẩm cùng Blossom", date: "2026-11-25", time: "08:00", platform: "FB & IG", status: "SCHEDULED", author: "Nguyễn Hà Linh" },
-        { id: 111, code: "BL-0118", title: "Tháng mới, làn da mới", date: "2026-11-28", time: "10:00", platform: "FB & IG", status: "PENDING", author: "Trần Ngọc Mai" }
-    ];
-
-    // Lịch mẫu cho Minh Anh / Thùy Dương, tính theo ngày hôm nay để luôn nằm ở tương lai
-    function seedDemoEvents() {
-        const now = new Date();
-        const at = function (days, hhmm) { return { date: isoDate(addDays(now, days)), time: hhmm }; };
-        const soon = new Date(now.getTime() + 40 * 60000);
-        soon.setMinutes(Math.ceil(soon.getMinutes() / 5) * 5, 0, 0);
-        const soonSlot = { date: isoDate(soon), time: pad2(soon.getHours()) + ":" + pad2(soon.getMinutes()) };
-
-        const E = function (id, title, slot, platform, status, author, owner, extra) {
-            return Object.assign({
-                id: id, code: "BL-LCH" + id, title: title, date: slot.date, time: slot.time,
-                platform: platform, status: status, author: author, owner_username: owner
-            }, extra || {});
-        };
-        return [
-            E(201, "Skincare routine", at(3, "09:00"), "FB & IG", "SCHEDULED", "Doãn Thị Minh Anh", "minhanh", { reviewed_by: "Manager" }),
-            E(202, "Makeup look nhẹ nhàng", at(3, "09:15"), "Facebook", "PENDING", "Nguyễn Thùy Dương", "thuyduong"),
-            E(203, "Review sản phẩm", at(5, "19:00"), "Instagram", "PENDING", "Doãn Thị Minh Anh", "minhanh"),
-            E(204, "Tips làm đẹp mùa lễ hội", at(6, "14:00"), "Threads", "EDITING", "Nguyễn Thùy Dương", "thuyduong", { change_reason: "Vui lòng dời sang khung 19:00 để tránh trùng giờ cao điểm.", reviewed_by: "Manager" }),
-            E(205, "Bộ sưu tập son mới", soonSlot, "FB & IG", "SCHEDULED", "Doãn Thị Minh Anh", "minhanh", { reviewed_by: "Manager" })
-        ];
-    }
-
     function postStatusToEventStatus(s) {
         if (s === "PUBLISHED" || s === "SCHEDULED" || s === "APPROVED") return "SCHEDULED";
         if (s === "REVISION_REQUESTED" || s === "REJECTED") return "EDITING";
@@ -423,62 +322,8 @@
     }
 
     function loadEvents() {
-        let list = readJson(CAL_KEY);
-        let changed = false;
-
-        if (!Array.isArray(list) || !list.length) {
-            const v1 = readJson(CAL_KEY_V1);
-            list = (Array.isArray(v1) && v1.length) ? v1 : clone(INITIAL_EVENTS);
-            changed = true;
-        }
-
-        list.forEach(function (ev) {
-            if (ev.platform === "TikTok") { ev.platform = "Threads"; changed = true; }
-            if (!ev.owner_username) {
-                const s = staffByName(ev.author);
-                if (s) { ev.owner_username = s.username; changed = true; }
-            }
-        });
-
-        if (!readFlags().demo_events_v1) {
-            seedDemoEvents().forEach(function (seed) {
-                if (!list.some(function (e) { return Number(e.id) === seed.id; })) list.push(seed);
-            });
-            setFlag("demo_events_v1");
-            changed = true;
-        }
-
-        // Đồng bộ bài viết (có ngày đăng dự kiến) lên lịch: Staff tạo bài => lịch ở trạng thái đề xuất
-        const posts = readJson(POSTS_KEY);
-        if (Array.isArray(posts)) {
-            posts.forEach(function (p) {
-                const pid = Number(p.post_id);
-                const idx = list.findIndex(function (e) { return e.post_id != null && Number(e.post_id) === pid; });
-
-                if (p.deleted_at) {
-                    if (idx !== -1) { list.splice(idx, 1); changed = true; }
-                    return;
-                }
-                if (!p.planned_date || pid <= 132) return; // bài mẫu ban đầu không tự sinh lịch
-
-                if (idx === -1) {
-                    list.unshift({
-                        id: pid, post_id: pid, code: p.code || ("BL-0" + pid), title: p.title,
-                        date: p.planned_date, time: p.planned_time || "09:00", platform: platformOfPost(p),
-                        status: postStatusToEventStatus(p.status), post_status_seen: p.status,
-                        author: p.author, owner_username: p.owner_username || (ownerOf(p) || undefined)
-                    });
-                    changed = true;
-                } else if (list[idx].post_status_seen !== p.status) {
-                    list[idx].status = postStatusToEventStatus(p.status);
-                    list[idx].post_status_seen = p.status;
-                    changed = true;
-                }
-            });
-        }
-
-        if (changed) writeEvents(list, true);
-        return list;
+        const list = readJson(CAL_KEY);
+        return Array.isArray(list) ? list : [];
     }
 
     function saveEvents(list, silent) {
@@ -631,18 +476,14 @@
         if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
         try {
             const res = await global.BlossomAPI.request("/posts?page_size=100");
-            if (Array.isArray(res) && res.length) {
+            if (Array.isArray(res)) {
                 const platNames = { 1: "Facebook", 2: "Instagram", 3: "Threads" };
-                const currentList = loadPosts();
-                const listMap = {};
-                currentList.forEach(function (p) { listMap[p.post_id] = p; });
-
-                res.forEach(function (bp) {
+                const realPosts = res.map(function (bp) {
                     const plat = platNames[bp.platform_id] || "Facebook";
                     const plannedDate = bp.planned_publish_time ? bp.planned_publish_time.slice(0, 10) : "";
                     const plannedTime = bp.planned_publish_time ? bp.planned_publish_time.slice(11, 16) : "09:00";
-                    
-                    const item = Object.assign({}, listMap[bp.post_id] || {}, {
+
+                    const item = {
                         post_id: bp.post_id,
                         code: "BL-0" + bp.post_id,
                         title: bp.title,
@@ -650,16 +491,16 @@
                         hashtags: bp.hashtags || "",
                         platforms: [plat],
                         platform_label: plat,
-                        author: bp.author_name || (listMap[bp.post_id] && listMap[bp.post_id].author) || "",
-                        owner_username: bp.author_username || (listMap[bp.post_id] && listMap[bp.post_id].owner_username) || undefined,
+                        author: bp.author_name || "",
+                        owner_username: bp.author_username || undefined,
                         status: bp.status,
-                        published_url: bp.published_url || (listMap[bp.post_id] && listMap[bp.post_id].published_url) || "",
+                        published_url: bp.published_url || "",
                         planned_date: plannedDate,
                         planned_time: plannedTime,
                         planned_label: plannedDate ? viDate(plannedDate) + " " + plannedTime : "",
                         updated_at: bp.updated_at || bp.created_at,
                         deleted_at: null
-                    });
+                    };
 
                     if (bp.media_files && Array.isArray(bp.media_files) && bp.media_files.length) {
                         const mUrl = (global.BlossomAPI && global.BlossomAPI.resolveMediaUrl) ? global.BlossomAPI.resolveMediaUrl(bp.media_files[0]) : bp.media_files[0];
@@ -671,30 +512,26 @@
                         });
                     }
 
-                    listMap[bp.post_id] = item;
+                    return item;
                 });
 
-                const merged = Object.values(listMap);
-                savePosts(merged, false);
+                savePosts(realPosts, false);
             }
 
             try {
                 const cal = await global.BlossomAPI.request("/schedules/calendar");
-                if (Array.isArray(cal) && cal.length) {
-                    const currentEvs = loadEvents();
-                    const evMap = {};
-                    currentEvs.forEach(function (e) { evMap[e.event_id || e.post_id] = e; });
-
-                    cal.forEach(function (cev) {
+                if (Array.isArray(cal)) {
+                    const realEvents = cal.map(function (cev) {
                         const plat = cev.platform_name || "Facebook";
                         const pubTime = cev.scheduled_time || cev.publish_time || "";
                         const dateStr = pubTime ? pubTime.slice(0, 10) : "";
                         const timeStr = pubTime ? pubTime.slice(11, 16) : "09:00";
-                        const evId = "ev_be_" + cev.schedule_id;
-                        evMap[evId] = {
-                            event_id: evId,
+                        return {
+                            id: cev.schedule_id,
+                            event_id: "ev_be_" + cev.schedule_id,
                             schedule_id: cev.schedule_id,
                             post_id: cev.post_id,
+                            code: "BL-0" + cev.post_id,
                             title: cev.title || cev.post_title || "",
                             platform: plat,
                             date: dateStr,
@@ -704,7 +541,7 @@
                             owner_username: cev.author_username || undefined
                         };
                     });
-                    saveEvents(Object.values(evMap), false);
+                    saveEvents(realEvents, false);
                 }
             } catch (calErr) {}
         } catch (err) {
