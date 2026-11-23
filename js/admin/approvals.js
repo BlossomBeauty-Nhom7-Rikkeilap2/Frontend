@@ -30,6 +30,23 @@
         Scope.savePosts(posts);
     }
 
+    function populateAuthorFilter() {
+        const sel = document.getElementById("authorFilter");
+        if (!sel) return;
+        const currentVal = sel.value || "ALL";
+        const authors = [];
+        getPosts().forEach(function (p) {
+            if (!p.deleted_at && p.author && authors.indexOf(p.author) === -1) {
+                authors.push(p.author);
+            }
+        });
+        authors.sort();
+        sel.innerHTML = '<option value="ALL">Tất cả tác giả</option>' + authors.map(function (a) {
+            return '<option value="' + UI.esc(a) + '">' + UI.esc(a) + '</option>';
+        }).join("");
+        if (authors.indexOf(currentVal) !== -1) sel.value = currentVal;
+    }
+
     function updateMetrics() {
         const posts = getPosts();
         const pending = posts.filter(function (p) { return p.status === "PENDING_APPROVAL"; }).length;
@@ -202,7 +219,8 @@
                 await BlossomAPI.request("/posts/" + postId + "/approve", { method: "POST" });
             }
         } catch (apiErr) {
-            console.warn("[Approvals] Backend approve error:", apiErr.message);
+            UI.toast("error", "Phê duyệt thất bại", apiErr.message || "Không thể kết nối Backend.");
+            return;
         }
 
         post.status = "APPROVED"; post._touched = true;
@@ -271,7 +289,7 @@
             }
         }, 0);
 
-        modalPromise.then(function (act) {
+        modalPromise.then(async function (act) {
             if (act === "CONFIRM") {
                 const reasonInput = document.getElementById("rejectReasonInput");
                 const reason = (reasonInput ? reasonInput.value : typedReason).trim();
@@ -289,7 +307,8 @@
                         });
                     }
                 } catch (apiErr) {
-                    console.warn("[Approvals] Backend reject error:", apiErr.message);
+                    UI.toast("error", "Từ chối thất bại", apiErr.message || "Không thể kết nối Backend.");
+                    return;
                 }
 
                 post.status = "REJECTED"; post._touched = true;
@@ -356,7 +375,7 @@
             }
         }, 0);
 
-        modalPromise.then(function (act) {
+        modalPromise.then(async function (act) {
             if (act === "CONFIRM") {
                 const noteInput = document.getElementById("revisionNoteInput");
                 const rawNote = (noteInput ? noteInput.value : typedNote).trim();
@@ -374,7 +393,8 @@
                         });
                     }
                 } catch (apiErr) {
-                    console.warn("[Approvals] Backend revision error:", apiErr.message);
+                    UI.toast("error", "Gửi yêu cầu thất bại", apiErr.message || "Không thể kết nối Backend.");
+                    return;
                 }
 
                 post.status = "REVISION_REQUESTED"; post._touched = true;
@@ -558,12 +578,14 @@
         }
 
         window.addEventListener("blossom_posts_updated", function () {
+            populateAuthorFilter();
             updateMetrics();
             renderTable();
         });
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        populateAuthorFilter();
         updateMetrics();
         renderTable();
         bindEvents();

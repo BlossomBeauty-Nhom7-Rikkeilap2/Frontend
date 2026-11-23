@@ -37,9 +37,6 @@
         settings:  "blossom_settings"
     };
 
-    // Mật khẩu demo ban đầu của từng role (khớp tài khoản demo trong login.js)
-    const DEMO_PASSWORD = { MANAGER: "Blossom@123", STAFF: "Manh@2026" };
-
     const DEFAULT_SETTINGS = {
         storeName: "Blossom Beauty Store",
         contactEmail: "admin@blossom.vn",
@@ -76,20 +73,16 @@
     }
 
     async function saveProfileRemote(data) {
-        if (window.BlossomAPI && BlossomAPI.getToken()) {
-            try {
-                await BlossomAPI.request("/users/me", {
-                    method: "PUT",
-                    body: {
-                        full_name: data.fullName,
-                        avatar_url: data.avatarUrl || null
-                    }
-                });
-            } catch (netErr) {
-                console.warn("[Account] Backend profile update fallback:", netErr.message);
-            }
+        if (!window.BlossomAPI || !BlossomAPI.getToken()) {
+            throw new Error("Phiên làm việc Backend không hợp lệ. Vui lòng đăng nhập lại.");
         }
-        await delay(300);
+        await BlossomAPI.request("/users/me", {
+            method: "PUT",
+            body: {
+                full_name: data.fullName,
+                avatar_url: data.avatarUrl || null
+            }
+        });
         if (!write(KEY.profile, { phone: data.phone, dob: data.dob, bio: data.bio })) {
             throw new Error("Không thể lưu dữ liệu trên trình duyệt này.");
         }
@@ -108,36 +101,23 @@
     }
 
     async function changePasswordRemote(current, next) {
-        if (window.BlossomAPI && BlossomAPI.getToken()) {
-            try {
-                await BlossomAPI.request("/auth/change-password", {
-                    method: "POST",
-                    body: {
-                        current_password: current,
-                        new_password: next
-                    }
-                });
-            } catch (apiErr) {
-                const err = new Error(apiErr.message || "Không thể đổi mật khẩu.");
-                if (apiErr.message && apiErr.message.includes("hiện tại")) {
-                    err.field = "current";
-                }
-                throw err;
-            }
-        } else {
-            const acc = findStoreAccount() || (window.AccountStore && AccountStore.findByIdentifier(user.email || user.username));
-            const validCurrent = acc
-                ? AccountStore.verifyPassword(acc, current)
-                : (current === DEMO_PASSWORD[user.role]);
-            if (!validCurrent) {
-                const err = new Error("Mật khẩu hiện tại không chính xác.");
-                err.field = "current";
-                throw err;
-            }
+        if (!window.BlossomAPI || !BlossomAPI.getToken()) {
+            throw new Error("Phiên làm việc Backend không hợp lệ. Vui lòng đăng nhập lại.");
         }
-        const acc = findStoreAccount() || (window.AccountStore && AccountStore.findByIdentifier(user.email || user.username));
-        if (acc && window.AccountStore && typeof AccountStore.updatePassword === "function") {
-            AccountStore.updatePassword(acc.id, next);
+        try {
+            await BlossomAPI.request("/auth/change-password", {
+                method: "POST",
+                body: {
+                    current_password: current,
+                    new_password: next
+                }
+            });
+        } catch (apiErr) {
+            const err = new Error(apiErr.message || "Không thể đổi mật khẩu.");
+            if (apiErr.message && apiErr.message.includes("hiện tại")) {
+                err.field = "current";
+            }
+            throw err;
         }
         write(KEY.pwdAt, new Date().toISOString());
     }

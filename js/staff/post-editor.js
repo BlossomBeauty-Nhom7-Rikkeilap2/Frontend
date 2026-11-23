@@ -257,19 +257,20 @@
         };
 
         renderMediaAttachment();
-        UI.toast("success", "Đã tải tệp Media hợp lệ", fileName + " (" + sizeMb + " MB)");
 
-        // Thử upload lên Backend /api/posts/upload-media nếu server đang chạy
+        // Upload bắt buộc lên Backend /api/posts/upload-media
         try {
             if (window.BlossomAPI && typeof window.BlossomAPI.uploadMedia === "function") {
                 const uploaded = await window.BlossomAPI.uploadMedia(file);
                 if (uploaded && uploaded.file_url) {
                     currentMedia.serverUrl = uploaded.file_url;
+                    UI.toast("success", "Đã tải lên tệp Media", fileName + " (" + sizeMb + " MB)");
                 }
             }
         } catch (e) {
-            console.warn("[PostEditor] Upload media fallback:", e.message);
-            /* fallback local preview URL */
+            currentMedia = null;
+            renderMediaAttachment();
+            UI.toast("error", "Tải tệp Media thất bại", e.message || "Không thể tải tệp lên Backend.");
         }
     }
 
@@ -718,14 +719,15 @@
         Scope.upsertEventForPost(post);   // lịch đăng + Tổng quan cập nhật ngay theo bài vừa lưu
         originalPlanned = plannedParsed.text;
 
-        // Gọi API Backend nếu đang chạy
+        // Gọi API Backend (chi dung du lieu thuc)
         try {
             if (window.BlossomAPI && typeof window.BlossomAPI.request === "function") {
                 const platformCodeMap = { facebook: 1, instagram: 2, threads: 3 };
                 const platKey = (payload.platforms && payload.platforms[0]) || "facebook";
                 const platId = platformCodeMap[platKey] || 1;
                 const mType = currentMedia && currentMedia.type === "VIDEO" ? "VIDEO" : "IMAGE";
-                const mediaUrls = currentMedia ? [currentMedia.serverUrl || currentMedia.url].filter(Boolean) : [];
+                const rawMediaUrl = currentMedia ? (currentMedia.serverUrl || (String(currentMedia.url || "").startsWith("http") ? currentMedia.url : "")) : "";
+                const mediaUrls = rawMediaUrl ? [rawMediaUrl] : [];
 
                 const backendBody = {
                     title: payload.title,
@@ -759,16 +761,12 @@
 
                 // Nếu người dùng chọn Gửi duyệt (SUBMIT):
                 if (targetAction === "SUBMIT" && currentPostId) {
-                    try {
-                        await BlossomAPI.request("/posts/" + currentPostId + "/submit", { method: "POST" });
-                    } catch (subErr) {
-                        console.warn("[PostEditor] Submit approval endpoint:", subErr.message);
-                    }
+                    await BlossomAPI.request("/posts/" + currentPostId + "/submit", { method: "POST" });
                 }
             }
         } catch (e) {
-            console.warn("[PostEditor] Backend save error:", e.message);
-            /* offline fallback */
+            UI.toast("error", "Không thể lưu bài viết lên Backend", e.message || "Vui lòng kiểm tra kết nối máy chủ.");
+            return;
         }
 
         const sub = document.getElementById("editorSubTitle");

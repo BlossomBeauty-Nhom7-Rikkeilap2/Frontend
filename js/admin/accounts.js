@@ -140,7 +140,7 @@
                     }
                 });
             } catch (apiErr) {
-                console.warn("[Accounts] API update user error:", apiErr.message);
+                throw fail(apiErr.message || "Không thể cập nhật tài khoản.", "email");
             }
         }
         const list = AccountStore.load();
@@ -169,7 +169,7 @@
                     body: { status: status === "active" ? "ACTIVE" : "LOCKED" }
                 });
             } catch (apiErr) {
-                console.warn("[Accounts] API set status error:", apiErr.message);
+                throw fail(apiErr.message || "Không thể cập nhật trạng thái tài khoản.");
             }
         }
         const list = AccountStore.load();

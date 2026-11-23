@@ -47,16 +47,32 @@
         };
     }
 
+    function populateStaffFilter() {
+        const sel = document.getElementById("reportStaffSelect");
+        if (!sel) return;
+        const currentVal = sel.value || "ALL";
+        const names = [];
+        (backendRankingPosts || []).forEach(function (item) {
+            if (item.author && names.indexOf(item.author) === -1) names.push(item.author);
+        });
+        names.sort();
+        sel.innerHTML = '<option value="ALL">Tất cả nhân sự</option>' + names.map(function (n) {
+            return '<option value="' + UI.esc(n) + '">' + UI.esc(n) + '</option>';
+        }).join("");
+        if (names.indexOf(currentVal) !== -1) sel.value = currentVal;
+    }
+
     async function loadBackendAnalytics() {
         if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
         try {
             const rows = await global.BlossomAPI.request("/analytics/export");
-            if (Array.isArray(rows) && rows.length > 0) {
+            if (Array.isArray(rows)) {
                 backendRankingPosts = rows.map(mapBackendRow);
+                populateStaffFilter();
                 renderDashboard();
             }
         } catch (err) {
-            console.warn("[Reports] Backend analytics load fallback:", err.message);
+            console.warn("[Reports] Backend analytics load error:", err.message);
         }
     }
 

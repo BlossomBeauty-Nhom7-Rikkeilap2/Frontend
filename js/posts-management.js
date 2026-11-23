@@ -346,7 +346,8 @@
                 await BlossomAPI.request("/posts/" + post.post_id, { method: "DELETE" });
             }
         } catch (e) {
-            /* fallback localStorage */
+            UI.toast("error", "Không thể xóa bài viết", e.message || "Lỗi kết nối Backend.");
+            return;
         }
 
         const nowStr = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }) + " " +
@@ -569,6 +570,7 @@
         // Đồng bộ dữ liệu liên trang
         window.addEventListener("blossom_posts_updated", function () {
             posts = loadPosts();
+            populateAuthorFilter();
             renderMetrics();
             renderTable();
         });
