@@ -476,12 +476,46 @@
         if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
         try {
             const res = await global.BlossomAPI.request("/posts?page_size=100");
+            let schedByPost = {};
+
+            try {
+                const cal = await global.BlossomAPI.request("/schedules/calendar");
+                if (Array.isArray(cal)) {
+                    const realEvents = cal.map(function (cev) {
+                        const plat = cev.platform_name || "Facebook";
+                        const pubTime = cev.scheduled_time || cev.publish_time || "";
+                        const dateStr = pubTime ? pubTime.slice(0, 10) : "";
+                        const timeStr = pubTime ? pubTime.slice(11, 16) : "09:00";
+                        if (cev.post_id && dateStr) {
+                            schedByPost[cev.post_id] = { date: dateStr, time: timeStr, label: viDate(dateStr) + " " + timeStr };
+                        }
+                        return {
+                            id: cev.schedule_id,
+                            event_id: "ev_be_" + cev.schedule_id,
+                            schedule_id: cev.schedule_id,
+                            post_id: cev.post_id,
+                            code: "BL-0" + cev.post_id,
+                            title: cev.title || cev.post_title || "",
+                            platform: plat,
+                            date: dateStr,
+                            time: timeStr,
+                            status: cev.schedule_status === "ACTIVE" ? "SCHEDULED" : (cev.schedule_status || cev.status || "SCHEDULED"),
+                            author: cev.author_name || "",
+                            owner_username: cev.author_username || undefined
+                        };
+                    });
+                    writeEvents(realEvents, false);
+                }
+            } catch (calErr) {}
+
             if (Array.isArray(res)) {
                 const platNames = { 1: "Facebook", 2: "Instagram", 3: "Threads" };
                 const realPosts = res.map(function (bp) {
                     const plat = platNames[bp.platform_id] || "Facebook";
-                    const plannedDate = bp.planned_publish_time ? bp.planned_publish_time.slice(0, 10) : "";
-                    const plannedTime = bp.planned_publish_time ? bp.planned_publish_time.slice(11, 16) : "09:00";
+                    const schedInfo = schedByPost[bp.post_id] || null;
+                    const rawTime = bp.planned_publish_time || (bp.status === "PUBLISHED" ? bp.published_at : "") || "";
+                    const plannedDate = rawTime ? rawTime.slice(0, 10) : (schedInfo ? schedInfo.date : "");
+                    const plannedTime = rawTime ? rawTime.slice(11, 16) : (schedInfo ? schedInfo.time : "09:00");
 
                     const item = {
                         post_id: bp.post_id,
@@ -517,53 +551,6 @@
 
                 savePosts(realPosts, false);
             }
-
-            try {
-                const cal = await global.BlossomAPI.request("/schedules/calendar");
-                if (Array.isArray(cal)) {
-                    const schedByPost = {};
-                    const realEvents = cal.map(function (cev) {
-                        const plat = cev.platform_name || "Facebook";
-                        const pubTime = cev.scheduled_time || cev.publish_time || "";
-                        const dateStr = pubTime ? pubTime.slice(0, 10) : "";
-                        const timeStr = pubTime ? pubTime.slice(11, 16) : "09:00";
-                        if (cev.post_id && dateStr) {
-                            schedByPost[cev.post_id] = { date: dateStr, time: timeStr, label: viDate(dateStr) + " " + timeStr };
-                        }
-                        return {
-                            id: cev.schedule_id,
-                            event_id: "ev_be_" + cev.schedule_id,
-                            schedule_id: cev.schedule_id,
-                            post_id: cev.post_id,
-                            code: "BL-0" + cev.post_id,
-                            title: cev.title || cev.post_title || "",
-                            platform: plat,
-                            date: dateStr,
-                            time: timeStr,
-                            status: cev.schedule_status === "ACTIVE" ? "SCHEDULED" : (cev.schedule_status || cev.status || "SCHEDULED"),
-                            author: cev.author_name || "",
-                            owner_username: cev.author_username || undefined
-                        };
-                    });
-                    saveEvents(realEvents, false);
-
-                    // Đồng bộ ngày/giờ từ lịch chính thức vào bài viết nếu planned_publish_time đang trống
-                    if (Object.keys(schedByPost).length > 0) {
-                        const curPosts = loadPosts();
-                        let updated = false;
-                        curPosts.forEach(function (p) {
-                            const s = schedByPost[p.post_id];
-                            if (s && !p.planned_date) {
-                                p.planned_date = s.date;
-                                p.planned_time = s.time;
-                                p.planned_label = s.label;
-                                updated = true;
-                            }
-                        });
-                        if (updated) savePosts(curPosts, false);
-                    }
-                }
-            } catch (calErr) {}
         } catch (err) {
             console.warn("[Scope] syncFromBackend error:", err.message);
         }
