@@ -521,11 +521,15 @@
             try {
                 const cal = await global.BlossomAPI.request("/schedules/calendar");
                 if (Array.isArray(cal)) {
+                    const schedByPost = {};
                     const realEvents = cal.map(function (cev) {
                         const plat = cev.platform_name || "Facebook";
                         const pubTime = cev.scheduled_time || cev.publish_time || "";
                         const dateStr = pubTime ? pubTime.slice(0, 10) : "";
                         const timeStr = pubTime ? pubTime.slice(11, 16) : "09:00";
+                        if (cev.post_id && dateStr) {
+                            schedByPost[cev.post_id] = { date: dateStr, time: timeStr, label: viDate(dateStr) + " " + timeStr };
+                        }
                         return {
                             id: cev.schedule_id,
                             event_id: "ev_be_" + cev.schedule_id,
@@ -542,6 +546,22 @@
                         };
                     });
                     saveEvents(realEvents, false);
+
+                    // Đồng bộ ngày/giờ từ lịch chính thức vào bài viết nếu planned_publish_time đang trống
+                    if (Object.keys(schedByPost).length > 0) {
+                        const curPosts = loadPosts();
+                        let updated = false;
+                        curPosts.forEach(function (p) {
+                            const s = schedByPost[p.post_id];
+                            if (s && !p.planned_date) {
+                                p.planned_date = s.date;
+                                p.planned_time = s.time;
+                                p.planned_label = s.label;
+                                updated = true;
+                            }
+                        });
+                        if (updated) savePosts(curPosts, false);
+                    }
                 }
             } catch (calErr) {}
         } catch (err) {

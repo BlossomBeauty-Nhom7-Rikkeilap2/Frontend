@@ -265,7 +265,7 @@
                     '<div><span class="fr07-status-pill ' + (p.deleted_at ? "st-deleted" : st.cls) + '">' +
                         UI.esc(p.deleted_at ? "Đã xóa mềm" : st.label) +
                     '</span></div>' +
-                    '<span class="fr07-date">' + UI.esc(p.planned_label || p.planned_date) + '</span>' +
+                    '<span class="fr07-date">' + UI.esc(p.planned_label || p.planned_date || "Chưa lên lịch") + '</span>' +
                     '<div class="fr07-row-actions">' + actionsHtml + '</div>' +
                 '</div>';
             }).join("");
