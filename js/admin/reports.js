@@ -6,117 +6,6 @@
 (function (global) {
     "use strict";
 
-    const TOP_POSTS_DATA = [
-        {
-            id: 128,
-            code: "BL-0128",
-            title: "5 bước dưỡng da cho buổi sáng rạng rỡ",
-            author: "Nguyễn Hà Linh",
-            period: "2026-11",
-            month: 11,
-            reach: 12840,
-            engagement: 1148,
-            rate: 8.94,
-            channel: "Facebook"
-        },
-        {
-            id: 129,
-            code: "BL-0129",
-            title: "Kem dưỡng trắng da Blossom",
-            author: "Doãn Thị Minh Anh",
-            period: "2026-11",
-            month: 11,
-            reach: 11500,
-            engagement: 1080,
-            rate: 9.39,
-            channel: "Instagram"
-        },
-        {
-            id: 123,
-            code: "BL-0123",
-            title: "Routine tối giản cho ngày bận rộn",
-            author: "Trần Ngọc Mai",
-            period: "2026-11",
-            month: 11,
-            reach: 10260,
-            engagement: 986,
-            rate: 9.61,
-            channel: "Facebook"
-        },
-        {
-            id: 118,
-            code: "BL-0118",
-            title: "Dịu dàng với làn da, dịu dàng với chính mình",
-            author: "Lê Thu Hương",
-            period: "2026-11",
-            month: 11,
-            reach: 9480,
-            engagement: 824,
-            rate: 8.69,
-            channel: "Facebook"
-        },
-        {
-            id: 121,
-            code: "BL-0121",
-            title: "Tẩy trang đúng cách giúp ngăn ngừa mụn ẩn",
-            author: "Lê Thu Hương",
-            period: "2026-11",
-            month: 11,
-            reach: 8650,
-            engagement: 910,
-            rate: 10.52,
-            channel: "Instagram"
-        },
-        {
-            id: 122,
-            code: "BL-0122",
-            title: "Review Son Dưỡng Thuần Chay Hương Đào Blossom",
-            author: "Trần Ngọc Mai",
-            period: "2026-11",
-            month: 11,
-            reach: 7920,
-            engagement: 895,
-            rate: 11.30,
-            channel: "Threads"
-        },
-        {
-            id: 115,
-            code: "BL-0115",
-            title: "Bí quyết khóa ẩm ban đêm với Mặt nạ Hoa Anh Đào",
-            author: "Nguyễn Hà Linh",
-            period: "2026-10",
-            month: 10,
-            reach: 11200,
-            engagement: 1040,
-            rate: 9.29,
-            channel: "Instagram"
-        },
-        {
-            id: 114,
-            code: "BL-0114",
-            title: "Chăm da đón gió thu cùng Serum Hoa Hồng",
-            author: "Trần Ngọc Mai",
-            period: "2026-10",
-            month: 10,
-            reach: 9850,
-            engagement: 920,
-            rate: 9.34,
-            channel: "Facebook"
-        },
-        {
-            id: 113,
-            code: "BL-0113",
-            title: "3 tips đánh son mịn môi không lộ vân",
-            author: "Lê Thu Hương",
-            period: "2026-10",
-            month: 10,
-            reach: 8400,
-            engagement: 860,
-            rate: 10.24,
-            channel: "Threads"
-        }
-    ];
-
     const CHANNEL_META = [
         { name: "Facebook",  color: "#cc618a" },
         { name: "Instagram", color: "#f4b8ce" },
@@ -124,57 +13,115 @@
     ];
 
     let state = {
-        period: "2026-11",   // 2026-11 | 2026-10 | 2026-Q4 | 2026-ALL | EMPTY
-        platform: "ALL",     // ALL | Facebook | Instagram | Threads
-        staff: "ALL"         // ALL | Doãn Thị Minh Anh | Nguyễn Hà Linh | Trần Ngọc Mai | Lê Thu Hương
+        period: "2026-ALL",
+        platform: "ALL",
+        staff: "ALL"
     };
+
+    let backendRankingPosts = null;
+
+    function mapBackendRow(r) {
+        const pubIso = r.published_at || "";
+        const period = pubIso.length >= 7 ? pubIso.slice(0, 7) : "2026-11";
+        const month = pubIso.length >= 7 ? (parseInt(pubIso.slice(5, 7), 10) || 11) : 11;
+        const reach = Number(r.reach) || 0;
+        const engagement = (Number(r.likes) || 0) + (Number(r.comments) || 0) + (Number(r.shares) || 0);
+        const rate = reach > 0 ? Number(((engagement / reach) * 100).toFixed(2)) : 0;
+
+        let channel = "Facebook";
+        const pLower = String(r.platform || "").toLowerCase();
+        if (pLower.indexOf("insta") !== -1) channel = "Instagram";
+        else if (pLower.indexOf("thread") !== -1) channel = "Threads";
+
+        return {
+            id: Number(r.post_id),
+            code: "BL-0" + r.post_id,
+            title: r.title || "",
+            author: r.author || "Chưa rõ",
+            period: period,
+            month: month,
+            reach: reach,
+            engagement: engagement,
+            rate: rate,
+            channel: channel
+        };
+    }
+
+    function populateStaffFilter() {
+        const sel = document.getElementById("reportStaffSelect");
+        if (!sel) return;
+        const currentVal = sel.value || "ALL";
+        const names = [];
+        (backendRankingPosts || []).forEach(function (item) {
+            if (item.author && names.indexOf(item.author) === -1) names.push(item.author);
+        });
+        names.sort();
+        sel.innerHTML = '<option value="ALL">Tất cả nhân sự</option>' + names.map(function (n) {
+            return '<option value="' + UI.esc(n) + '">' + UI.esc(n) + '</option>';
+        }).join("");
+        if (names.indexOf(currentVal) !== -1) sel.value = currentVal;
+    }
+
+    function populatePeriodFilter() {
+        const sel = document.getElementById("reportPeriodSelect");
+        if (!sel) return;
+        const cur = sel.value || state.period || "2026-ALL";
+        const months = [];
+        (backendRankingPosts || []).forEach(function (item) {
+            if (item.period && /^\d{4}-\d{2}$/.test(item.period) && months.indexOf(item.period) === -1) {
+                months.push(item.period);
+            }
+        });
+        months.sort().reverse();
+        let html = '<option value="2026-ALL">Tất cả thời gian</option>';
+        months.forEach(function (ym) {
+            const parts = ym.split("-");
+            html += '<option value="' + UI.esc(ym) + '">Tháng ' + parseInt(parts[1], 10) + ', ' + parts[0] + '</option>';
+        });
+        html += '<option value="2026-Q4">Quý 4, 2026</option>';
+        sel.innerHTML = html;
+        if (Array.from(sel.options).some(function (o) { return o.value === cur; })) {
+            sel.value = cur;
+            state.period = cur;
+        } else {
+            sel.value = "2026-ALL";
+            state.period = "2026-ALL";
+        }
+    }
+
+    async function loadBackendAnalytics() {
+        if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
+        try {
+            const rows = await global.BlossomAPI.request("/analytics/export");
+            if (Array.isArray(rows)) {
+                backendRankingPosts = rows.map(mapBackendRow);
+                populatePeriodFilter();
+                populateStaffFilter();
+                renderDashboard();
+            }
+        } catch (err) {
+            console.warn("[Reports] Backend analytics load error:", err.message);
+        }
+    }
 
     function formatNumber(n) {
         return Number(n || 0).toLocaleString("vi-VN");
     }
 
     function getAllRankingPosts() {
-        const list = TOP_POSTS_DATA.slice();
-        try {
-            const shared = JSON.parse(localStorage.getItem("blossom_posts_fr06_07_v1") || "[]");
-            if (Array.isArray(shared)) {
-                shared.forEach(function (p) {
-                    if (p.deleted_at) return;
-                    const exists = list.some(function (x) { return x.code === p.code || Number(x.id) === Number(p.post_id); });
-                    if (!exists && Number(p.post_id) > 129) {
-                        const m = p.planned_date ? parseInt(p.planned_date.split("-")[1], 10) : 11;
-                        let ch = "Facebook";
-                        if (Array.isArray(p.platforms) && p.platforms.length > 0) {
-                            const p0 = String(p.platforms[0]).toLowerCase();
-                            if (p0.indexOf("thread") !== -1) ch = "Threads";
-                            else if (p0.indexOf("insta") !== -1) ch = "Instagram";
-                            else ch = "Facebook";
-                        }
-                        list.unshift({
-                            id: Number(p.post_id),
-                            code: p.code || ("BL-0" + p.post_id),
-                            title: p.title,
-                            author: p.author || "Doãn Thị Minh Anh",
-                            period: "2026-" + String(m || 11).padStart(2, "0"),
-                            month: m || 11,
-                            reach: 6420,
-                            engagement: 685,
-                            rate: 10.67,
-                            channel: ch
-                        });
-                    }
-                });
-            }
-        } catch (_) {}
-        return list;
+        return Array.isArray(backendRankingPosts) ? backendRankingPosts.slice() : [];
     }
 
     function getFilteredData() {
         if (state.period === "EMPTY") return [];
         return getAllRankingPosts().filter(function (item) {
-            if (state.period === "2026-11" && item.period !== "2026-11") return false;
-            if (state.period === "2026-10" && item.period !== "2026-10") return false;
-            if (state.period === "2026-Q4" && (item.month < 10 || item.month > 12)) return false;
+            if (state.period && state.period !== "2026-ALL" && state.period !== "ALL") {
+                if (state.period === "2026-Q4") {
+                    if (item.month < 10 || item.month > 12) return false;
+                } else if (item.period !== state.period) {
+                    return false;
+                }
+            }
             if (state.platform !== "ALL" && item.channel !== state.platform) return false;
             if (state.staff !== "ALL" && item.author !== state.staff) return false;
             return true;
@@ -187,19 +134,11 @@
         const bigTotalEl = document.getElementById("trendTotalPosts");
         if (!plotEl) return;
 
-        // Tính số liệu bài viết theo 12 tháng từ bộ lọc
-        const scaleFactor = Math.max(0.2, filtered.length / 5);
-        const baseHistory = [1, 2, 1, 3, 3, 4, 3, 4, 5, 0, 0, 0];
-        const monthlyCounts = baseHistory.map(function (v, idx) {
-            const monthNum = idx + 1;
-            const actualInMonth = filtered.filter(function (x) { return x.month === monthNum; }).length;
-            if (monthNum === 10 || monthNum === 11) {
-                return actualInMonth;
-            }
-            if (state.period === "2026-11" || state.period === "2026-10") {
-                return Math.max(0, Math.round(v * Math.min(1, scaleFactor)));
-            }
-            return Math.max(0, Math.round(v * Math.min(1.2, scaleFactor)));
+        // Tính số liệu bài viết thực tế theo 12 tháng từ dữ liệu Backend
+        const monthlyCounts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        filtered.forEach(function (x) {
+            const idx = (Number(x.month) || 1) - 1;
+            if (idx >= 0 && idx < 12) monthlyCounts[idx] += 1;
         });
 
         const totalYearPosts = monthlyCounts.reduce(function (s, n) { return s + n; }, 0);
@@ -416,22 +355,7 @@
         if (menu) menu.hidden = true;
 
         const filtered = getFilteredData();
-        const dateStamp = "20261120";
-
-        try {
-            const resp = await fetch(
-                (global.BlossomAPI ? global.BlossomAPI.API_BASE : "http://localhost:8000/api") +
-                "/analytics/export?format=" + encodeURIComponent(format),
-                { credentials: "include" }
-            );
-            if (resp.ok) {
-                const blob = await resp.blob();
-                const ext = format === "excel" ? "xlsx" : format;
-                triggerDownload(blob, "Bao_Cao_Blossom_" + dateStamp + "." + ext);
-                UI.toast("success", "Xuất báo cáo thành công", "Đã tải xuống tệp báo cáo.");
-                return;
-            }
-        } catch (_) {}
+        const dateStamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
 
         if (format === "pdf") {
             window.print();
@@ -495,14 +419,14 @@
         const resetBtn = document.getElementById("btnResetReportFilters");
         if (resetBtn) {
             resetBtn.addEventListener("click", function () {
-                state.period = "2026-11";
+                state.period = "2026-ALL";
                 state.platform = "ALL";
                 state.staff = "ALL";
-                if (periodSel) periodSel.value = "2026-11";
+                if (periodSel) periodSel.value = "2026-ALL";
                 if (platSel) platSel.value = "ALL";
                 if (staffSel) staffSel.value = "ALL";
                 renderDashboard();
-                UI.toast("info", "Đã đặt lại bộ lọc", "Hiển thị dữ liệu Tháng 11, 2026.");
+                UI.toast("info", "Đã đặt lại bộ lọc", "Hiển thị toàn bộ dữ liệu thống kê.");
             });
         }
 
@@ -571,10 +495,12 @@
             initFromUrl();
             bindEvents();
             renderDashboard();
+            loadBackendAnalytics();
         });
     } else {
         initFromUrl();
         bindEvents();
         renderDashboard();
+        loadBackendAnalytics();
     }
 })(window);

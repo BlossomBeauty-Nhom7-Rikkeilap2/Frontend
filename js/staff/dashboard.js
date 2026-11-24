@@ -138,12 +138,13 @@
         if (scheduleEl) {
             if (upcoming.length) {
                 scheduleEl.innerHTML = upcoming.map(function (p) {
-                    const d = p.planned_date ? new Date(p.planned_date + "T09:00:00") : now;
+                    const timeStr = (p.planned_time && /^\d{1,2}:\d{2}/.test(p.planned_time)) ? p.planned_time.slice(0, 5) : "09:00";
+                    const d = p.planned_date ? new Date(p.planned_date + "T" + timeStr + ":00") : now;
                     const plat = p.platform_label || (Array.isArray(p.platforms) ? p.platforms.join(" & ") : "Mạng xã hội");
                     return '<div class="schedule-item">' +
                         '<div class="date-box"><b>' + UI.pad(d.getDate()) + '</b><small>TH ' + (d.getMonth() + 1) + '</small></div>' +
                         '<div class="schedule-info"><b>' + UI.esc(p.title) + '</b>' +
-                        '<small>09:00 · ' + UI.esc(plat) + '</small></div>' +
+                        '<small>' + UI.esc(timeStr) + ' · ' + UI.esc(plat) + '</small></div>' +
                     '</div>';
                 }).join("");
             } else {

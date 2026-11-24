@@ -11,20 +11,7 @@
     "use strict";
 
     const KEY = "blossom_accounts";
-
-    // role: "MANAGER" | "STAFF"      status: "active" | "locked"
-    const SEED = [
-        { id: "acc-001", username: "admin",     fullName: "Đoàn Thị Minh Anh", email: "admin@blossom.vn",     password: "Blossom@123", role: "MANAGER", status: "active", createdAt: "2026-01-05" },
-        { id: "acc-002", username: "manh",      fullName: "Trần Quốc Mạnh",    email: "manh@blossom.vn",      password: "Manh@2026",   role: "STAFF",   status: "active", createdAt: "2026-02-12" },
-        { id: "acc-003", username: "thuha",     fullName: "Nguyễn Thu Hà",     email: "thuha@blossom.vn",     password: "Staff@123",   role: "STAFF",   status: "active", createdAt: "2026-02-20" },
-        { id: "acc-004", username: "hoanglong", fullName: "Lê Hoàng Long",     email: "hoanglong@blossom.vn", password: "Staff@123",   role: "STAFF",   status: "locked", createdAt: "2026-03-08" },
-        { id: "acc-005", username: "ngocdiep",  fullName: "Phạm Ngọc Diệp",    email: "ngocdiep@blossom.vn",  password: "Blossom@123", role: "MANAGER", status: "active", createdAt: "2026-04-02" },
-        { id: "acc-006", username: "khanhlinh", fullName: "Võ Khánh Linh",     email: "khanhlinh@blossom.vn", password: "Staff@123",   role: "STAFF",   status: "active", createdAt: "2026-05-17" },
-        { id: "acc-007", username: "baochau",   fullName: "Đặng Bảo Châu",     email: "baochau@blossom.vn",   password: "Staff@123",   role: "STAFF",   status: "active", createdAt: "2026-07-01" },
-        { id: "acc-008", username: "giahan",    fullName: "Bùi Gia Hân",       email: "giahan@blossom.vn",    password: "Staff@123",   role: "STAFF",   status: "locked", createdAt: "2026-09-22" },
-        { id: "acc-009", username: "minhanh",   fullName: "Doãn Thị Minh Anh", email: "minhanh@blossom.vn",   password: "Staff@123",   role: "STAFF",   status: "active", createdAt: "2026-02-15" },
-        { id: "acc-010", username: "thuyduong", fullName: "Nguyễn Thùy Dương", email: "thuyduong@blossom.vn", password: "Staff@123",   role: "STAFF",   status: "active", createdAt: "2026-02-18" }
-    ];
+    const REAL_MODE_FLAG = "blossom_accounts_real_v1";
 
     function normEmail(email) {
         return String(email || "").trim().toLowerCase();
@@ -36,47 +23,26 @@
         return at > 0 ? clean.slice(0, at) : clean;
     }
 
-    function defaultPasswordFor(email, role) {
-        const key = normEmail(email);
-        const found = SEED.filter(function (s) { return normEmail(s.email) === key; })[0];
-        if (found) return found.password;
-        return role === "MANAGER" ? "Blossom@123" : "Staff@123";
+    function defaultPasswordFor() {
+        return "";
     }
 
     function save(list) {
-        try { localStorage.setItem(KEY, JSON.stringify(list)); } catch (e) { /* bỏ qua */ }
+        try { localStorage.setItem(KEY, JSON.stringify(list || [])); } catch (e) { /* bỏ qua */ }
     }
 
     function load() {
         try {
+            if (!localStorage.getItem(REAL_MODE_FLAG)) {
+                localStorage.removeItem(KEY);
+                localStorage.setItem(REAL_MODE_FLAG, "1");
+            }
             const raw = JSON.parse(localStorage.getItem(KEY));
             if (Array.isArray(raw)) {
-                let changed = false;
-                raw.forEach(function (a) {
-                    if (!a.username && a.email) {
-                        a.username = usernameFromEmail(a.email);
-                        changed = true;
-                    }
-                    if (!a.password) {
-                        a.password = defaultPasswordFor(a.email, a.role);
-                        changed = true;
-                    }
-                });
-                // Đảm bảo tài khoản nhân viên mặc định (minhanh, thuyduong) luôn tồn tại nếu chưa có
-                ["minhanh@blossom.vn", "thuyduong@blossom.vn"].forEach(function (em) {
-                    const exists = raw.some(function (a) { return normEmail(a.email) === em; });
-                    if (!exists) {
-                        const seedItem = SEED.filter(function (s) { return s.email === em; })[0];
-                        if (seedItem) { raw.push(Object.assign({}, seedItem)); changed = true; }
-                    }
-                });
-                if (changed) save(raw);
                 return raw;
             }
-        } catch (e) { /* dữ liệu hỏng -> dùng dữ liệu mẫu */ }
-        const seed = SEED.map(function (a) { return Object.assign({}, a); });
-        save(seed);
-        return seed;
+        } catch (e) { /* bỏ qua */ }
+        return [];
     }
 
     function findByIdentifier(identifier) {
@@ -111,8 +77,47 @@
         return !!acc && acc.status === "locked";
     }
 
+    async function syncFromBackend() {
+        if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
+        const role = global.Auth && typeof global.Auth.getRole === "function" ? global.Auth.getRole() : null;
+        if (role && role !== "MANAGER") return;
+        try {
+            const users = await global.BlossomAPI.request("/users");
+            if (Array.isArray(users)) {
+                const realList = users.map(function (u) {
+                    const isMgr = (u.role && u.role.role_code === "MANAGER") || u.role_id === 1;
+                    const statusStr = (u.status === "ACTIVE" ? "active" : "locked");
+                    const dateStr = u.created_at ? u.created_at.slice(0, 10) : "";
+                    return {
+                        id: u.user_id,
+                        username: u.username,
+                        fullName: u.full_name,
+                        email: u.email,
+                        role: isMgr ? "MANAGER" : "STAFF",
+                        status: statusStr,
+                        createdAt: dateStr
+                    };
+                });
+
+                save(realList);
+                try { global.dispatchEvent(new Event("blossom_accounts_updated")); } catch (e) {}
+            }
+        } catch (e) {
+            console.warn("[AccountStore] syncFromBackend error:", e.message);
+        }
+    }
+
     global.AccountStore = {
         KEY, load, save, isLocked, normEmail,
-        usernameFromEmail, defaultPasswordFor, findByIdentifier, verifyPassword, updatePassword
+        usernameFromEmail, defaultPasswordFor, findByIdentifier, verifyPassword, updatePassword,
+        syncFromBackend: syncFromBackend
     };
+
+    if (typeof window !== "undefined") {
+        window.addEventListener("DOMContentLoaded", function () {
+            if (global.BlossomAPI && global.BlossomAPI.getToken()) {
+                syncFromBackend();
+            }
+        });
+    }
 })(window);

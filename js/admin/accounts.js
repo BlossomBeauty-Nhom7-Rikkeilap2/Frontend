@@ -67,72 +67,137 @@
         return "acc-" + String(max + 1).padStart(3, "0");
     }
 
+    function sameId(a, b) {
+        return a != null && b != null && String(a) === String(b);
+    }
+
     // Email đã tồn tại chưa (không phân biệt hoa/thường), bỏ qua chính tài khoản đang sửa
     function emailTaken(list, email, exceptId) {
         const key = AccountStore.normEmail(email);
-        return list.some(function (a) { return a.id !== exceptId && AccountStore.normEmail(a.email) === key; });
+        return list.some(function (a) { return !sameId(a.id, exceptId) && AccountStore.normEmail(a.email) === key; });
     }
 
     function activeManagersExcept(list, id) {
-        return list.filter(function (a) { return a.id !== id && a.role === "MANAGER" && a.status === "active"; }).length;
+        return list.filter(function (a) { return !sameId(a.id, id) && a.role === "MANAGER" && a.status === "active"; }).length;
     }
 
-    // TODO(API): POST /accounts { fullName, email, password, role } – server băm mật khẩu, trả 409 nếu trùng Email.
-    function createAccountRemote(data) {
-        return delay(500).then(function () {
-            const list = AccountStore.load();                       // đọc lại để chặn trùng khi mở nhiều tab
-            if (emailTaken(list, data.email)) throw fail("Email này đã được sử dụng.", "email");
-            const rec = {
-                id: nextId(list),
-                username: AccountStore.usernameFromEmail(data.email),
-                fullName: data.fullName,
-                email: data.email,
-                password: data.password,
-                role: data.role,
-                status: "active",
-                createdAt: today()
-            };
-            list.push(rec);
-            AccountStore.save(list);
-            return rec;
-        });
+    function uniqueUsernameFromEmail(list, email) {
+        let base = AccountStore.usernameFromEmail(email).replace(/[^a-zA-Z0-9_.-]/g, "") || "staff";
+        if (base.length < 3) base = base + "_user";
+        let candidate = base.slice(0, 45);
+        let idx = 2;
+        while (list.some(function (a) { return String(a.username || "").toLowerCase() === candidate.toLowerCase(); })) {
+            candidate = base.slice(0, 42) + "_" + idx;
+            idx += 1;
+        }
+        return candidate;
     }
 
-    // TODO(API): PATCH /accounts/{id} { fullName, email, role, password? }
-    function updateAccountRemote(id, data) {
-        return delay(500).then(function () {
-            const list = AccountStore.load();
-            const rec = list.filter(function (a) { return a.id === id; })[0];
-            if (!rec) throw fail("Tài khoản không còn tồn tại.");
-            if (emailTaken(list, data.email, id)) throw fail("Email này đã được sử dụng.", "email");
-            if (rec.role === "MANAGER" && data.role !== "MANAGER" && rec.status === "active" && !activeManagersExcept(list, id)) {
-                throw fail("Hệ thống phải còn ít nhất một Manager đang hoạt động.", "role");
+    async function createAccountRemote(data) {
+        const list = AccountStore.load();
+        if (emailTaken(list, data.email, null)) throw fail("Email này đã được sử dụng.", "email");
+        const uname = uniqueUsernameFromEmail(list, data.email);
+
+        if (window.BlossomAPI && typeof window.BlossomAPI.request === "function") {
+            try {
+                const created = await BlossomAPI.request("/users", {
+                    method: "POST",
+                    body: {
+                        username: uname,
+                        email: data.email,
+                        password: data.password,
+                        full_name: data.fullName,
+                        role_id: data.role === "MANAGER" ? 1 : 2
+                    }
+                });
+                if (created) {
+                    const rec = {
+                        id: created.user_id,
+                        username: created.username,
+                        fullName: created.full_name,
+                        email: created.email,
+                        role: data.role,
+                        status: "active",
+                        createdAt: created.created_at ? created.created_at.slice(0, 10) : today()
+                    };
+                    list.push(rec);
+                    AccountStore.save(list);
+                    return rec;
+                }
+            } catch (apiErr) {
+                console.warn("[Accounts] API create user error:", apiErr.message);
+                throw fail(apiErr.message, "email");
             }
-            rec.fullName = data.fullName;
-            rec.email = data.email;
-            rec.username = AccountStore.usernameFromEmail(data.email);
-            rec.role = data.role;
-            if (data.password) {
-                rec.password = data.password;
-            }
-            AccountStore.save(list);
-            return rec;
-        });
+        }
+        const rec = {
+            id: nextId(list),
+            username: uname,
+            fullName: data.fullName,
+            email: data.email,
+            role: data.role,
+            status: "active",
+            createdAt: today()
+        };
+        list.push(rec);
+        AccountStore.save(list);
+        return rec;
     }
 
-    // TODO(API): PATCH /accounts/{id}/status { status: "active" | "locked" }
-    function setStatusRemote(id, status) {
-        return delay(400).then(function () {
-            const list = AccountStore.load();
-            const rec = list.filter(function (a) { return a.id === id; })[0];
-            if (!rec) throw fail("Tài khoản không còn tồn tại.");
-            if (status === "locked" && rec.role === "MANAGER" && rec.status === "active" && !activeManagersExcept(list, id)) {
-                throw fail("Không thể khóa Manager đang hoạt động cuối cùng.");
+    async function updateAccountRemote(id, data) {
+        const list = AccountStore.load();
+        const rec = list.filter(function (a) { return sameId(a.id, id); })[0];
+        if (!rec) throw fail("Tài khoản không còn tồn tại.");
+        if (emailTaken(list, data.email, id)) throw fail("Email này đã được sử dụng.", "email");
+        if (rec.role === "MANAGER" && data.role !== "MANAGER" && rec.status === "active" && !activeManagersExcept(list, id)) {
+            throw fail("Hệ thống phải còn ít nhất một Manager đang hoạt động.", "role");
+        }
+
+        if (window.BlossomAPI && typeof window.BlossomAPI.request === "function" && Number(id)) {
+            try {
+                const body = {
+                    email: data.email,
+                    full_name: data.fullName,
+                    role_id: data.role === "MANAGER" ? 1 : 2
+                };
+                if (data.password) {
+                    body.password = data.password;
+                }
+                await BlossomAPI.request("/users/" + id, {
+                    method: "PUT",
+                    body: body
+                });
+            } catch (apiErr) {
+                throw fail(apiErr.message || "Không thể cập nhật tài khoản.", "email");
             }
-            rec.status = status;
-            AccountStore.save(list);
-            return rec;
-        });
+        }
+        rec.fullName = data.fullName;
+        rec.email = data.email;
+        rec.role = data.role;
+        AccountStore.save(list);
+        return rec;
+    }
+
+    async function setStatusRemote(id, status) {
+        const list = AccountStore.load();
+        const rec = list.filter(function (a) { return sameId(a.id, id); })[0];
+        if (!rec) throw fail("Tài khoản không còn tồn tại.");
+        if (status === "locked" && rec.role === "MANAGER" && rec.status === "active" && !activeManagersExcept(list, id)) {
+            throw fail("Không thể khóa Manager đang hoạt động cuối cùng.");
+        }
+
+        if (window.BlossomAPI && typeof window.BlossomAPI.request === "function" && Number(id)) {
+            try {
+                await BlossomAPI.request("/users/" + id + "/status", {
+                    method: "PATCH",
+                    body: { status: status === "active" ? "ACTIVE" : "LOCKED" }
+                });
+            } catch (apiErr) {
+                throw fail(apiErr.message || "Không thể cập nhật trạng thái tài khoản.");
+            }
+        }
+        rec.status = status;
+        AccountStore.save(list);
+        return rec;
     }
 
     /* ---------- 3. TIỆN ÍCH ---------- */
@@ -144,7 +209,7 @@
     }
 
     function findById(id) {
-        return accounts.filter(function (a) { return a.id === id; })[0] || null;
+        return accounts.filter(function (a) { return sameId(a.id, id); })[0] || null;
     }
 
     function reload() { accounts = AccountStore.load(); }
@@ -239,7 +304,7 @@
                 "</td></tr>";
         } else {
             listEl.innerHTML = view.map(function (a) {
-                const cls = (a.id === state.selectedId ? "is-selected " : "") + (a.status === "locked" ? "is-locked" : "");
+                const cls = (sameId(a.id, state.selectedId) ? "is-selected " : "") + (a.status === "locked" ? "is-locked" : "");
                 return '<tr data-id="' + esc(a.id) + '" class="' + cls.trim() + '" tabindex="0">' +
                     '<td><div class="acc-user"><span class="avatar avatar--sm">' + avatarContent(a) + "</span>" +
                         "<div><b>" + esc(a.fullName) + "</b><small>" + esc(a.email) + "</small></div></div></td>" +
@@ -726,6 +791,10 @@
     // Đồng bộ khi tab khác thay đổi dữ liệu (khóa / mở khóa / thêm...)
     window.addEventListener("storage", function (e) {
         if (e.key === AccountStore.KEY) { reload(); renderAll(); }
+    });
+    window.addEventListener("blossom_accounts_updated", function () {
+        reload();
+        renderAll();
     });
 
     /* ---------- 8. KHỞI TẠO ---------- */

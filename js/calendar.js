@@ -72,11 +72,36 @@
        Dữ liệu + quyền
        --------------------------------------------------------- */
     function reload() { state.events = Scope.loadEvents(); }
-    function persist() { Scope.saveEvents(state.events); }
+    async function persist(target) {
+        Scope.saveEvents(state.events);
+        if (!target || !window.BlossomAPI || typeof window.BlossomAPI.request !== "function") return;
+        const targets = Array.isArray(target) ? target : [target];
+        for (let i = 0; i < targets.length; i++) {
+            const ev = targets[i];
+            if (ev && ev.post_id && ev.date) {
+                const dtStr = ev.date + "T" + (ev.time || "09:00") + ":00";
+                try {
+                    await BlossomAPI.request("/schedules/" + ev.post_id, {
+                        method: "PUT",
+                        body: { scheduled_time: dtStr, remind_before_minutes: 30 }
+                    });
+                } catch (e) {
+                    console.warn("[Calendar] PUT schedule error:", e.message);
+                    toast("warning", "Chưa đồng bộ được lên máy chủ", e.message || "Vui lòng kiểm tra trạng thái bài viết.");
+                }
+            }
+        }
+    }
     function findEvent(id) {
         return state.events.find(function (e) { return Number(e.id) === Number(id); }) || null;
     }
     function ownerName(ev) { return ev.author || Scope.ownerName(ev.owner_username, []) || "—"; }
+
+    function isEventPublished(ev) {
+        if (!ev) return false;
+        if (ev.published || ev.post_status === "PUBLISHED") return true;
+        return ev.status === "SCHEDULED" && isPast(ev.date, ev.time);
+    }
 
     // Lịch người dùng hiện tại được phép thấy + bộ lọc giao diện
     function visible() {
@@ -90,6 +115,7 @@
     }
 
     function canEditFields(ev) {
+        if (ev && (ev.published || ev.post_status === "PUBLISHED")) return false;
         if (isMgr) return true;
         if (!ev) return true;                         // tạo mới
         return Scope.isOwner(ev, me) && ev.status !== "SCHEDULED";
@@ -99,7 +125,18 @@
     /* ---------------------------------------------------------
        Nền tảng + xung đột
        --------------------------------------------------------- */
-    function expandPlatform(p) { return p === "FB & IG" ? ["Facebook", "Instagram"] : [p]; }
+    function normPlat(p) {
+        const s = String(p || "").trim().toLowerCase();
+        if (!s) return "Facebook";
+        if (s === "fb & ig" || (s.indexOf("face") !== -1 && s.indexOf("insta") !== -1)) return "FB & IG";
+        if (s.indexOf("insta") !== -1) return "Instagram";
+        if (s.indexOf("thread") !== -1) return "Threads";
+        return "Facebook";
+    }
+    function expandPlatform(p) {
+        const np = normPlat(p);
+        return np === "FB & IG" ? ["Facebook", "Instagram"] : [np];
+    }
     function platformsOverlap(a, b) {
         const x = expandPlatform(a), y = expandPlatform(b);
         return x.some(function (c) { return y.indexOf(c) !== -1; });
@@ -109,15 +146,17 @@
         return expandPlatform(ev.platform).indexOf(f) !== -1;
     }
     function platformClass(p) {
-        if (p === "Facebook") return "platform-fb";
-        if (p === "Instagram") return "platform-ig";
-        if (p === "Threads") return "platform-threads";
+        const np = normPlat(p);
+        if (np === "Facebook") return "platform-fb";
+        if (np === "Instagram") return "platform-ig";
+        if (np === "Threads") return "platform-threads";
         return "platform-fbig";
     }
     function platformDot(p) {
-        if (p === "Facebook") return "#1877F2";
-        if (p === "Instagram") return "#E1306C";
-        if (p === "Threads") return "#111111";
+        const np = normPlat(p);
+        if (np === "Facebook") return "#1877F2";
+        if (np === "Instagram") return "#E1306C";
+        if (np === "Threads") return "#111111";
         return "#cc618a";
     }
 
@@ -166,7 +205,7 @@
        Hiển thị thẻ lịch
        --------------------------------------------------------- */
     function statusLabel(ev) {
-        if (ev.status === "SCHEDULED" && isPast(ev.date, ev.time)) return "Đã đăng";
+        if (isEventPublished(ev)) return "Đã đăng";
         return STATUS_TEXT[ev.status] || ev.status;
     }
     function statusClass(s) {
@@ -190,8 +229,8 @@
         return '<div class="' + cls + '" draggable="' + (drag ? "true" : "false") + '" data-event-id="' + ev.id + '" ' +
             'title="' + esc(drag ? "Kéo-thả để đổi lịch hoặc nhấn để xem / chỉnh (" : "Nhấn để xem chi tiết (") + esc(statusLabel(ev)) + ')">' +
             '<div class="fr11-event-meta">' +
-                '<span><span class="fr11-platform-dot" style="background:' + platformDot(ev.platform) + '"></span> ' + esc(ev.time) + ' · ' + esc(ev.platform) + '</span>' +
-                (conflict ? '<span class="fr11-conflict-pill">⚠️ Trùng lịch</span>' : "") +
+                '<span><span class="fr11-platform-dot" style="background:' + platformDot(ev.platform) + '"></span> ' + esc(ev.time) + ' · ' + esc(normPlat(ev.platform)) + '</span>' +
+                (conflict ? '<span class="fr11-conflict-pill">Trùng lịch</span>' : "") +
             '</div>' +
             '<div class="fr11-event-title">' + esc(ev.title) + '</div>' +
             '<div class="fr11-event-foot">' +
@@ -258,7 +297,7 @@
         const dayEvents = list.filter(function (e) { return e.date === iso; });
         const slots = slotsFor(dayEvents);
         let html = '<div class="fr11-day-view-header"><div class="fr11-day-view-title">Lịch chi tiết theo giờ — Ngày ' + Scope.viDate(iso) + (iso === todayStr() ? " (HÔM NAY)" : "") + '</div>' +
-            '<div class="fr11-day-view-hint">💡 Kéo-thả thẻ bài viết giữa các khung giờ để đổi giờ đăng</div></div><div class="fr11-day-timeline">';
+            '<div class="fr11-day-view-hint">Kéo-thả thẻ bài viết giữa các khung giờ để đổi giờ đăng</div></div><div class="fr11-day-timeline">';
         slots.forEach(function (slot) {
             const here = dayEvents.filter(function (e) { return e.time === slot; });
             html += '<div class="fr11-day-row"><div class="fr11-day-time"><span>' + slot + '</span><small>GMT+7</small></div>' +
@@ -282,10 +321,10 @@
                 const conflict = ids.has(Number(e.id));
                 return '<tr data-event-id="' + e.id + '">' +
                     '<td><b>' + esc(e.time) + '</b><br><small>' + Scope.viDate(e.date) + '</small></td>' +
-                    '<td>' + esc(e.title) + (conflict ? ' <span class="fr11-conflict-pill">⚠️ Trùng lịch</span>' : "") +
+                    '<td>' + esc(e.title) + (conflict ? ' <span class="fr11-conflict-pill">Trùng lịch</span>' : "") +
                         (e.status === "EDITING" && e.change_reason ? '<br><small class="fr11-reason-inline">Lý do: ' + esc(e.change_reason) + '</small>' : "") + '</td>' +
                     (isMgr ? '<td>' + esc(ownerName(e)) + '</td>' : "") +
-                    '<td>' + esc(e.platform) + '</td>' +
+                    '<td>' + esc(normPlat(e.platform)) + '</td>' +
                     '<td><span class="fr11-event-chip ' + statusClass(e.status) + '">' + esc(statusLabel(e)) + '</span></td>' +
                     '<td class="fr11-list-actions">' +
                         (isMgr && e.status === "PENDING" ? '<button type="button" class="fr11-quick-btn ok" data-quick="confirm" title="Xác nhận lịch">✓</button><button type="button" class="fr11-quick-btn" data-quick="change" title="Yêu cầu thay đổi">↺</button>' : "") +
@@ -305,8 +344,8 @@
             if (isMgr && state.staffFilter !== "ALL" && Scope.ownerOf(e) !== state.staffFilter) return false;
             return true;
         });
-        const posted = mine.filter(function (e) { return e.status === "SCHEDULED" && isPast(e.date, e.time); }).length;
-        const confirmed = mine.filter(function (e) { return e.status === "SCHEDULED" && !isPast(e.date, e.time); }).length;
+        const posted = mine.filter(function (e) { return isEventPublished(e); }).length;
+        const confirmed = mine.filter(function (e) { return e.status === "SCHEDULED" && !isEventPublished(e); }).length;
         const pending = mine.filter(function (e) { return e.status === "PENDING"; }).length;
         const editing = mine.filter(function (e) { return e.status === "EDITING"; }).length;
         const card = function (cls, label, value, note) {
@@ -471,7 +510,7 @@
             notifyManagers("submitted", "Nhân viên đã cập nhật lịch đăng", me.fullName + " dời lịch “" + ev.title + "” sang " + when(ev) + " – chờ xác nhận.", ev);
         }
 
-        persist();
+        persist(ev);
         render();
         const others = conflictsOf(ev, ev.id);
         if (others.length) {
@@ -502,7 +541,7 @@
         ev.reviewed_by = me.fullName;
         ev.reviewed_at = new Date().toISOString();
         ev.remind_sent = false;
-        persist();
+        await persist(ev);
         if (ev.owner_username && !Scope.sameUser(ev.owner_username, me.username)) {
             notifyOwner("approved", "Lịch đăng đã được xác nhận", "Lịch đăng “" + ev.title + "” lúc " + when(ev) + " đã được Manager xác nhận và trở thành lịch chính thức.", ev);
         }
@@ -547,6 +586,33 @@
         });
     }
 
+    function collectKnownStaff() {
+        const map = {};
+        const list = [];
+        const add = function (username, fullName) {
+            const u = String(username || "").trim();
+            if (!u || map[u]) return;
+            map[u] = true;
+            list.push({ username: u, fullName: fullName || u });
+        };
+        if (global.AccountStore && typeof global.AccountStore.load === "function") {
+            global.AccountStore.load().forEach(function (a) {
+                if (a && a.status !== "locked") add(a.username, a.fullName);
+            });
+        }
+        Scope.STAFF.forEach(function (s) { add(s.username, s.fullName); });
+        state.events.forEach(function (e) {
+            const k = Scope.ownerOf(e);
+            if (k) add(k, e.author || k);
+        });
+        Scope.loadPosts().forEach(function (p) {
+            const k = Scope.ownerOf(p);
+            if (k) add(k, p.author || k);
+        });
+        if (me && me.username) add(me.username, me.fullName);
+        return list;
+    }
+
     function refreshModalConflict() {
         const box = $("fr11ConflictBox");
         if (!box) return;
@@ -555,7 +621,7 @@
         const idVal = $("fr11FormId").value;
         const others = conflictsOf({ date: date, time: time, platform: platform }, idVal ? Number(idVal) : null);
         if (!others.length) { box.hidden = true; return; }
-        box.innerHTML = "<strong>⚠️ Lịch bị trùng</strong><span>" + esc(conflictWarningText(null, others)) +
+        box.innerHTML = "<strong>Lịch bị trùng</strong><span>" + esc(conflictWarningText(null, others)) +
             (isMgr ? "" : " Bạn vẫn có thể gửi, Manager sẽ xem xét.") + "</span>";
         box.hidden = false;
     }
@@ -585,7 +651,8 @@
         if (ownerGroup && ownerSel) {
             ownerGroup.hidden = !(isMgr && !ev);
             if (isMgr && !ev) {
-                ownerSel.innerHTML = Scope.STAFF.map(function (s) { return '<option value="' + esc(s.username) + '">' + esc(s.fullName) + '</option>'; }).join("");
+                const knownStaff = collectKnownStaff();
+                ownerSel.innerHTML = knownStaff.map(function (s) { return '<option value="' + esc(s.username) + '">' + esc(s.fullName) + '</option>'; }).join("");
                 if (state.staffFilter !== "ALL") ownerSel.value = state.staffFilter;
             }
         }
@@ -593,7 +660,7 @@
         if (ev) {
             heading.textContent = (editable ? "Điều chỉnh lịch đăng bài" : "Chi tiết lịch đăng bài") + " (" + ev.code + ")";
             $("fr11FormTitle").value = ev.title;
-            $("fr11FormPlatform").value = ev.platform;
+            $("fr11FormPlatform").value = normPlat(ev.platform);
             $("fr11FormDate").value = ev.date;
             $("fr11FormTime").value = ev.time;
         } else {
@@ -710,9 +777,10 @@
 
         if (!ev) {
             const id = Date.now();
-            const owner = isMgr ? Scope.STAFF.find(function (s) { return s.username === f.owner; }) : null;
+            const knownStaff = collectKnownStaff();
+            const owner = isMgr ? knownStaff.find(function (s) { return s.username === f.owner; }) : null;
             const entry = {
-                id: id, code: "LCH-" + String(id).slice(-5), title: f.title, date: f.date, time: f.time, platform: f.platform,
+                id: id, code: "LCH-" + String(id).slice(-5), title: f.title, date: f.date, time: f.time, platform: normPlat(f.platform),
                 status: isMgr ? "SCHEDULED" : "PENDING",
                 author: isMgr ? (owner ? owner.fullName : me.fullName) : me.fullName,
                 owner_username: isMgr ? (owner ? owner.username : me.username) : me.username,
@@ -720,7 +788,7 @@
             };
             if (isMgr) { entry.reviewed_by = me.fullName; entry.reviewed_at = new Date().toISOString(); }
             state.events.push(entry);
-            persist();
+            persist(entry);
             if (isMgr) {
                 if (entry.owner_username && !Scope.sameUser(entry.owner_username, me.username)) {
                     notifyOwner("approved", "Lịch đăng đã được xác nhận", "Manager đã tạo lịch đăng chính thức cho bài “" + entry.title + "” lúc " + when(entry) + " (" + entry.platform + ").", entry);
@@ -730,9 +798,9 @@
                 notifyManagers("submitted", "Có lịch đăng mới cần xác nhận", me.fullName + " đề xuất đăng “" + entry.title + "” lúc " + when(entry) + " (" + entry.platform + ").", entry);
             }
         } else {
-            const old = when(ev) + " · " + ev.platform;
+            const old = when(ev) + " · " + normPlat(ev.platform);
             const wasEditing = ev.status === "EDITING";
-            ev.title = f.title; ev.platform = f.platform; ev.date = f.date; ev.time = f.time;
+            ev.title = f.title; ev.platform = normPlat(f.platform); ev.date = f.date; ev.time = f.time;
             if (changedTime || old.indexOf(ev.platform) === -1) ev.remind_sent = false;
 
             if (isMgr) {
@@ -746,7 +814,7 @@
                 notifyManagers("submitted", "Nhân viên đã cập nhật lịch đăng",
                     me.fullName + " " + (wasEditing ? "đã cập nhật lịch theo yêu cầu" : "cập nhật lịch") + " “" + ev.title + "” sang " + when(ev) + " (" + ev.platform + ") – chờ xác nhận.", ev);
             }
-            persist();
+            persist(ev);
         }
 
         closeScheduleModal();
@@ -793,6 +861,7 @@
     function resolveConflicts() {
         if (!isMgr) return;
         let adjusted = 0;
+        const moved = [];
         for (let pass = 0; pass < 6; pass++) {
             const { pairs } = detectConflicts(state.events);
             if (!pairs.length) break;
@@ -805,12 +874,13 @@
             const old = when(mover);
             mover.time = formatMinutes(parseMinutes(stay.time) + CONFLICT_MINUTES);
             mover.remind_sent = false;
+            if (moved.indexOf(mover) === -1) moved.push(mover);
             if (mover.owner_username && !Scope.sameUser(mover.owner_username, me.username)) {
                 notifyOwner("revision", "Lịch đăng đã được thay đổi", "Lịch đăng “" + mover.title + "” được dời từ " + old + " sang " + when(mover) + " để tránh trùng giờ.", mover);
             }
             adjusted++;
         }
-        persist();
+        persist(moved);
         render();
         if (adjusted) toast("success", "Đã giãn cách lịch", "Đã tự động dời " + adjusted + " lịch cách nhau tối thiểu " + CONFLICT_MINUTES + " phút.");
     }
@@ -826,22 +896,27 @@
         render();
     }
 
-    function initFilters() {
+    function populateStaffFilter() {
         const staffSel = $("staffFilterSelect");
-        if (staffSel) {
-            if (!isMgr) {
-                staffSel.hidden = true;   // Staff không có bộ lọc nhân viên
-            } else {
-                const names = Scope.STAFF.slice();
-                state.events.forEach(function (e) {
-                    const k = Scope.ownerOf(e);
-                    if (k && !names.some(function (s) { return s.username === k; })) names.push({ username: k, fullName: e.author || k });
-                });
-                staffSel.innerHTML = '<option value="ALL">Tất cả nhân viên</option>' + names.map(function (s) {
-                    return '<option value="' + esc(s.username) + '">' + esc(s.fullName) + '</option>';
-                }).join("");
-                staffSel.addEventListener("change", function () { state.staffFilter = staffSel.value; render(); });
-            }
+        if (!staffSel) return;
+        if (!isMgr) {
+            staffSel.hidden = true;   // Staff không có bộ lọc nhân viên
+            return;
+        }
+        const cur = staffSel.value || state.staffFilter || "ALL";
+        const names = collectKnownStaff();
+        staffSel.innerHTML = '<option value="ALL">Tất cả nhân viên</option>' + names.map(function (s) {
+            return '<option value="' + esc(s.username) + '">' + esc(s.fullName) + '</option>';
+        }).join("");
+        if (names.some(function (s) { return s.username === cur; })) staffSel.value = cur;
+        else { staffSel.value = "ALL"; state.staffFilter = "ALL"; }
+    }
+
+    function initFilters() {
+        populateStaffFilter();
+        const staffSel = $("staffFilterSelect");
+        if (staffSel && isMgr) {
+            staffSel.addEventListener("change", function () { state.staffFilter = staffSel.value; render(); });
         }
         const ch = $("channelFilterSelect");
         if (ch) ch.addEventListener("change", function () { state.channelFilter = ch.value; render(); });
@@ -883,9 +958,10 @@
 
         // Đồng bộ khi dữ liệu thay đổi ở tab khác / sau khi nhắc lịch
         global.addEventListener("storage", function (e) {
-            if (e.key === Scope.CAL_KEY || e.key === Scope.POSTS_KEY) { reload(); render(); }
+            if (e.key === Scope.CAL_KEY || e.key === Scope.POSTS_KEY) { reload(); populateStaffFilter(); render(); }
         });
-        global.addEventListener("blossom_events_updated", function () { reload(); render(); });
+        global.addEventListener("blossom_events_updated", function () { reload(); populateStaffFilter(); render(); });
+        global.addEventListener("blossom_accounts_updated", function () { populateStaffFilter(); });
 
         render();
     }

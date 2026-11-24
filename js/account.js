@@ -37,9 +37,6 @@
         settings:  "blossom_settings"
     };
 
-    // Mật khẩu demo ban đầu của từng role (khớp tài khoản demo trong login.js)
-    const DEMO_PASSWORD = { MANAGER: "Blossom@123", STAFF: "Manh@2026" };
-
     const DEFAULT_SETTINGS = {
         storeName: "Blossom Beauty Store",
         contactEmail: "admin@blossom.vn",
@@ -75,43 +72,54 @@
         return AccountStore.load().filter(function (a) { return AccountStore.normEmail(a.email) === key; })[0] || null;
     }
 
-    function saveProfileRemote(data) {
-        return delay(500).then(function () {
-            if (!write(KEY.profile, { phone: data.phone, dob: data.dob, bio: data.bio })) {
-                throw new Error("Không thể lưu dữ liệu trên trình duyệt này.");
-            }
-            // Cập nhật phiên đăng nhập để header / menu hiển thị tên mới
-            let raw = {};
-            try { raw = JSON.parse(localStorage.getItem(Auth.USER_KEY)) || {}; } catch (e) { /* bỏ qua */ }
-            raw.fullName = data.fullName;
-            localStorage.setItem(Auth.USER_KEY, JSON.stringify(raw));
-            // Đồng bộ họ tên sang kho tài khoản để trang Tài khoản & Phân quyền hiển thị khớp
-            const acc = findStoreAccount();
-            if (acc) {
-                const list = AccountStore.load();
-                const rec = list.filter(function (a) { return a.id === acc.id; })[0];
-                if (rec) { rec.fullName = data.fullName; AccountStore.save(list); }
+    async function saveProfileRemote(data) {
+        if (!window.BlossomAPI || !BlossomAPI.getToken()) {
+            throw new Error("Phiên làm việc Backend không hợp lệ. Vui lòng đăng nhập lại.");
+        }
+        await BlossomAPI.request("/users/me", {
+            method: "PUT",
+            body: {
+                full_name: data.fullName,
+                avatar_url: data.avatarUrl || null
             }
         });
+        if (!write(KEY.profile, { phone: data.phone, dob: data.dob, bio: data.bio })) {
+            throw new Error("Không thể lưu dữ liệu trên trình duyệt này.");
+        }
+        // Cập nhật phiên đăng nhập để header / menu hiển thị tên mới
+        let raw = {};
+        try { raw = JSON.parse(localStorage.getItem(Auth.USER_KEY)) || {}; } catch (e) { /* bỏ qua */ }
+        raw.fullName = data.fullName;
+        localStorage.setItem(Auth.USER_KEY, JSON.stringify(raw));
+        // Đồng bộ họ tên sang kho tài khoản để trang Tài khoản & Phân quyền hiển thị khớp
+        const acc = findStoreAccount();
+        if (acc) {
+            const list = AccountStore.load();
+            const rec = list.filter(function (a) { return a.id === acc.id; })[0];
+            if (rec) { rec.fullName = data.fullName; AccountStore.save(list); }
+        }
     }
 
-    function changePasswordRemote(current, next) {
-        // Xác thực mật khẩu hiện tại trong AccountStore và cập nhật mật khẩu mới ngay lập tức
-        return delay(500).then(function () {
-            const acc = findStoreAccount() || (window.AccountStore && AccountStore.findByIdentifier(user.email || user.username));
-            const validCurrent = acc
-                ? AccountStore.verifyPassword(acc, current)
-                : (current === DEMO_PASSWORD[user.role]);
-            if (!validCurrent) {
-                const err = new Error("Mật khẩu hiện tại không chính xác.");
+    async function changePasswordRemote(current, next) {
+        if (!window.BlossomAPI || !BlossomAPI.getToken()) {
+            throw new Error("Phiên làm việc Backend không hợp lệ. Vui lòng đăng nhập lại.");
+        }
+        try {
+            await BlossomAPI.request("/auth/change-password", {
+                method: "POST",
+                body: {
+                    current_password: current,
+                    new_password: next
+                }
+            });
+        } catch (apiErr) {
+            const err = new Error(apiErr.message || "Không thể đổi mật khẩu.");
+            if (apiErr.message && apiErr.message.includes("hiện tại")) {
                 err.field = "current";
-                throw err;
             }
-            if (acc && window.AccountStore && typeof AccountStore.updatePassword === "function") {
-                AccountStore.updatePassword(acc.id, next);
-            }
-            write(KEY.pwdAt, new Date().toISOString());
-        });
+            throw err;
+        }
+        write(KEY.pwdAt, new Date().toISOString());
     }
 
     function saveSettingsRemote(data) {

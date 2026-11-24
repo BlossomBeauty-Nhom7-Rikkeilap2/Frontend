@@ -65,8 +65,12 @@
     }
 
     // Đăng xuất: xóa phiên, GIỮ lại "ghi nhớ tên đăng nhập"
-    function logout() {
+    async function logout() {
+        if (global.BlossomAPI && typeof global.BlossomAPI.logout === "function") {
+            try { await global.BlossomAPI.logout(); } catch (e) {}
+        }
         localStorage.removeItem(USER_KEY);
+        try { localStorage.removeItem("blossom_access_token"); } catch (e) {}
         location.replace(loginUrl());
     }
 

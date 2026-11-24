@@ -213,8 +213,8 @@
                             '<img src="../../assets/figma/file-text.svg" alt="Xem" width="15" height="15">' +
                         '</button>';
                     } else {
-                        // Bài của mình: chỉ sửa được khi ở trạng thái DRAFT, REVISION_REQUESTED hoặc REJECTED
-                        const canStaffEdit = (p.status === "DRAFT" || p.status === "REVISION_REQUESTED" || p.status === "REJECTED");
+                        // Bài của mình: được sửa khi ở trạng thái DRAFT, REVISION_REQUESTED, REJECTED, APPROVED, SCHEDULED (BR-04 sửa bài đã duyệt sẽ chuyển lại về Chờ duyệt)
+                        const canStaffEdit = (p.status === "DRAFT" || p.status === "REVISION_REQUESTED" || p.status === "REJECTED" || p.status === "APPROVED" || p.status === "SCHEDULED");
                         const canStaffDelete = !p.deleted_at && (p.status === "DRAFT" || p.status === "REJECTED");
 
                         if (canStaffEdit) {
@@ -265,7 +265,7 @@
                     '<div><span class="fr07-status-pill ' + (p.deleted_at ? "st-deleted" : st.cls) + '">' +
                         UI.esc(p.deleted_at ? "Đã xóa mềm" : st.label) +
                     '</span></div>' +
-                    '<span class="fr07-date">' + UI.esc(p.planned_label || p.planned_date) + '</span>' +
+                    '<span class="fr07-date">' + UI.esc(p.planned_label || p.planned_date || "Chưa lên lịch") + '</span>' +
                     '<div class="fr07-row-actions">' + actionsHtml + '</div>' +
                 '</div>';
             }).join("");
@@ -346,7 +346,8 @@
                 await BlossomAPI.request("/posts/" + post.post_id, { method: "DELETE" });
             }
         } catch (e) {
-            /* fallback localStorage */
+            UI.toast("error", "Không thể xóa bài viết", e.message || "Lỗi kết nối Backend.");
+            return;
         }
 
         const nowStr = new Date().toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" }) + " " +
@@ -569,6 +570,7 @@
         // Đồng bộ dữ liệu liên trang
         window.addEventListener("blossom_posts_updated", function () {
             posts = loadPosts();
+            populateAuthorFilter();
             renderMetrics();
             renderTable();
         });
