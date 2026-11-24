@@ -213,10 +213,12 @@
                         ? '<div style="margin-top:8px;padding:12px;border-radius:10px;background:#f8fbf9;border:1px solid #d5eadc;display:flex;flex-direction:column;gap:10px;">' +
                             '<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">' +
                                 '<span style="font-size:12px;font-weight:700;color:#2f7d4e;text-transform:uppercase;">Hiệu quả bài đăng & Đồng bộ</span>' +
-                                '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-                                    '<button type="button" class="btn btn--primary btn--sm" id="btnModalSyncSocial">Đồng bộ MXH</button>' +
-                                    '<button type="button" class="btn btn--ghost btn--sm" id="btnModalManualStats">Nhập số liệu</button>' +
-                                '</div>' +
+                                ((Scope.isManager() || Scope.isMine(post))
+                                    ? '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+                                        '<button type="button" class="btn btn--primary btn--sm" id="btnModalSyncSocial">Đồng bộ MXH</button>' +
+                                        '<button type="button" class="btn btn--ghost btn--sm" id="btnModalManualStats">Nhập số liệu</button>' +
+                                      '</div>'
+                                    : "") +
                             '</div>' +
                             '<div id="postModalStatsBox" style="font-size:12.5px;color:#574b50;">Đang tải số liệu...</div>' +
                           '</div>'
@@ -230,9 +232,7 @@
         const canEditThisPost = !onApprovalsPage &&
             Scope.isMine(post) &&
             post.status !== "PUBLISHED" &&
-            post.status !== "PENDING_APPROVAL" &&
-            post.status !== "APPROVED" &&
-            post.status !== "SCHEDULED";
+            post.status !== "PENDING_APPROVAL";
 
         const modalActions = [{ label: "Đóng", variant: "ghost", value: false }];
         if (canEditThisPost) {
@@ -305,16 +305,18 @@
 
     async function loadLatestStats(postId) {
         const box = document.getElementById("postModalStatsBox");
-        if (!box) return;
+        if (!box) return null;
         if (!window.BlossomAPI || !window.BlossomAPI.getToken()) {
             renderStatsBox(null);
-            return;
+            return null;
         }
         try {
             const stat = await BlossomAPI.request("/posts/" + postId + "/statistics/latest");
             renderStatsBox(stat);
+            return stat;
         } catch (_) {
             renderStatsBox(null);
+            return null;
         }
     }
 
@@ -347,12 +349,13 @@
         const btnManual = document.getElementById("btnModalManualPublish");
         if (btnManual) {
             btnManual.addEventListener("click", async function () {
+                let typedUrl = "";
                 const body =
                     '<div style="display:flex;flex-direction:column;gap:8px;">' +
-                        '<label style="font-size:13px;font-weight:600;">Đường dẫn bài đăng thực tế (Facebook / Instagram / Threads):</label>' +
+                        '<label for="manualPublishUrlInput" style="font-size:13px;font-weight:600;">Đường dẫn bài đăng thực tế (Facebook / Instagram / Threads):</label>' +
                         '<input type="url" id="manualPublishUrlInput" class="input" placeholder="https://www.facebook.com/..." style="width:100%;padding:8px 10px;border:1px solid #e2cdd5;border-radius:8px;">' +
                     '</div>';
-                const act = await UI.modal({
+                const modalPromise = UI.modal({
                     title: "Xác nhận đã đăng bài",
                     body: body,
                     actions: [
@@ -360,9 +363,19 @@
                         { label: "Xác nhận", variant: "primary", value: "CONFIRM" }
                     ]
                 });
+                setTimeout(function () {
+                    const inputEl = document.getElementById("manualPublishUrlInput");
+                    if (inputEl) {
+                        inputEl.focus();
+                        inputEl.addEventListener("input", function () {
+                            typedUrl = inputEl.value;
+                        });
+                    }
+                }, 0);
+                const act = await modalPromise;
                 if (act !== "CONFIRM") return;
-                const inputEl = document.getElementById("manualPublishUrlInput");
-                const urlVal = inputEl ? inputEl.value.trim() : "";
+                const liveInput = document.getElementById("manualPublishUrlInput");
+                const urlVal = (liveInput ? liveInput.value : typedUrl).trim();
                 if (!urlVal) {
                     UI.toast("error", "Thiếu đường dẫn", "Vui lòng nhập URL bài đăng hợp lệ.");
                     return;
@@ -384,7 +397,8 @@
         }
 
         if (post.status === "PUBLISHED") {
-            loadLatestStats(post.post_id);
+            let latestLoadedStat = null;
+            loadLatestStats(post.post_id).then(function (st) { latestLoadedStat = st || null; });
 
             const btnSyncSocial = document.getElementById("btnModalSyncSocial");
             if (btnSyncSocial) {
@@ -398,6 +412,7 @@
                     btnSyncSocial.textContent = "Đang đồng bộ...";
                     try {
                         const stat = await BlossomAPI.request(endpoint, { method: "POST", body: {} });
+                        latestLoadedStat = stat;
                         renderStatsBox(stat);
                         UI.toast("success", "Đồng bộ thành công", "Đã cập nhật số liệu mới nhất từ mạng xã hội.");
                     } catch (err) {
@@ -412,15 +427,22 @@
             const btnManualStats = document.getElementById("btnModalManualStats");
             if (btnManualStats) {
                 btnManualStats.addEventListener("click", async function () {
+                    const typedStats = {
+                        reach: latestLoadedStat ? Number(latestLoadedStat.reach_count || 0) : 0,
+                        views: latestLoadedStat ? Number(latestLoadedStat.view_count || 0) : 0,
+                        likes: latestLoadedStat ? Number(latestLoadedStat.like_count || 0) : 0,
+                        comments: latestLoadedStat ? Number(latestLoadedStat.comment_count || 0) : 0,
+                        shares: latestLoadedStat ? Number(latestLoadedStat.share_count || 0) : 0
+                    };
                     const formBody =
                         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">' +
-                            '<div><label>Reach</label><input type="number" min="0" id="statReach" value="0" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
-                            '<div><label>Views</label><input type="number" min="0" id="statViews" value="0" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
-                            '<div><label>Likes</label><input type="number" min="0" id="statLikes" value="0" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
-                            '<div><label>Comments</label><input type="number" min="0" id="statComments" value="0" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
-                            '<div><label>Shares</label><input type="number" min="0" id="statShares" value="0" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
+                            '<div><label for="statReach">Reach</label><input type="number" min="0" id="statReach" value="' + typedStats.reach + '" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
+                            '<div><label for="statViews">Views</label><input type="number" min="0" id="statViews" value="' + typedStats.views + '" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
+                            '<div><label for="statLikes">Likes</label><input type="number" min="0" id="statLikes" value="' + typedStats.likes + '" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
+                            '<div><label for="statComments">Comments</label><input type="number" min="0" id="statComments" value="' + typedStats.comments + '" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
+                            '<div><label for="statShares">Shares</label><input type="number" min="0" id="statShares" value="' + typedStats.shares + '" style="width:100%;padding:6px 8px;border:1px solid #e2cdd5;border-radius:6px;"></div>' +
                         '</div>';
-                    const ok = await UI.modal({
+                    const modalPromise = UI.modal({
                         title: "Nhập số liệu thống kê thủ công",
                         body: formBody,
                         actions: [
@@ -428,13 +450,29 @@
                             { label: "Lưu số liệu", variant: "primary", value: "SAVE" }
                         ]
                     });
+                    setTimeout(function () {
+                        const bindNum = function (id, key) {
+                            const el = document.getElementById(id);
+                            if (el) {
+                                el.addEventListener("input", function () {
+                                    typedStats[key] = Math.max(0, parseInt(el.value, 10) || 0);
+                                });
+                            }
+                        };
+                        bindNum("statReach", "reach");
+                        bindNum("statViews", "views");
+                        bindNum("statLikes", "likes");
+                        bindNum("statComments", "comments");
+                        bindNum("statShares", "shares");
+                    }, 0);
+                    const ok = await modalPromise;
                     if (ok !== "SAVE") return;
                     const payload = {
-                        reach_count: Number(document.getElementById("statReach").value || 0),
-                        view_count: Number(document.getElementById("statViews").value || 0),
-                        like_count: Number(document.getElementById("statLikes").value || 0),
-                        comment_count: Number(document.getElementById("statComments").value || 0),
-                        share_count: Number(document.getElementById("statShares").value || 0),
+                        reach_count: Math.max(0, Number(typedStats.reach || 0)),
+                        view_count: Math.max(0, Number(typedStats.views || 0)),
+                        like_count: Math.max(0, Number(typedStats.likes || 0)),
+                        comment_count: Math.max(0, Number(typedStats.comments || 0)),
+                        share_count: Math.max(0, Number(typedStats.shares || 0)),
                         source_type: "MANUAL"
                     };
                     try {
@@ -442,6 +480,7 @@
                             method: "POST",
                             body: payload
                         });
+                        latestLoadedStat = saved;
                         renderStatsBox(saved);
                         UI.toast("success", "Đã lưu số liệu", "Dữ liệu thống kê thủ công đã được ghi nhận.");
                     } catch (err) {

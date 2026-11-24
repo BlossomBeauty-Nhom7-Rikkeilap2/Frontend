@@ -172,7 +172,7 @@
                         '<div class="post-meta-sub">' + platBadges + '</div>' +
                     '</div>' +
                 '</td>' +
-                '<td class="col-author" style="white-space:nowrap;font-size:15px;font-weight:550;color:#2f2635;">' + UI.esc(post.author || "Doãn Thị Minh Anh") + '</td>' +
+                '<td class="col-author" style="white-space:nowrap;font-size:15px;font-weight:550;color:#2f2635;">' + UI.esc(post.author || "—") + '</td>' +
                 '<td style="white-space:nowrap;font-size:14.5px;color:#6e6472;">' + UI.esc(post.planned_label || "Chưa lên lịch") + '</td>' +
                 '<td style="white-space:nowrap;"><span style="font-size:13px;font-weight:600;color:' + st.color + ';background:' + st.bg + ';padding:4px 12px;border-radius:100px;">' + UI.esc(st.label) + '</span></td>' +
                 '<td style="text-align:right;">' + actionsHtml + '</td>' +
@@ -201,7 +201,7 @@
     /* ---------- THAO TÁC PHÊ DUYỆT ---------- */
     function currentManagerName() {
         const u = (window.Auth && typeof window.Auth.getUser === "function") ? window.Auth.getUser() : null;
-        return (u && u.fullName) ? u.fullName : "Đoàn Thị Minh Anh";
+        return (u && u.fullName) ? u.fullName : "Quản lý";
     }
 
     async function handleApprove(postId) {
@@ -225,6 +225,8 @@
 
         post.status = "APPROVED"; post._touched = true;
         savePosts(posts);
+        if (Scope.upsertEventForPost) Scope.upsertEventForPost(post);
+        if (Scope.syncFromBackend) Scope.syncFromBackend();
         updateMetrics();
         renderTable();
 
@@ -314,6 +316,7 @@
                 post.status = "REJECTED"; post._touched = true;
                 post.rejection_reason = reason;
                 savePosts(posts);
+                if (Scope.syncFromBackend) Scope.syncFromBackend();
                 updateMetrics();
                 renderTable();
 
@@ -402,6 +405,7 @@
                 post.revision_reason = note;
                 post.manager_comment = note;
                 savePosts(posts);
+                if (Scope.syncFromBackend) Scope.syncFromBackend();
                 updateMetrics();
                 renderTable();
 
@@ -442,27 +446,22 @@
             return Number(p.post_id) === Number(postId) ||
                    String(p.post_id) === String(postId) ||
                    p.code === String(postId);
-        }) || {
-            post_id: postId,
-            code: "BL-0" + postId,
-            title: "Bài viết #" + postId,
-            platforms: ["Facebook & Instagram"],
-            platform_label: "Facebook & Instagram",
-            author: "Doãn Thị Minh Anh",
-            status: "PENDING_APPROVAL",
-            planned_label: "05/11/2026 08:00",
-            caption: "Kem dưỡng trắng da Blossom chứa chiết xuất hoa anh đào giúp nâng tông nhẹ nhàng và cấp ẩm sâu.",
-            mediaUrl: "../../assets/figma/skincare-editorial.png"
-        };
+        });
+        if (!post) {
+            UI.toast("error", "Không tìm thấy bài viết", "Bài viết không tồn tại hoặc đã bị xóa.");
+            return;
+        }
 
         const st = STATUS_MAP[post.status] || { label: post.status, color: "#8c8294", bg: "#f0edf3" };
         const plat = post.platform_label || (Array.isArray(post.platforms) ? post.platforms.join(" & ") : "Mạng xã hội");
-        const mediaUrl = post.mediaUrl || "../../assets/figma/skincare-editorial.png";
+        const mediaUrl = post.mediaUrl || "";
 
         const bodyHtml =
             '<div style="display:grid;grid-template-columns:220px 1fr;gap:20px;font-size:14px;align-items:start;">' +
                 '<div style="text-align:center;">' +
-                    '<img src="' + UI.esc(mediaUrl) + '" alt="Preview" style="width:100%;height:220px;object-fit:cover;border-radius:10px;border:1px solid #f4dce4;margin-bottom:10px;" onerror="this.src=\'../../assets/figma/skincare-editorial.png\'">' +
+                    (mediaUrl
+                        ? '<img src="' + UI.esc(mediaUrl) + '" alt="Preview" style="width:100%;height:220px;object-fit:cover;border-radius:10px;border:1px solid #f4dce4;margin-bottom:10px;">'
+                        : '<div style="width:100%;height:220px;display:grid;place-content:center;border:1.5px dashed #f0c6d6;border-radius:10px;color:var(--muted);margin-bottom:10px;">Chưa có media</div>') +
                     '<button type="button" class="btn btn--secondary btn--sm" id="btnFallbackCopy" style="width:100%;font-size:13px;padding:8px 12px;">' +
                         UI.icon("clipboard") + '<span>Sao chép Caption</span>' +
                     '</button>' +
@@ -474,7 +473,7 @@
                     '</div>' +
                     '<h3 style="font-family:var(--font-display);font-size:20px;color:#2f2635;margin:0;line-height:1.4;">' + UI.esc(post.title) + '</h3>' +
                     '<div style="font-size:13px;color:var(--muted);display:flex;gap:16px;border-bottom:1px solid #f4dce4;padding-bottom:10px;">' +
-                        '<span>Tác giả: <b style="color:#2f2635;">' + UI.esc(post.author || "Doãn Thị Minh Anh") + '</b></span>' +
+                        '<span>Tác giả: <b style="color:#2f2635;">' + UI.esc(post.author || "—") + '</b></span>' +
                         '<span>Lịch dự kiến: <b style="color:#2f2635;">' + UI.esc(post.planned_label || "Chưa lên lịch") + '</b></span>' +
                     '</div>' +
                     '<div>' +

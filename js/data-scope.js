@@ -472,6 +472,15 @@
         if (postsChanged) writeJson(POSTS_KEY, posts);
     }
 
+    function normalizePlatformName(raw) {
+        const s = String(raw || "").trim().toLowerCase();
+        if (!s) return "Facebook";
+        if (s.indexOf("fb & ig") !== -1 || (s.indexOf("face") !== -1 && s.indexOf("insta") !== -1)) return "FB & IG";
+        if (s.indexOf("insta") !== -1) return "Instagram";
+        if (s.indexOf("thread") !== -1) return "Threads";
+        return "Facebook";
+    }
+
     async function syncFromBackend() {
         if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
         try {
@@ -482,13 +491,17 @@
                 const cal = await global.BlossomAPI.request("/schedules/calendar");
                 if (Array.isArray(cal)) {
                     const realEvents = cal.map(function (cev) {
-                        const plat = cev.platform_name || "Facebook";
+                        const plat = normalizePlatformName(cev.platform_name);
                         const pubTime = cev.scheduled_time || cev.publish_time || "";
                         const dateStr = pubTime ? pubTime.slice(0, 10) : "";
                         const timeStr = pubTime ? pubTime.slice(11, 16) : "09:00";
                         if (cev.post_id && dateStr) {
                             schedByPost[cev.post_id] = { date: dateStr, time: timeStr, label: viDate(dateStr) + " " + timeStr };
                         }
+                        const isDone = cev.post_status === "PUBLISHED" || cev.schedule_status === "COMPLETED";
+                        const evStatus = (cev.schedule_status === "ACTIVE" || isDone)
+                            ? "SCHEDULED"
+                            : (cev.schedule_status || cev.status || "SCHEDULED");
                         return {
                             id: cev.schedule_id,
                             event_id: "ev_be_" + cev.schedule_id,
@@ -499,7 +512,9 @@
                             platform: plat,
                             date: dateStr,
                             time: timeStr,
-                            status: cev.schedule_status === "ACTIVE" ? "SCHEDULED" : (cev.schedule_status || cev.status || "SCHEDULED"),
+                            status: evStatus,
+                            post_status: cev.post_status || "",
+                            published: isDone,
                             author: cev.author_name || "",
                             owner_username: cev.author_username || undefined
                         };
@@ -514,8 +529,8 @@
                     const plat = platNames[bp.platform_id] || "Facebook";
                     const schedInfo = schedByPost[bp.post_id] || null;
                     const rawTime = bp.planned_publish_time || (bp.status === "PUBLISHED" ? bp.published_at : "") || "";
-                    const plannedDate = rawTime ? rawTime.slice(0, 10) : (schedInfo ? schedInfo.date : "");
-                    const plannedTime = rawTime ? rawTime.slice(11, 16) : (schedInfo ? schedInfo.time : "09:00");
+                    const plannedDate = schedInfo ? schedInfo.date : (rawTime ? rawTime.slice(0, 10) : "");
+                    const plannedTime = schedInfo ? schedInfo.time : (rawTime ? rawTime.slice(11, 16) : "09:00");
 
                     const item = {
                         post_id: bp.post_id,

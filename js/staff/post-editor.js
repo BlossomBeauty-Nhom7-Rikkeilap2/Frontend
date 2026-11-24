@@ -415,19 +415,19 @@
             bannerEl.hidden = false;
             bannerEl.className = "fr05-banner fr05-banner--published";
             bannerEl.innerHTML =
-                '<div><b>🔒 Bài viết đã xuất bản:</b> ' +
+                '<div><b>Bài viết đã xuất bản:</b> ' +
                 'Bài viết này đã được đăng chính thức (' + UI.esc(post.published_url || "") + '). ' +
                 'Hệ thống khóa chức năng chỉnh sửa nội dung bài viết đã xuất bản, chỉ cho phép cập nhật liên kết thực tế và theo dõi số liệu thống kê.</div>';
-        } else if (post.status === "APPROVED") {
+        } else if (post.status === "APPROVED" || post.status === "SCHEDULED") {
             bannerEl.hidden = false;
             bannerEl.className = "fr05-banner fr05-banner--approved";
             bannerEl.innerHTML =
-                '<div><b>⚠️ Cảnh báo chỉnh sửa bài viết đã phê duyệt:</b> ' +
+                '<div><b>Cảnh báo chỉnh sửa bài viết đã phê duyệt:</b> ' +
                 'Bài viết này đã được Quản lý phê duyệt. Nếu bạn lưu thay đổi nội dung hoặc Media, hệ thống sẽ tự động chuyển trạng thái bài viết về <b>Chờ phê duyệt (Pending Approval)</b> và tạm gỡ khỏi Lịch đăng bài để duyệt lại.</div>';
         } else if (post.status === "REVISION_REQUESTED") {
             bannerEl.hidden = false;
             bannerEl.className = "fr05-banner fr05-banner--revision";
-            bannerEl.innerHTML = '<div><b>💬 Yêu cầu chỉnh sửa từ Marketing Manager:</b> ' + UI.esc(post.manager_comment || "") + '</div>';
+            bannerEl.innerHTML = '<div><b>Yêu cầu chỉnh sửa từ Marketing Manager:</b> ' + UI.esc(post.manager_comment || "") + '</div>';
         } else {
             bannerEl.hidden = true;
             bannerEl.innerHTML = "";
@@ -637,8 +637,8 @@
         let historyText = "";
         const userNow = (window.Auth && Auth.getUser()) || { fullName: "Nhân viên" };
 
-        // Nếu đang sửa bài đã APPROVED -> Hiển thị hộp thoại cảnh báo xác nhận chuyển về PENDING_APPROVAL (FR-05 Step 4a)
-        if (currentPostStatus === "APPROVED") {
+        // Nếu đang sửa bài đã APPROVED hoặc SCHEDULED -> Hiển thị hộp thoại cảnh báo xác nhận chuyển về PENDING_APPROVAL (FR-05 Step 4a)
+        if (currentPostStatus === "APPROVED" || currentPostStatus === "SCHEDULED") {
             const confirmed = await UI.confirm({
                 title: "Cảnh báo chỉnh sửa bài viết đã duyệt (Approved)",
                 message: "Bài viết này đang ở trạng thái Đã phê duyệt. Việc lưu thay đổi sẽ đưa bài viết quay lại trạng thái Chờ duyệt và cập nhật trên Lịch đăng bài. Bạn có chắc chắn muốn tiếp tục?",
@@ -789,10 +789,15 @@
                     }
                 }
 
-                // 3. Nếu người dùng chọn Gửi duyệt (SUBMIT): gửi duyệt toàn bộ các bài đã tạo/cập nhật
+                // 3. Nếu người dùng chọn Gửi duyệt (SUBMIT): gửi duyệt toàn bộ các bài chưa ở trạng thái PENDING_APPROVAL
                 if (targetAction === "SUBMIT") {
                     for (let i = 0; i < createdOrUpdatedIds.length; i++) {
-                        await BlossomAPI.request("/posts/" + createdOrUpdatedIds[i] + "/submit", { method: "POST" });
+                        try {
+                            await BlossomAPI.request("/posts/" + createdOrUpdatedIds[i] + "/submit", { method: "POST" });
+                        } catch (subErr) {
+                            // Nếu bài vừa sửa từ APPROVED/SCHEDULED thì PUT /posts/{id} đã tự chuyển về PENDING_APPROVAL ở Backend
+                            if (prevStatus !== "APPROVED" && prevStatus !== "SCHEDULED") throw subErr;
+                        }
                     }
                 }
 
@@ -964,6 +969,10 @@
                     .then(function (backendPost) {
                         const platNameMap = { 1: "Facebook", 2: "Instagram", 3: "Threads" };
                         const platName = platNameMap[backendPost.platform_id] || "Facebook";
+                        const rawMedia = (backendPost.media_files && backendPost.media_files[0]) || "";
+                        const resolvedMedia = (rawMedia && window.BlossomAPI && BlossomAPI.resolveMediaUrl)
+                            ? BlossomAPI.resolveMediaUrl(rawMedia)
+                            : rawMedia;
                         target = {
                             post_id: backendPost.post_id,
                             code: "BL-0" + backendPost.post_id,
@@ -975,14 +984,16 @@
                             hashtags: backendPost.hashtags || "",
                             platforms: [platName],
                             platform_label: platName,
-                            author: backendPost.author ? backendPost.author.full_name : "",
-                            owner_username: backendPost.author ? backendPost.author.username : "",
+                            author: backendPost.author_name || (backendPost.author && backendPost.author.full_name) || "",
+                            owner_username: backendPost.author_username || (backendPost.author && backendPost.author.username) || "",
                             status: backendPost.status,
+                            published_url: backendPost.published_url || "",
                             planned_date: backendPost.planned_publish_time ? backendPost.planned_publish_time.slice(0, 10) : "",
                             planned_time: backendPost.planned_publish_time ? backendPost.planned_publish_time.slice(11, 16) : "09:00",
                             media_files: backendPost.media_files || [],
                             media_type: backendPost.media_type || "IMAGE",
-                            media_url: (backendPost.media_files && backendPost.media_files[0]) || "",
+                            media_url: resolvedMedia,
+                            total_media_size_bytes: backendPost.total_media_size_bytes || 0,
                             history: []
                         };
                         proceedWithPost(target);

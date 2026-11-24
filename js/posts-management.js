@@ -213,8 +213,8 @@
                             '<img src="../../assets/figma/file-text.svg" alt="Xem" width="15" height="15">' +
                         '</button>';
                     } else {
-                        // Bài của mình: chỉ sửa được khi ở trạng thái DRAFT, REVISION_REQUESTED hoặc REJECTED
-                        const canStaffEdit = (p.status === "DRAFT" || p.status === "REVISION_REQUESTED" || p.status === "REJECTED");
+                        // Bài của mình: được sửa khi ở trạng thái DRAFT, REVISION_REQUESTED, REJECTED, APPROVED, SCHEDULED (BR-04 sửa bài đã duyệt sẽ chuyển lại về Chờ duyệt)
+                        const canStaffEdit = (p.status === "DRAFT" || p.status === "REVISION_REQUESTED" || p.status === "REJECTED" || p.status === "APPROVED" || p.status === "SCHEDULED");
                         const canStaffDelete = !p.deleted_at && (p.status === "DRAFT" || p.status === "REJECTED");
 
                         if (canStaffEdit) {

@@ -394,9 +394,9 @@
             });
         }
 
-        window.addEventListener("blossom_posts_updated", function () { loadAll(); refreshUI(); });
+        window.addEventListener("blossom_posts_updated", function () { loadAll(); populateFilters(); refreshUI(); });
         window.addEventListener("storage", function (e) {
-            if (e.key === Scope.POSTS_KEY) { loadAll(); refreshUI(); }
+            if (e.key === Scope.POSTS_KEY) { loadAll(); populateFilters(); refreshUI(); }
         });
     }
 

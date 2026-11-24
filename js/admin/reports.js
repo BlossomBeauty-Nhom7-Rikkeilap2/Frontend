@@ -13,9 +13,9 @@
     ];
 
     let state = {
-        period: "2026-11",   // 2026-11 | 2026-10 | 2026-Q4 | 2026-ALL | EMPTY
-        platform: "ALL",     // ALL | Facebook | Instagram | Threads
-        staff: "ALL"         // ALL | Doãn Thị Minh Anh | Nguyễn Hà Linh | Trần Ngọc Mai | Lê Thu Hương
+        period: "2026-ALL",
+        platform: "ALL",
+        staff: "ALL"
     };
 
     let backendRankingPosts = null;
@@ -62,12 +62,40 @@
         if (names.indexOf(currentVal) !== -1) sel.value = currentVal;
     }
 
+    function populatePeriodFilter() {
+        const sel = document.getElementById("reportPeriodSelect");
+        if (!sel) return;
+        const cur = sel.value || state.period || "2026-ALL";
+        const months = [];
+        (backendRankingPosts || []).forEach(function (item) {
+            if (item.period && /^\d{4}-\d{2}$/.test(item.period) && months.indexOf(item.period) === -1) {
+                months.push(item.period);
+            }
+        });
+        months.sort().reverse();
+        let html = '<option value="2026-ALL">Tất cả thời gian</option>';
+        months.forEach(function (ym) {
+            const parts = ym.split("-");
+            html += '<option value="' + UI.esc(ym) + '">Tháng ' + parseInt(parts[1], 10) + ', ' + parts[0] + '</option>';
+        });
+        html += '<option value="2026-Q4">Quý 4, 2026</option>';
+        sel.innerHTML = html;
+        if (Array.from(sel.options).some(function (o) { return o.value === cur; })) {
+            sel.value = cur;
+            state.period = cur;
+        } else {
+            sel.value = "2026-ALL";
+            state.period = "2026-ALL";
+        }
+    }
+
     async function loadBackendAnalytics() {
         if (!global.BlossomAPI || !global.BlossomAPI.getToken()) return;
         try {
             const rows = await global.BlossomAPI.request("/analytics/export");
             if (Array.isArray(rows)) {
                 backendRankingPosts = rows.map(mapBackendRow);
+                populatePeriodFilter();
                 populateStaffFilter();
                 renderDashboard();
             }
@@ -87,9 +115,13 @@
     function getFilteredData() {
         if (state.period === "EMPTY") return [];
         return getAllRankingPosts().filter(function (item) {
-            if (state.period === "2026-11" && item.period !== "2026-11") return false;
-            if (state.period === "2026-10" && item.period !== "2026-10") return false;
-            if (state.period === "2026-Q4" && (item.month < 10 || item.month > 12)) return false;
+            if (state.period && state.period !== "2026-ALL" && state.period !== "ALL") {
+                if (state.period === "2026-Q4") {
+                    if (item.month < 10 || item.month > 12) return false;
+                } else if (item.period !== state.period) {
+                    return false;
+                }
+            }
             if (state.platform !== "ALL" && item.channel !== state.platform) return false;
             if (state.staff !== "ALL" && item.author !== state.staff) return false;
             return true;
@@ -387,14 +419,14 @@
         const resetBtn = document.getElementById("btnResetReportFilters");
         if (resetBtn) {
             resetBtn.addEventListener("click", function () {
-                state.period = "2026-11";
+                state.period = "2026-ALL";
                 state.platform = "ALL";
                 state.staff = "ALL";
-                if (periodSel) periodSel.value = "2026-11";
+                if (periodSel) periodSel.value = "2026-ALL";
                 if (platSel) platSel.value = "ALL";
                 if (staffSel) staffSel.value = "ALL";
                 renderDashboard();
-                UI.toast("info", "Đã đặt lại bộ lọc", "Hiển thị dữ liệu Tháng 11, 2026.");
+                UI.toast("info", "Đã đặt lại bộ lọc", "Hiển thị toàn bộ dữ liệu thống kê.");
             });
         }
 
